@@ -1,0 +1,315 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fix insert/fragments command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="Manual.html">LIGGGHTS</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="Manual.html">Docs</a> &raquo;</li>
+      
+    <li>fix insert/fragments command</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/fix_insert_fragments.txt" rel="nofollow"> View page source</a> 
+        
+          <a href="http://www.cfdem.com"> Website</a>
+        
+          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+        
+      
+    </li>
+  </ul>
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fix-insert-fragments-command">
+<span id="index-0"></span><h1>fix insert/fragments command<a class="headerlink" href="#fix-insert-fragments-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>fix ID group-ID insert/fragments seed seed_value distributiontemplate dist-ID general_keywords general_values fragment_keywords fragment_values ...</pre>
+</div>
+<ul class="simple">
+<li>ID, group-ID are documented in <a class="reference internal" href="fix.html"><em>fix</em></a> command</li>
+<li>insert/fragments = style names of this fix command</li>
+<li>seed = obligatory keyword</li>
+<li>seed_value = random # seed (prime number greater than 10000)</li>
+<li>distributiontemplate = obligatory keyword</li>
+<li>dist-ID = ID of a <a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> to be used for particle insertion</li>
+<li>one or more general keyword/value pairs can be appended</li>
+<li>general_keywords = <em>every</em> or <em>verbose</em></li>
+</ul>
+<pre class="literal-block">
+<em>every</em> value = ev
+  once = value to signalise that isertion takes place only once (the step after the fix is issued)
+  ev = every how many time-steps eligible particles are replaced by fragments
+<em>verbose</em> = yes or no
+</pre>
+<ul class="simple">
+<li>following the general keyword/value section, one or more fragment keyword/value pairs can be appended for the fix insert/fragments command</li>
+<li>fragment_keywords = <em>region</em> or <em>type_replace</em> or <em>check_bound_sphere</em></li>
+</ul>
+<pre class="literal-block">
+<em>region</em> value = region-ID
+  region-ID = ID of the region where the particles will be generated (positive integer)
+<em>type_replace</em> values = vol
+  vol =  atom type (material type) of the particles to be replaced
+<em>check_bound_sphere</em> values = yes or no
+  yes =  do check if the bounding sphere of the fragment is &lt; 1 (length units)
+  no =  do check  the bounding sphere of the fragment
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>region  replacereg block -0.1 0.1 -0.1 0.1 0. 0.1 units box
+fix     replace all insert/fragments seed 123457 distributiontemplate pdfragments every 1 region ins type_replace 1</pre>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Replace granular particles every few timesteps by a predefined set
+of fragment particles. A particle is eligible to be replaced if it
+is within the specified region, as defined via the <em>region</em> keyword
+and if it is of the atom type specified via the <em>type_replace</em>
+keyword.</p>
+<p>The <em>verbose</em> keyword controls whether statistics about particle
+insertion is output to the screen each time particles are inserted.</p>
+<p>This command must use the distributiontemplate keyword to refer to a
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a>
+(defined by dist-fix-ID) that defines the properties of the
+inserted particles. This
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a>
+must hold exactly one particle template of type
+<tt class="xref doc docutils literal"><span class="pre">fix_particletemplate_multiplespheres</span></tt>
+that has a bounding radius of &lt;= 1. It is required to use the
+<em>relative</em> = yes option as described in
+<a class="reference internal" href="fix_particletemplate_sphere.html"><em>fix_particletemplate_sphere</em></a></p>
+<p>The frequency of the insertion/replacement can be controlled via the
+<em>every</em> keyword. At each insertion step, fix insert/fragments replaces
+all eligible particles. Note that in general the particles to be
+replaced have different radii, so the fragment defined by the
+<tt class="xref doc docutils literal"><span class="pre">fix_particletemplate_multiplespheres</span></tt>
+is scaled down with the particle radius.</p>
+<p>Inserted particles are assigned the atom type specified by the
+particledistribution defined via the
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a>
+and are assigned to 4 groups: the default group &#8220;all&#8221; and the group
+specified in the fix insert command, as well as the groups specified
+in the <a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> and
+<a class="reference internal" href="fix_particletemplate_sphere.html"><em>fix_particletemplate_sphere</em></a>
+command (all of which can also be &#8220;all&#8221;).</p>
+<p>As all particles should be inserted within the hull of existing
+particles, no overlapcheck is performed.</p>
+</div>
+<div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
+<h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
+<p>Information about this fix is written to <a class="reference internal" href="restart.html"><em>binary restart files</em></a>.  This means you can restart a simulation
+while inserting particles, when the restart file was written during the
+insertion operation.</p>
+<p>None of the <a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a> options are relevant to this
+fix. A global vector is stored by this fix for access by various <em class="xref std std-ref">output commands</em>. The first component of the vector is the
+number of particles already inserted, the second component is the mass
+of particles already inserted. No parameter of this fix can be
+used with the <em>start/stop</em> keywords of the <a class="reference internal" href="run.html"><em>run</em></a> command.
+This fix is not invoked during <tt class="xref doc docutils literal"><span class="pre">energy</span> <span class="pre">minimization</span></tt>.</p>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>The <em>overlapcheck</em> = &#8216;yes&#8217; option performs an inherently serial operation
+and will thus not scale well in parallel. For this reason, if you
+want to generate large systems, you are advised to turn <em>overlapcheck</em>
+off and let the packing relax afterwards to generate a valid packing.</p>
+<p>Option <em>all_in</em> = &#8216;yes&#8217; will not work if the <a class="reference internal" href="region.html"><em>region</em></a> used
+is a tet mesh region.</p>
+<p>Keywords <em>duration</em> and <em>extrude_length</em> can not be used together.</p>
+<p>Currently <em>all_in yes</em> is not yet supported for all types of insertion.</p>
+<p>Dynamic regions are not supported as insertion region.</p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="fix_insert_stream.html"><em>fix_insert_stream</em></a>, <a class="reference internal" href="fix_insert_rate_region.html"><em>fix_insert_rate_region</em></a>,
+<a class="reference internal" href="region.html"><em>region</em></a></p>
+<p><strong>Default:</strong> none</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'v3.X',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

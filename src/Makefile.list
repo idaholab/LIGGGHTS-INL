@@ -1,0 +1,51 @@
+# LAMMPS multiple-machine Makefile with explicit file list
+
+SHELL = /bin/sh
+
+# Subtargets for makefile auto
+SUBTARGET = $@
+OPTIONSPOSTFIX =
+ifneq ($(origin postfix), undefined)
+    ifneq (${postfix}, )
+        ifneq (,$(filter $(MAKECMDGOALS), auto clean-auto))
+            ifeq (${postfix}, default)
+                $(error A postfix value of "default" is not allowed)
+            endif
+            SUBTARGET = $@"_"${postfix}
+            OPTIONSPOSTFIX = _${postfix}
+        endif
+    endif
+endif
+
+# Definitions
+
+ROOT =	lmp
+EXE =	$(ROOT)_$(SUBTARGET)
+
+SRC := $(wildcard *cpp)
+
+INC := $(wildcard *.h)
+
+OBJ =	$(SRC:.cpp=.o)
+
+# Targets
+
+help:
+	@echo 'Type "make target" where target is one of:'
+	@echo ''
+	@files="`ls MAKE/Makefile.*`"; \
+	for file in $$files; do head -1 $$file; done
+
+.DEFAULT:
+	@test -f MAKE/Makefile.$@
+	@if [ ! -d Obj_$(SUBTARGET) ]; then mkdir Obj_$(SUBTARGET); fi
+	@cp -p $(SRC) $(INC) Obj_$(SUBTARGET)
+	@cp MAKE/Makefile.$@ Obj_$(SUBTARGET)/Makefile
+	@if [ ! -e Makefile.package ]; \
+	  then cp Makefile.package.empty Makefile.package; fi
+	@if [ ! -e Makefile.package.settings ]; \
+	  then cp Makefile.package.settings.empty Makefile.package.settings; fi
+	@cp Makefile.package Makefile.package.settings Obj_$(SUBTARGET)
+	@cd Obj_$(SUBTARGET); \
+	$(MAKE) $(MFLAGS) "OBJ = $(OBJ)" "INC = $(INC)" "EXE = ../$(EXE)" ../$(EXE)
+	@if [ -d Obj_$(SUBTARGET) ]; then cd Obj_$(SUBTARGET); rm -f $(SRC) $(INC) Makefile*; fi

@@ -1,0 +1,54 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+compute bond/counter command :h3
+
+[Syntax:]
+
+compute ID group-ID bond/counter general_keyword general_values :pre
+
+ID, group-ID are documented in "compute"_compute.html command :ulb,l
+bond/counter = style name of this compute command :l
+general_keywords general_values are documented in "compute"_compute.html" :l
+:ule
+
+[Examples:]
+
+compute 1 all bond/counter :pre
+
+[Description:]
+
+Define a computation that tracks the number of bonds from the "cohesion model
+bond"_gran_cohesion_bond.html. Additionally it also tracks the number of bonds
+created and destroyed since its last output. Bonds between particles and between
+particles and walls are tracked separately.
+
+[Output info:]
+
+This compute calculates a global vector with six entries. The first three
+entries correspond to the particle-particle bonds. The first two entries are the
+number of bonds created and destroyed, respectively, since the last output of
+this compute. The third entry is the number of intact bonds at the time of the
+compute output. The last three entries are identical to the first three, except
+that they store the information about particle-wall bonds.
+
+These values can be used by any command that uses a global scalar value from a
+compute as input.  See "Section_howto 8"_Section_howto.html#howto_8 for an
+overview of LIGGGHTS(R)-INL output options.
+
+[Restrictions:]
+
+None.
+
+[Related commands:]
+
+None.
+
+[Default:]
+
+None.

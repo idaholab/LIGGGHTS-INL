@@ -1,0 +1,3 @@
+force should be 500*0.008^3*pi/6*8000*9.81 = 10.52
+Area of plate = 0.01
+stress should be 10.52/0.01 = 1052

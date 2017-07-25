@@ -1,0 +1,238 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+gran cohesion bond model :h3
+
+[Syntax:]
+
+cohesion bond \[other model_type/model_name pairs as described "here"_pair_gran.html \] keyword values :pre
+zero or more keyword/value pairs may be appended to the end (after all models are specified) :l
+  {stressBreak} values = 'on' or 'off'
+    on = bond will break by exceeding maximum stresses
+    off = no effect due to stress
+  {temperatureBreak} values = 'on' or 'off'
+    on = not implemented at the moment
+    off = no effect due to heat
+  {tensionStress} values = 'on' or 'off'
+    on = normal, tension force contributes to bond stress
+    off = disabled normal, tension forces
+  {compressionStress} values = 'on' or 'off'
+    on = normal, compression force contributes to bond stress
+    off = disabled normal, compression forces
+  {shearStress} values = 'on' or 'off'
+    on = tangential (shear) force contributes to bond stress
+    off = disabled tangential forces
+  {normalTorqueStress} values = 'on' or 'off'
+    on = normal torque contributes to bond stress
+    off = disabled normal torque
+  {shearTorqueStress} values = 'on' or 'off'
+    on = tangential (shear) torque contributes to bond stress
+    off = disabled shear torque
+  {createBondAlways} values = 'on' or 'off'
+    on = bonds are created always for all particles if they are within a user-defined range
+    off = bonds are created at a user-defined timestep for all particles if they are within a user-defined range
+  {dampingBond} values = 'on' or 'off'
+    on = damping is enabled for bonds
+    off = disabled damping
+  {dampingBondSmooth} values = 'on' or 'off'
+    on = smooth damping is enabled for bonds
+    off = disabled smooth damping
+  {dissipationBond} values = 'on' or 'off'
+    on = dissipation is enabled for bonds
+    off = disable dissipation
+  {computeDissipatedEnergy} values = 'on' or 'off'
+    on = the cohesion model saves the dissipated energy for each contact for the
+    use in "fix calculate/dissipated_energy"_fix_calculate_dissipated_energy.html
+    of = no values are saved
+  {computeElasticPotential} values = 'on' or 'off'
+    on = the bond model saves the current elastic potential for each contact for
+    the use in "fix
+    calculate/cohesion_elastic_energy"_fix_calculate/cohesion_elastic_energy.html
+    of = no values are saved
+  {druckerPrager} values = 'on' or 'off'
+    on = a Drucker-Prager type model is used for the tangential limiting stress
+    off = the constant value is used
+  {ratioTensionCompression} values = 'on' or 'off'
+    on = a different limiting value for the normal tension and compression case is used
+    of = the same value is used :pre
+
+[Description:]
+
+This model can be used as part of "pair gran"_pair_gran.html and
+"fix wall/gran"_fix_wall_gran.html
+
+This bond model implements the parallel bond model from "Potyondy and Cundall"_#PotyondyCundall2004 , 
+while facilitating some user customization.
+
+The current implementation creates the bond with zero forces and torques between 
+the bonded particles. Due to relative motion forces and torques will act on the particles, where the 
+normal force (Fn) is calculated explicit and all the other (tangential force (Ft), normal and tangential 
+torque (Tn, Tt)) are calculated incrementally:
+
+Fn =  kn * A * (initial_distance - distance)
+Ft += kt * A * v_t * dt
+Tn += kt * J * omega_n * dt
+Tt += kn * I * omega_t * dt :pre
+
+with the crossectional area {A}, the polar moment of inertia {J} and the moment of inertia {I} defined by
+
+A = rb^2 * pi,
+J = 0.5 * pi * rb^4,
+I = 0.25 * pi * rb^4 :pre
+
+The beam radius (rb) is defined by the product of the minimum radius of the bonded particles and the 
+user-defined {radiusMultiplierBond}. The {normalBondStiffnessPerUnitArea} {kn} and 
+{tangentialBondStiffnessPerUnitArea} {kt} are also user-defined properties.
+
+The stress flags ({tensionStress}, {compressionStress}, {shearStress}, {normalTorqueStress}, and 
+{shearTorqueStress}) allow to disable the calculation of the corresponding force/torque componant 
+at all. Consequently the disabled component does not contribute to the normal (sigma) or tangential 
+stress (tau), which are used for the stress-based breakage model (see below).
+
+Unless other breakage models are enabled, the default one depends on an user-defined maximum bond 
+distance. If the bond is overstreched (distance > {maxDistanceBond}), it will break.
+
+{stressBreak} = on means a stress-based breakage model, where a bond breaks if a maximum stress is 
+reached. Therefore, two additional properties have to be defined, {maxSigmaBond} and {maxTauBond}. 
+Those maximum stresses are compared to the calculated bond stresses that are defined by:
+
+sigma = abs(Fn)/A + abs(Tt) * rb/I
+tau = abs(Ft)/A + abs(Tn) * rb/J :pre
+
+Note that "normal" and "tangential" always refer to the coordinate system
+local to the bond. Thus, these forces and torques need to be rotated along
+with the bonded pair of particles to compute the forces and torques in the
+global frame of reference.
+
+IMPORTANT NOTE: LIGGGHTS(R)-INL will calculate a maximum bond length / contact distance 
+from values for maxDistanceBond or the max. sigma/tau values which is used for defining 
+the cut-off for the neighbor list build. For unrealistically high values, this might lead
+to a neighbor list overflow.
+
+In order to stabalize the system a kind of energy dissipation is required. By default the model uses the approach as 
+suggested by "Potyondy and Cundall"_#PotyondyCundall2004. Thus for each degree of freedom a damping 
+force/torque is added that is defined by (normal force example)
+
+Fd = - alpha * abs(Fn) * sign(v_n) :pre
+
+where sign(v) provides the direction of motion (normal or tangential relative (angular) velocity). 
+The damping coefficient alpha can be set separatly for each degree of freedom by the user-defined 
+properties {dampingNormalForceBond}, {dampingTangentialForceBond}, {dampingNormalTorqueBond}, and 
+{dampingTangentialTorqueBond}. The model can be disabled by the {dampingBond}.
+
+As the damping model above is sensitive to the sign of the normal velocity this model can
+cause instabilities when a system under loading is considered. In this case the
+{dampingBondSmooth} option can be enabled. This will modify the above equation to read
+
+Fd = - alpha * abs(Fn) * multiplier
+multiplier = min(1, max(-1, v_n/max(minvel, dv)))
+dv = |force_n * dt|
+minvel = radius/dt * 0.001 :pre
+
+which corresponds to a linear switching for velocities below a velocity threshold that
+depends on the force intensity.
+
+Additionally, a temporal dissipation model for forces and torques can be enabled by {dissipationBond}. 
+This increases numerical stabilty of the method. The dissipation is controlled by a 
+user-defined property for each force/torque ({dissipationNormalForceBond}, {dissipationTangentialForceBond}, 
+{dissipationNormalTorqueBond}, {dissipationTangentialTorqueBond}). These values have the unit of time (e.g. 
+seconds for si) and they define the relaxation time (63% of a response answer). In order to disable an 
+indiviual dissipation term set the corresponding coefficient {dissipation*Bond} to a high value (e.g. 1e20). 
+As an example the shear force is relaxed by
+
+Ft = Ft * ( 1 - min(dt/dissipationTangentialForceBond, 1) ) :pre
+
+By default bonds are created if two particles touch each other. The option {createBond} allows to change this 
+behaviour, thus bonds are created at a user-defined timestep ({tsCreateBond}, scalar property) for particles 
+within a user-defined range ({createDistanceBond}, perAtomTypePair property).
+
+To define those material properties, it is mandatory to use multiple "fix property/global"_fix_property.html commands:
+
+fix id all property/global radiusMultiplierBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+fix id all property/global normalBondStiffnessPerUnitArea peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+fix id all property/global tangentialBondStiffnessPerUnitArea peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+    (value_ij=value for the coefficient of restitution between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation) :pre
+
+According to the choosen damping/dissipation model you need to add:
+
+fix id all property/global dampingNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dampingTangentialForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dampingNormalTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dampingTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+or
+
+fix id all property/global dissipationNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dissipationTangentialForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dissipationNormalTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . 
+fix id all property/global dissipationTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+Dependent on selected flags ({stressBreak}, {temperatureBreak}) you need to add:
+
+fix id all property/global maxDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+or
+
+fix id all property/global maxSigmaBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+fix id all property/global maxTauBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+
+For {createBondAlways} = 'on' you need to add:
+
+fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+For {createBondAlways} = 'off' you need to add:
+
+fix id all property/global tsCreateBond scalar value .
+fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+IMPORTANT NOTE: You have to use atom styles beginning from 1, e.g. 1,2,3,...
+
+If {druckerPrager} = 'on' a Drucker-Prager model is used to determine the limiting
+tangential stress. Its value is computed by
+
+tau_max = {maxTauBond} + sigma tan({frictionAngle}) :pre
+
+where sigma is the normal stress, {maxTauBond} takes the role of the cohesion strength and
+{frictionAngle} is a peratomtypepair property which needs to be set as
+
+fix id all property/global frictionAngle peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+If {ratioTensionCompression} = 'on' the following property needs to be set:
+
+fix id all property/global ratioTensionCompression peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+This value, abbreviated with {rTC}, is then used to determine the maximum stress in normal
+direction under tension as {rTC} \* {maxSigmaBond}. This can be used to simulate materials
+which exhibit different compressive and tensile strengths.
+
+[Restrictions:]
+
+None.
+
+[Coarse-graining information:]
+
+Using "coarsegraining"_coarsegraining.html in
+combination with this command might lead to
+different dynamics or system state and thus to 
+inconsistancies.
+
+NOTE: "Coarsegraining"_coarsegraining.html may or 
+may not be available in LIGGGHTS(R)-INL.
+
+[Default:] 
+
+{stressBreak} = off, {temperatureBreak} = off, {tensionStress} = on, {compressionStress} = on, {shearStress} = on, 
+{normalTorqueStress} = on, {shearTorqueStress} = on, {createBondAlways} = off, {dampingBond} = on, {dissipationBond} = off
+
+:line
+
+:link(PotyondyCundall2004)
+[(Potyondy and Cundall, 2004)] "A bonded-particle model for rock", D. O. Potyondy and P. A. Cundall (2004), 
+International Journal of Rock Mechanics and Mining Sciences, 41(8), 1329ff.
+

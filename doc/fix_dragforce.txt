@@ -1,0 +1,98 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix dragforce command :h3
+
+[Syntax:]
+
+fix ID group-ID dragforce style_keyword style_values keyword value ... :pre
+
+ID, group-ID are documented in "fix"_fix.html command :ulb,l
+dragforce = style name of this fix command :l
+style_keyword = {Schiller_Naumann} or {const_Cd} :l
+  {Schiller_Naumann} style_values = viscosity viscosity-value density density-value
+    viscosity = obligatory word
+    viscosity-value = kinematic fluid density in length^2/time units
+    density = obligatory word
+    density-value = fluid density in mass/length^3 units
+  {const_Cd} style_values = Cd Cd-value viscosity viscosity-value density density-value
+    Cd = obligatory word
+    Cd-value = value of drag coefficient (dimensionless)
+    viscosity = obligatory word
+    viscosity-value = kinematic fluid density in length^2/time units
+    density = obligatory word
+    density-value = fluid density in mass/length^3 units :pre
+zero or more keyword/value pairs may be appended to args :l
+keyword =  {U_fluid} or {region} :l
+  {U_fluid} value = ux uy uz
+    ux, uy, uz = fluid velocity vector in length/time units
+  {region} value = region-ID
+    region-ID = ID of region atoms must be in to have added drag force  :pre
+:ule
+
+[Examples:]
+
+fix drag all dragforce Schiller_Naumann viscosity 0.0002 density 1000 region water :pre
+
+[Description:]
+
+Add a drag force for each atom in the group, which reads:
+
+Fd = 0.5*density*Urel^2*Cd*A* :pre
+
+where A is the particle's cross-sectional area, Urel is the relative
+velocity of particle and fluid. {density} is the fluid density.
+If {const_Cd} is used, then the value of Cd is specified by the user.
+In case {Schiller_Naumann} is used, then Cd reads
+
+Cd = max(0.44, 24/Re*(1.+0.15*Re^0.687)
+Re = U*2*r/viscosity :pre
+
+Re is the Reynolds Number, and keyword {viscosity} is the
+kinematic viscosity of the fluid. R is the particle radius. Keyword
+{U_fluid} is used to define the fluid velocity, which is assumed
+to be constant.
+
+If the {region} keyword is used, the atom must also be in the
+specified geometric "region"_region.html in order to have buoyancy force
+added to it.
+
+:line
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+No information about this fix is written to "binary restart
+files"_restart.html. No "fix_modify"_fix_modify.html option applies
+to this fix. This fix computes no output, which can be accessed by
+various "output commands"_Section_howto.html#howto_8.
+No parameter of this fix can be used with the {start/stop} keywords of
+the "run"_run.html command.
+
+The forces due to this fix are imposed during an energy minimization,
+invoked by the "minimize"_minimize.html command.
+
+[Restrictions:] none
+
+[Related commands:]
+
+"fix setforce"_fix_setforce.html, "fix aveforce"_fix_aveforce.html,
+"fix addforce"_fix_addforce.html
+
+[Coarse-graining information:]
+
+Using "coarsegraining"_coarsegraining.html in
+combination with this command might lead to
+different dynamics or system state and thus to 
+inconsistancies.
+
+NOTE: "Coarsegraining"_coarsegraining.html may or 
+may not be available in LIGGGHTS(R)-INL.
+
+[Default:]
+
+region = whole simulation box, density = 0, viscosity = 0

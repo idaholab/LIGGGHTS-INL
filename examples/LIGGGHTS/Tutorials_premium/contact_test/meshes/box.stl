@@ -1,0 +1,75 @@
+# ======
+#box.stl:
+solid BOX
+facet normal 0.000000 0.000000 -1.000000
+outer loop
+vertex  0.0  0 -0.02
+vertex  0.06 0 -0.02
+vertex  0.0  0.065 -0.02
+endloop
+endfacet
+facet normal 0.000000 0.000000 -1.000000
+outer loop
+vertex  0.0  0.065 -0.02
+vertex  0.06 0 -0.02
+vertex  0.06 0.065 -0.02
+endloop
+endfacet
+#facet normal -1.000000 0.000000 0.000000
+#outer loop
+#vertex  0.06 0 -0.02
+#vertex  0.06 0.065 -0.02
+#vertex  0.06 0  0.02
+#endloop
+#endfacet
+#facet normal -1.000000 0.000000 0.000000
+#outer loop
+#vertex  0.06 0  0.02
+#vertex  0.06 0.065 -0.02
+#vertex  0.06 0.065  0.02
+#endloop
+#endfacet
+facet normal 0.000000 1.000000 0.000000
+outer loop
+vertex  0.0  0 -0.02
+vertex  0.06 0 -0.02
+vertex  0.0  0  0.02
+endloop
+endfacet
+facet normal 0.000000 1.000000 0.000000
+outer loop
+vertex  0.0  0  0.02
+vertex  0.06 0 -0.02
+vertex  0.06 0  0.02
+endloop
+endfacet
+facet normal 0.000000 -1.000000 0.000000
+outer loop
+vertex  0.0  0.065 -0.02
+vertex  0.06 0.065 -0.02
+vertex  0.0  0.065  0.02
+endloop
+endfacet
+facet normal 0.000000 -1.000000 0.000000
+outer loop
+vertex  0.0  0.065  0.02
+vertex  0.06 0.065 -0.02
+vertex  0.06 0.065  0.02
+endloop
+endfacet
+facet normal 0.000000 0.000000 1.000000
+outer loop
+vertex  0.0  0 0.02
+vertex  0.06 0 0.02
+vertex  0.0  0.065 0.02
+endloop
+endfacet
+facet normal 0.000000 0.000000 1.000000
+outer loop
+vertex  0.0  0.065 0.02
+vertex  0.06 0 0.02
+vertex  0.06 0.065 0.02
+endloop
+endfacet
+endsolid BOX
+#=====

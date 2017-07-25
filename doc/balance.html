@@ -1,0 +1,440 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>balance command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="Manual.html">LIGGGHTS</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="Manual.html">Docs</a> &raquo;</li>
+      
+    <li>balance command</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/balance.txt" rel="nofollow"> View page source</a> 
+        
+          <a href="http://www.cfdem.com"> Website</a>
+        
+          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+        
+      
+    </li>
+  </ul>
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="balance-command">
+<span id="index-0"></span><h1>balance command<a class="headerlink" href="#balance-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>balance keyword args ...</pre>
+</div>
+<ul class="simple">
+<li>one or more keyword/arg pairs may be appended</li>
+<li>keyword = <em>x</em> or <em>y</em> or <em>z</em> or <em>dynamic</em> or <em>out</em></li>
+</ul>
+<pre class="literal-block">
+<em>x</em> args = <em>uniform</em> or Px-1 numbers between 0 and 1
+  <em>uniform</em> = evenly spaced cuts between processors in x dimension
+  numbers = Px-1 ascending values between 0 and 1, Px - # of processors in x dimension
+<em>y</em> args = <em>uniform</em> or Py-1 numbers between 0 and 1
+  <em>uniform</em> = evenly spaced cuts between processors in y dimension
+  numbers = Py-1 ascending values between 0 and 1, Py - # of processors in y dimension
+<em>z</em> args = <em>uniform</em> or Pz-1 numbers between 0 and 1
+  <em>uniform</em> = evenly spaced cuts between processors in z dimension
+  numbers = Pz-1 ascending values between 0 and 1, Pz - # of processors in z dimension
+<em>dynamic</em> args = dimstr Niter thresh
+  dimstr = sequence of letters containing &quot;x&quot; or &quot;y&quot; or &quot;z&quot;, each not more than once
+  Niter = # of times to iterate within each dimension of dimstr sequence
+  thresh = stop balancing when this imbalance threshhold is reached
+<em>out</em> arg = filename
+  filename = output file to write each processor's sub-domain to
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>balance x uniform y 0.4 0.5 0.6
+balance dynamic xz 5 1.1
+balance dynamic x 20 1.0 out tmp.balance</pre>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This command adjusts the size of processor sub-domains within the
+simulation box, to attempt to balance the number of particles and thus
+the computational cost (load) evenly across processors.  The load
+balancing is &#8220;static&#8221; in the sense that this command performs the
+balancing once, before or between simulations.  The processor
+sub-domains will then remain static during the subsequent run.  To
+perform &#8220;dynamic&#8221; balancing, see the <a class="reference internal" href="fix_balance.html"><em>fix balance</em></a>
+command, which can adjust processor sub-domain sizes on-the-fly during
+a <a class="reference internal" href="run.html"><em>run</em></a>.</p>
+<p>Load-balancing is only useful if the particles in the simulation box
+have a spatially-varying density distribution.  E.g. a model of a
+vapor/liquid interface, or a solid with an irregular-shaped geometry
+containing void regions.  In this case, the LIGGGHTS(R)-INL default of dividing
+the simulation box volume into a regular-spaced grid of processor
+sub-domain, with one equal-volume sub-domain per procesor, may assign
+very different numbers of particles per processor.  This can lead to
+poor performance in a scalability sense, when the simulation is run in
+parallel.</p>
+<p>Note that the <a class="reference internal" href="processors.html"><em>processors</em></a> command gives you control
+over how the box volume is split across processors.  Specifically, for
+a Px by Py by Pz grid of processors, it chooses or lets you choose Px,
+Py, and Pz, subject to the constraint that Px * Py * Pz = P, the total
+number of processors.  This is sufficient to achieve good load-balance
+for many models on many processor counts.  However, all the processor
+sub-domains will still be the same shape and have the same volume.</p>
+<p>This command does not alter the topology of the Px by Py by Pz grid or
+processors.  But it shifts the cutting planes between processors (in
+3d, or lines in 2d), which adjusts the volume (area in 2d) assigned to
+each processor, as in the following 2d diagram.  The left diagram is
+the default partitioning of the simulation box across processors (one
+sub-box for each of 16 processors); the right diagram is after
+balancing.</p>
+<img alt="_images/balance.jpg" class="align-center" src="_images/balance.jpg" />
+<p>When the balance command completes, it prints out the final positions
+of all cutting planes in each of the 3 dimensions (as fractions of the
+box length).  It also prints statistics about its results, including
+the change in &#8220;imbalance factor&#8221;.  This factor is defined as the
+maximum number of particles owned by any processor, divided by the
+average number of particles per processor.  Thus an imbalance factor
+of 1.0 is perfect balance.  For 10000 particles running on 10
+processors, if the most heavily loaded processor has 1200 particles,
+then the factor is 1.2, meaning there is a 20% imbalance.  The change
+in the maximum number of particles (on any processor) is also printed.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This command attempts to minimize the imbalance
+factor, as defined above.  But because of the topology constraint that
+only the cutting planes (lines) between processors are moved, there
+are many irregular distributions of particles, where this factor
+cannot be shrunk to 1.0, particuarly in 3d.  Also, computational cost
+is not strictly proportional to particle count, and changing the
+relative size and shape of processor sub-domains may lead to
+additional computational and communication overheads, e.g. in the PPPM
+solver used via the <tt class="xref doc docutils literal"><span class="pre">kspace_style</span></tt> command.  Thus
+you should benchmark the run times of your simulation before and after
+balancing.</p>
+</div>
+<hr class="docutils" />
+<p>The <em>x</em>, <em>y</em>, and <em>z</em> keywords adjust the position of cutting planes
+between processor sub-domains in a specific dimension.  The <em>uniform</em>
+argument spaces the planes evenly, as in the left diagram above.  The
+<em>numeric</em> argument requires you to list Ps-1 numbers that specify the
+position of the cutting planes.  This requires that you know Ps = Px
+or Py or Pz = the number of processors assigned by LIGGGHTS(R)-INL to the
+relevant dimension.  This assignment is made (and the Px, Py, Pz
+values printed out) when the simulation box is created by the
+&#8220;create_box&#8221; or &#8220;read_data&#8221; or &#8220;read_restart&#8221; command and is
+influenced by the settings of the &#8220;processors&#8221; command.</p>
+<p>Each of the numeric values must be between 0 and 1, and they must be
+listed in ascending order.  They represent the fractional position of
+the cutting place.  The left (or lower) edge of the box is 0.0, and
+the right (or upper) edge is 1.0.  Neither of these values is
+specified.  Only the interior Ps-1 positions are specified.  Thus is
+there are 2 procesors in the x dimension, you specify a single value
+such as 0.75, which would make the left processor&#8217;s sub-domain 3x
+larger than the right processor&#8217;s sub-domain.</p>
+<hr class="docutils" />
+<p>The <em>dynamic</em> keyword changes the cutting planes between processors in
+an iterative fashion, seeking to reduce the imbalance factor, similar
+to how the <a class="reference internal" href="fix_balance.html"><em>fix balance</em></a> command operates.  Note that
+this keyword begins its operation from the current processor
+partitioning, which could be uniform or the result of a previous
+balance command.</p>
+<p>The <em>dimstr</em> argument is a string of characters, each of which must be
+an &#8220;x&#8221; or &#8220;y&#8221; or &#8220;z&#8221;.  Eacn character can appear zero or one time,
+since there is no advantage to balancing on a dimension more than
+once.  You should normally only list dimensions where you expect there
+to be a density variation in the particles.</p>
+<p>Balancing proceeds by adjusting the cutting planes in each of the
+dimensions listed in <em>dimstr</em>, one dimension at a time.  For a single
+dimension, the balancing operation (described below) is iterated on up
+to <em>Niter</em> times.  After each dimension finishes, the imbalance factor
+is re-computed, and the balancing operation halts if the <em>thresh</em>
+criterion is met.</p>
+<p>A rebalance operation in a single dimension is performed using a
+recursive multisectioning algorithm, where the position of each
+cutting plane (line in 2d) in the dimension is adjusted independently.
+This is similar to a recursive bisectioning (RCB) for a single value,
+except that the bounds used for each bisectioning take advantage of
+information from neighboring cuts if possible.  At each iteration, the
+count of particles on either side of each plane is tallied.  If the
+counts do not match the target value for the plane, the position of
+the cut is adjusted to be halfway between a low and high bound.  The
+low and high bounds are adjusted on each iteration, using new count
+information, so that they become closer together over time.  Thus as
+the recustion progresses, the count of particles on either side of the
+plane gets closer to the target value.</p>
+<p>Once the rebalancing is complete and final processor sub-domains
+assigned, particles are migrated to their new owning processor, and
+the balance procedure ends.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">At each rebalance operation, the RCB for each cutting
+plane (line in 2d) typcially starts with low and high bounds separated
+by the extent of a processor&#8217;s sub-domain in one dimension.  The size
+of this bracketing region shrinks by 1/2 every iteration.  Thus if
+<em>Niter</em> is specified as 10, the cutting plane will typically be
+positioned to 1 part in 1000 accuracy (relative to the perfect target
+position).  For <em>Niter</em> = 20, it will be accurate to 1 part in a
+million.  Tus there is no need ot set <em>Niter</em> to a large value.
+LIGGGHTS(R)-INL will check if the threshold accuracy is reached (in a
+dimension) is less iterations than <em>Niter</em> and exit early.  However,
+<em>Niter</em> should also not be set too small, since it will take roughly
+the same number of iterations to converge even if the cutting plane is
+initially close to the target value.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If a portion of your system is a perfect lattice,
+e.g. the intiial system is generated by the
+<a class="reference internal" href="create_atoms.html"><em>create_atoms</em></a> command, then the balancer may be
+unable to achieve exact balance.  I.e. entire lattice planes will be
+owned or not owned by a single processor.  So you you should not
+expect to achieve perfect balance in this case.</p>
+</div>
+<hr class="docutils" />
+<p>The <em>out</em> keyword writes a text file to the specified <em>filename</em> with
+the results of the balancing operation.  The file contains the bounds
+of the sub-domain for each processor after the balancing operation
+completes.  The format of the file is compatible with the
+<a class="reference external" href="pizza">Pizza.py</a> <em>mdump</em> tool which has support for manipulating and
+visualizing mesh files.  An example is shown here for a balancing by 4
+processors for a 2d problem:</p>
+<div class="highlight-python"><pre>ITEM: TIMESTEP
+0
+ITEM: NUMBER OF SQUARES
+4
+ITEM: SQUARES
+1 1 1 2 7 6
+2 2 2 3 8 7
+3 3 3 4 9 8
+4 4 4 5 10 9
+ITEM: TIMESTEP
+0
+ITEM: NUMBER OF NODES
+10
+ITEM: BOX BOUNDS
+-153.919 184.703
+0 15.3919
+-0.769595 0.769595
+ITEM: NODES
+1 1 -153.919 0 0
+2 1 7.45545 0 0
+3 1 14.7305 0 0
+4 1 22.667 0 0
+5 1 184.703 0 0
+6 1 -153.919 15.3919 0
+7 1 7.45545 15.3919 0
+8 1 14.7305 15.3919 0
+9 1 22.667 15.3919 0
+10 1 184.703 15.3919 0</pre>
+</div>
+<p>The &#8220;SQUARES&#8221; lists the node IDs of the 4 vertices in a rectangle for
+each processor (1 to 4).  The first SQUARE 1 (for processor 0) is a
+rectangle of type 1 (equal to SQUARE ID) and contains vertices
+1,2,7,6.  The coordinates of all the vertices are listed in the NODES
+section.  Note that the 4 sub-domains share vertices, so there are
+only 10 unique vertices in total.</p>
+<p>For a 3d problem, the syntax is similar with &#8220;SQUARES&#8221; replaced by
+&#8220;CUBES&#8221;, and 8 vertices listed for each processor, instead of 4.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>This command cannot be used together with meshes (e.g. a
+<a class="reference internal" href="fix_mesh_surface.html"><em>fix mesh/surface</em></a> command)</p>
+<p>The <em>dynamic</em> keyword cannot be used with the <em>x</em>, <em>y</em>, or <em>z</em>
+arguments.</p>
+<p>For 2d simulations, the <em>z</em> keyword cannot be used.  Nor can a &#8220;z&#8221;
+appear in <em>dimstr</em> for the <em>dynamic</em> keyword.</p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="processors.html"><em>processors</em></a>, <a class="reference internal" href="fix_balance.html"><em>fix balance</em></a></p>
+<p><strong>Default:</strong> none</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'v3.X',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

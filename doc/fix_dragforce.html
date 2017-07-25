@@ -1,0 +1,303 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fix dragforce command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="Manual.html">LIGGGHTS</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="Manual.html">Docs</a> &raquo;</li>
+      
+    <li>fix dragforce command</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/fix_dragforce.txt" rel="nofollow"> View page source</a> 
+        
+          <a href="http://www.cfdem.com"> Website</a>
+        
+          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+        
+      
+    </li>
+  </ul>
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fix-dragforce-command">
+<span id="index-0"></span><h1>fix dragforce command<a class="headerlink" href="#fix-dragforce-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>fix ID group-ID dragforce style_keyword style_values keyword value ...</pre>
+</div>
+<ul class="simple">
+<li>ID, group-ID are documented in <a class="reference internal" href="fix.html"><em>fix</em></a> command</li>
+<li>dragforce = style name of this fix command</li>
+<li>style_keyword = <em>Schiller_Naumann</em> or <em>const_Cd</em></li>
+</ul>
+<pre class="literal-block">
+<em>Schiller_Naumann</em> style_values = viscosity viscosity-value density density-value
+  viscosity = obligatory word
+  viscosity-value = kinematic fluid density in length^2/time units
+  density = obligatory word
+  density-value = fluid density in mass/length^3 units
+<em>const_Cd</em> style_values = Cd Cd-value viscosity viscosity-value density density-value
+  Cd = obligatory word
+  Cd-value = value of drag coefficient (dimensionless)
+  viscosity = obligatory word
+  viscosity-value = kinematic fluid density in length^2/time units
+  density = obligatory word
+  density-value = fluid density in mass/length^3 units
+</pre>
+<ul class="simple">
+<li>zero or more keyword/value pairs may be appended to args</li>
+<li>keyword =  <em>U_fluid</em> or <em>region</em></li>
+</ul>
+<pre class="literal-block">
+<em>U_fluid</em> value = ux uy uz
+  ux, uy, uz = fluid velocity vector in length/time units
+<em>region</em> value = region-ID
+  region-ID = ID of region atoms must be in to have added drag force
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>fix drag all dragforce Schiller_Naumann viscosity 0.0002 density 1000 region water</pre>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Add a drag force for each atom in the group, which reads:</p>
+<div class="highlight-python"><pre>Fd = 0.5*density*Urel^2*Cd*A*</pre>
+</div>
+<p>where A is the particle&#8217;s cross-sectional area, Urel is the relative
+velocity of particle and fluid. <em>density</em> is the fluid density.
+If <em>const_Cd</em> is used, then the value of Cd is specified by the user.
+In case <em>Schiller_Naumann</em> is used, then Cd reads</p>
+<div class="highlight-python"><pre>Cd = max(0.44, 24/Re*(1.+0.15*Re^0.687)
+Re = U*2*r/viscosity</pre>
+</div>
+<p>Re is the Reynolds Number, and keyword <em>viscosity</em> is the
+kinematic viscosity of the fluid. R is the particle radius. Keyword
+<em>U_fluid</em> is used to define the fluid velocity, which is assumed
+to be constant.</p>
+<p>If the <em>region</em> keyword is used, the atom must also be in the
+specified geometric <a class="reference internal" href="region.html"><em>region</em></a> in order to have buoyancy force
+added to it.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
+<h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
+<p>No information about this fix is written to <a class="reference internal" href="restart.html"><em>binary restart files</em></a>. No <a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a> option applies
+to this fix. This fix computes no output, which can be accessed by
+various <em class="xref std std-ref">output commands</em>.
+No parameter of this fix can be used with the <em>start/stop</em> keywords of
+the <a class="reference internal" href="run.html"><em>run</em></a> command.</p>
+<p>The forces due to this fix are imposed during an energy minimization,
+invoked by the <tt class="xref doc docutils literal"><span class="pre">minimize</span></tt> command.</p>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>none</div></blockquote>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="fix_setforce.html"><em>fix setforce</em></a>, <a class="reference internal" href="fix_aveforce.html"><em>fix aveforce</em></a>,
+<a class="reference internal" href="fix_addforce.html"><em>fix addforce</em></a></p>
+<p><strong>Coarse-graining information:</strong></p>
+<p>Using <tt class="xref doc docutils literal"><span class="pre">coarsegraining</span></tt> in
+combination with this command might lead to
+different dynamics or system state and thus to
+inconsistancies.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><tt class="xref doc docutils literal"><span class="pre">Coarsegraining</span></tt> may or
+may not be available in LIGGGHTS(R)-INL.</p>
+</div>
+</div>
+<div class="section" id="default">
+<h2>Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h2>
+<p>region = whole simulation box, density = 0, viscosity = 0</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'v3.X',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

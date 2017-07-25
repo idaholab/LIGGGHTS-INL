@@ -1,0 +1,113 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+mesh module 6dof :h3
+
+[Syntax:]
+
+6dof 6dof_keywords 6dof_values :pre
+
+zero or more 6dof_keyword/value pairs may be appended
+6dof keywords = {mass} (obligatory) or {com} (obligatory) or {moi} (obligatory) or {vcm} or {angmom} or {suspension}  or {forceflags} or {torqueflags} or {externalForces} :ulb,l
+{mass} value = mass
+   mass = mass of the rigid body (mass units)
+{com} values = x, y, z
+    x, y, z = coordinates of the center of mass of the body (distance units)
+{moi} values = Ixx, Iyy, Izz, Ixy, Ixz, Iyz
+    Ixx, Iyy, Izz, Ixy, Ixz, Iyz = moments of inertia around the given axis
+{vel} values = vx, vy, vz
+    vx, vy, vz = velocities of the center of mass of the body (velocity units)
+{angmom} values = ax, ay, az
+    ax, ay, az = initial angular momentum around x-, y-, and z-axis
+{suspension} values = k_t kt c_t ct k_r kr c_r cr
+    k_t = obligatory keyword
+    kt = stiffness for translational spring
+    c_t = obligatory keyword
+    ct = damper coefficient for translational damper
+    k_r = obligatory keyword
+    kr = stiffness for rotational spring
+    c_r = obligatory keyword
+    cr = damper coefficient for rotational damper
+{forceflags} values = f1 f2 f3
+    f1,f2,f3 = flags for x,y,z which can be 0 or 1
+{torqueflags} values = t1 t2 t3
+    t1,t2,t3 = flags for x,y,z which can be 0 or 1 
+{externalForce} values = f1, f2, f3
+    f1, f2, f3 = values for externally acting forces :pre
+:ule
+
+[Examples:]
+
+fix	cube all mesh/surface/stress/6dof file cube.stl type 1 com 0. 0. 0. vel 0. 0. -0.5 mass 40 moi 0.266666 0.266666 0.266666 0. 0. 0. :pre
+
+[Description:]
+
+This mesh module integrates the motion of the mesh assuming it to be a rigid body with the
+given {com} (center of mass) and {moi} (moments of inertia). Optionally, you can specify
+an initial velocity and angular momentum of the rigid body. Please note the difference
+between angular velocity omega and angular momentum (which is I*omega)
+
+Note that if a "fix gravity"_fix_gravity.html is used, the gravitational force acts on the
+center of mass of the body
+
+With the optional {suspension} keyword, an additional suspension force and torque is
+activated which tries to pull the body back into its original position (which is the {com}
+as defined by this command) and its original orientation. The force and torque consist of
+translational and rotational spring/damping parts and write
+
+f = kt * dx - ct * vel t = kr * dalpha * axis - cr * omega
+
+where vec and omega are the body velocity and rotational velocity. dx represents the
+translational displacement of the body from its original position. dalpha and axis
+represent the rotational displacement of the body from its original orientation, where
+dalpha is the the angle and axis is the the corresponding rotation (unit) axis.
+
+With the optional {forceflags} and {torqueflags} keywords, motion integration can be
+turned off separately for the x-, y-, and z-axis by setting the correspondig entry 0.
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+This mesh module stores a global vector with 7 components for access by various "output
+commands"_Section_howto.html#4_15.  The first 3 components (7-9) store the position of the
+center of mass of the body. The next 4 components (10-13) are the quaternion of the
+rotation of the body.  Please note that if this module is availalble the total force and
+torque (in the output of "mesh module stress"_mesh_module_stress.html)contain the
+contributions of the particles, gravity and the suspension model (if activated).
+Furthermore, this module writes the state of the rigid body (translational and rotational)
+to binary restart files so that a simulation can continue correctly.  This module supports
+"fix_modify"_fix_modify.html with options {6dof/forceflags}, {6dof/torqueflags},
+{6dof/vel}, {6dof/angmom} and {6dof/move_mesh}.  All options, except {6dof/move_mesh},
+work as their counterpart in the definition of the module (see Syntax). The option
+{6dof/move_mesh} takes three values as input and shifts the position of the mesh according
+to these three values. The following
+
+fix_modify my_fix_id 6dof/move_mesh 0. 0. 1. :pre
+
+would shift the mesh in {my_fix_id} 1 unit in {z}-direction.
+
+[Restrictions:]
+
+This mesh module requires the usage of "mesh module stress"_mesh_module_stress.html and
+that module needs to preceede the 6dof module.
+
+When using this module, along with scaling or rotate the body, all the 6dof_keyword/value
+pairs have to represent the state after scaling/rotation.  Mesh elements may not be
+deleted in case due to leaving the simulation box for a fixed boundary.  In this case, an
+error is generated. See "boundary"_boundary.html command for details.  This module can not
+be used in conjunction with another fix that manipulates mesh geometry, such as a "fix
+move/mesh"_fix_move_mesh.html or the "mesh module servo"_mesh_module_servo.html
+
+[Related commands:]
+
+"Mesh module stress"_mesh_module_stress.html, "fix wall/gran"_fix_wall_gran.html, "fix
+mesh/surface"_fix_mesh_surface.html
+
+[Default:]
+
+{vel} = 0 0 0, {angmom} = 0 0 0, {forceflags} = 1 1 1, {torqueflags} = 1 1 1 ,
+{suspension} = off

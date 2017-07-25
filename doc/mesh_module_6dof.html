@@ -1,0 +1,307 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mesh module 6dof &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="Manual.html">LIGGGHTS</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="Manual.html">Docs</a> &raquo;</li>
+      
+    <li>mesh module 6dof</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="_sources/mesh_module_6dof.txt" rel="nofollow"> View page source</a> 
+        
+          <a href="http://www.cfdem.com"> Website</a>
+        
+          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+        
+      
+    </li>
+  </ul>
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mesh-module-6dof">
+<h1>mesh module 6dof<a class="headerlink" href="#mesh-module-6dof" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>6dof 6dof_keywords 6dof_values</pre>
+</div>
+<ul class="simple">
+<li>zero or more 6dof_keyword/value pairs may be appended
+6dof keywords = <em>mass</em> (obligatory) or <em>com</em> (obligatory) or <em>moi</em> (obligatory) or <em>vcm</em> or <em>angmom</em> or <em>suspension</em>  or <em>forceflags</em> or <em>torqueflags</em> or <em>externalForces</em></li>
+</ul>
+<pre class="literal-block">
+<em>mass</em> value = mass
+   mass = mass of the rigid body (mass units)
+<em>com</em> values = x, y, z
+    x, y, z = coordinates of the center of mass of the body (distance units)
+<em>moi</em> values = Ixx, Iyy, Izz, Ixy, Ixz, Iyz
+    Ixx, Iyy, Izz, Ixy, Ixz, Iyz = moments of inertia around the given axis
+<em>vel</em> values = vx, vy, vz
+    vx, vy, vz = velocities of the center of mass of the body (velocity units)
+<em>angmom</em> values = ax, ay, az
+    ax, ay, az = initial angular momentum around x-, y-, and z-axis
+<em>suspension</em> values = k_t kt c_t ct k_r kr c_r cr
+    k_t = obligatory keyword
+    kt = stiffness for translational spring
+    c_t = obligatory keyword
+    ct = damper coefficient for translational damper
+    k_r = obligatory keyword
+    kr = stiffness for rotational spring
+    c_r = obligatory keyword
+    cr = damper coefficient for rotational damper
+<em>forceflags</em> values = f1 f2 f3
+    f1,f2,f3 = flags for x,y,z which can be 0 or 1
+<em>torqueflags</em> values = t1 t2 t3
+    t1,t2,t3 = flags for x,y,z which can be 0 or 1
+<em>externalForce</em> values = f1, f2, f3
+    f1, f2, f3 = values for externally acting forces
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>fix  cube all mesh/surface/stress/6dof file cube.stl type 1 com 0. 0. 0. vel 0. 0. -0.5 mass 40 moi 0.266666 0.266666 0.266666 0. 0. 0.</pre>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This mesh module integrates the motion of the mesh assuming it to be a rigid body with the
+given <em>com</em> (center of mass) and <em>moi</em> (moments of inertia). Optionally, you can specify
+an initial velocity and angular momentum of the rigid body. Please note the difference
+between angular velocity omega and angular momentum (which is I*omega)</p>
+<p>Note that if a <a class="reference internal" href="fix_gravity.html"><em>fix gravity</em></a> is used, the gravitational force acts on the
+center of mass of the body</p>
+<p>With the optional <em>suspension</em> keyword, an additional suspension force and torque is
+activated which tries to pull the body back into its original position (which is the <em>com</em>
+as defined by this command) and its original orientation. The force and torque consist of
+translational and rotational spring/damping parts and write</p>
+<p>f = kt * dx - ct * vel t = kr * dalpha * axis - cr * omega</p>
+<p>where vec and omega are the body velocity and rotational velocity. dx represents the
+translational displacement of the body from its original position. dalpha and axis
+represent the rotational displacement of the body from its original orientation, where
+dalpha is the the angle and axis is the the corresponding rotation (unit) axis.</p>
+<p>With the optional <em>forceflags</em> and <em>torqueflags</em> keywords, motion integration can be
+turned off separately for the x-, y-, and z-axis by setting the correspondig entry 0.</p>
+</div>
+<div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
+<h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
+<p>This mesh module stores a global vector with 7 components for access by various <em class="xref std std-ref">output commands</em>.  The first 3 components (7-9) store the position of the
+center of mass of the body. The next 4 components (10-13) are the quaternion of the
+rotation of the body.  Please note that if this module is availalble the total force and
+torque (in the output of <a class="reference external" href="mesh_module_stress.html)contain">mesh module stress</a> the
+contributions of the particles, gravity and the suspension model (if activated).
+Furthermore, this module writes the state of the rigid body (translational and rotational)
+to binary restart files so that a simulation can continue correctly.  This module supports
+<a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a> with options <em>6dof/forceflags</em>, <em>6dof/torqueflags</em>,
+<em>6dof/vel</em>, <em>6dof/angmom</em> and <em>6dof/move_mesh</em>.  All options, except <em>6dof/move_mesh</em>,
+work as their counterpart in the definition of the module (see Syntax). The option
+<em>6dof/move_mesh</em> takes three values as input and shifts the position of the mesh according
+to these three values. The following</p>
+<div class="highlight-python"><pre>fix_modify my_fix_id 6dof/move_mesh 0. 0. 1.</pre>
+</div>
+<p>would shift the mesh in <em>my_fix_id</em> 1 unit in <em>z</em>-direction.</p>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>This mesh module requires the usage of <a class="reference internal" href="mesh_module_stress.html"><em>mesh module stress</em></a> and
+that module needs to preceede the 6dof module.</p>
+<p>When using this module, along with scaling or rotate the body, all the 6dof_keyword/value
+pairs have to represent the state after scaling/rotation.  Mesh elements may not be
+deleted in case due to leaving the simulation box for a fixed boundary.  In this case, an
+error is generated. See <a class="reference internal" href="boundary.html"><em>boundary</em></a> command for details.  This module can not
+be used in conjunction with another fix that manipulates mesh geometry, such as a <a class="reference internal" href="fix_move_mesh.html"><em>fix move/mesh</em></a> or the <a class="reference internal" href="mesh_module_servo.html"><em>mesh module servo</em></a></p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="mesh_module_stress.html"><em>Mesh module stress</em></a>, <a class="reference internal" href="fix_wall_gran.html"><em>fix wall/gran</em></a>, <a class="reference internal" href="fix_mesh_surface.html"><em>fix mesh/surface</em></a></p>
+</div>
+<div class="section" id="default">
+<h2>Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h2>
+<p><em>vel</em> = 0 0 0, <em>angmom</em> = 0 0 0, <em>forceflags</em> = 1 1 1, <em>torqueflags</em> = 1 1 1 ,
+<em>suspension</em> = off</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'',
+            VERSION:'v3.X',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

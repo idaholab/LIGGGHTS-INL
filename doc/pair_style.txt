@@ -1,0 +1,85 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+pair_style command :h3
+
+[Syntax:]
+
+pair_style style args :pre
+
+style = one of the styles from the list "here"_Section_commands.html#cmd_5
+args = arguments used by a particular style :ul
+
+[Examples:]
+
+pair_style gran model hertz tangential history
+pair_style none :pre
+
+[Description:]
+
+Set the formula(s) LIGGGHTS(R)-INL uses to compute pairwise interactions.  In
+LIGGGHTS(R)-INL, pair potentials are defined between pairs of atoms that are
+within a cutoff distance and the set of active interactions typically
+changes over time.  See the "bond_style"_bond_style.html command to
+define potentials between pairs of bonded atoms, which typically
+remain in place for the duration of a simulation.
+
+The full list of pair styles defined in LIGGGHTS(R)-INL is on "this
+page"_Section_commands.html#cmd_5.
+
+Hybrid models where specified pairs of atom types interact via
+different pair potentials can be setup using the {hybrid} pair style.
+
+The coefficients associated with a pair style are typically set for
+each pair of atom types, and are specified by the
+"pair_coeff"_pair_coeff.html command or read from a file by the
+"read_data"_read_data.html or "read_restart"_read_restart.html
+commands.
+
+The "pair_modify"_pair_modify.html command sets options for mixing of
+type I-J interaction coefficients.
+
+If the pair_style command has a cutoff argument, it sets global
+cutoffs for all pairs of atom types.  The distance(s) can be smaller
+or larger than the dimensions of the simulation box.
+
+Typically, the global cutoff value can be overridden for a specific
+pair of atom types by the "pair_coeff"_pair_coeff.html command.  The
+pair style settings (including global cutoffs) can be changed by a
+subsequent pair_style command using the same style.  This will reset
+the cutoffs for all atom type pairs, including those previously set
+explicitly by a "pair_coeff"_pair_coeff.html command.  The exceptions
+to this are that pair_style {table} and {hybrid} settings cannot be
+reset.  A new pair_style command for these styles will wipe out all
+previously specified pair_coeff values.
+
+:line
+
+The full list of pair styles defined in LIGGGHTS(R)-INL is on "this
+page"_Section_commands.html#cmd_5.
+
+[Restrictions:]
+
+This command must be used before any coefficients are set by the
+"pair_coeff"_pair_coeff.html, "read_data"_read_data.html, or
+"read_restart"_read_restart.html commands.
+
+Some pair styles are part of specific packages.  They are only enabled
+if LIGGGHTS(R)-INL was built with that package.  See the "Making
+LIGGGHTS(R)-INL"_Section_start.html#start_3 section for more info on packages.
+The doc pages for individual pair potentials tell if it is part of a
+package.
+
+[Related commands:]
+
+"pair_coeff"_pair_coeff.html, "read_data"_read_data.html,
+"pair_modify"_pair_modify.html, "dielectric"_dielectric.html,
+
+[Default:]
+
+pair_style none :pre

@@ -1,0 +1,47 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+bond_style harmonic command :h3
+
+[Syntax:]
+
+bond_style harmonic :pre
+
+[Examples:]
+
+bond_style harmonic
+bond_coeff 5 80.0 1.2 :pre
+
+[Description:]
+
+The {harmonic} bond style uses the potential
+
+:c,image(Eqs/bond_harmonic.jpg)
+
+where r0 is the equilibrium bond distance.  Note that the usual 1/2
+factor is included in K.
+
+The following coefficients must be defined for each bond type via the
+"bond_coeff"_bond_coeff.html command as in the example above, or in
+the data file or restart files read by the "read_data"_read_data.html
+or "read_restart"_read_restart.html commands:
+
+K (energy/distance^2)
+r0 (distance) :ul
+
+[Restrictions:]
+
+This bond style can only be used if LIGGGHTS(R)-INL was built with the
+MOLECULAR package (which it is by default).  See the "Making
+LIGGGHTS(R)-INL"_Section_start.html#start_3 section for more info on packages.
+
+[Related commands:]
+
+"bond_coeff"_bond_coeff.html, "delete_bonds"_delete_bonds.html
+
+[Default:] none

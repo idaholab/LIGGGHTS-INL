@@ -1,0 +1,73 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix particletemplate/sphere command :h3
+
+[Syntax:]
+
+fix ID group-ID particletemplate/sphere seed keyword values ...  :pre
+
+ID, group-ID are documented in "fix"_fix.html command :ulb,l
+particletemplate/sphere = style name of this fix command  :l
+seed = random number generator seed (prime number greater 10000) :l
+zero or more keyword/value pairs can be appended :l
+keyword = {atom_type} or {density} or {volume_limit} or {radius} or {relative} :l
+{atom_type} value = atom type assigned to this particle template
+{density} values = random_style param1 (param2)
+  random_style = 'constant' 
+  param1 = density for 'constant',
+    param2 = omitted for 'constant'
+{volume_limit} value = lowest particle volume allowed in simulation
+{radius} values = random_style param1 (param2)
+  random_style = 'constant' 
+  param1 = radius for 'constant'
+  param2 = omitted for 'constant'
+{relative} value = yes or no
+  no = set a flag for other commands that radius given here is abosulute (in length units)
+  yes = set a flag for other commands that radius given here is relative (in % of a reference radius) :pre
+:ule
+
+[Examples:]
+
+fix pts1 all particletemplate/sphere 123457 atom_type 1 density constant 2500 radius constant 0.0015 :pre
+
+[Description:]
+
+Define a particle that is used as input for a 
+"fix_particledistribution_discrete"_fix_particledistribution_discrete.html command. 
+You can choose the atom type, density and radius of the particles. For density and 
+radius, there is currently only a 'constant' style. Note that this is not a restriction since
+multiple commands of style particletemplate/sphere can be used in a "fix_particledistribution_discrete"_fix_particledistribution_discrete.html
+command so any kind of distribution can be approximated to any arbitrary precision.
+
+Keyword {relative} lets the user set a flag to let other commands know if the radii specified
+by this command are absolute (length units) or relative (in % of a reference radius). 
+IMPORTANT NOTE: This setting should not be changed away from the default value (no) unless
+explicity required by another command! 
+
+LIGGGHTS(R)-INL will throw an error if the particle volume is too small compared to machine precision.
+If you are sure you know what you are doing you can override the default limit of 1e-12.
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+Information about the random state in this fix is written to "binary restart files"_restart.html 
+so you can restart a simulation with the same particles being chosen for insertion. None of the 
+"fix_modify"_fix_modify.html options are relevant to this fix. No global scalar or vector or 
+per-atom quantities are stored by this fix for access by various "output commands"_Section_howto.html#4_15. 
+No parameter of this fix can be used with the {start}/{stop} keywords of the "run"_run.html command. 
+This fix is not invoked during "energy minimization"_minimize.html.
+
+[Restrictions:] none
+
+[Related commands:]
+
+"fix_particletemplate_sphere"_fix_particletemplate_sphere.html
+
+[Default:] 
+
+radius = 1.0, density = 1.0, atom_type = 1, volume_limit = 1e-12, relative = no

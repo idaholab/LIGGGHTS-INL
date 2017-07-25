@@ -1,0 +1,33 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+undump command :h3
+
+[Syntax:]
+
+undump dump-ID :pre
+
+dump-ID = ID of previously defined dump :ul
+
+[Examples:]
+
+undump mine
+undump 2 :pre
+
+[Description:]
+
+Turn off a previously defined dump so that it is no longer active.
+This closes the file associated with the dump.
+
+[Restrictions:] none
+
+[Related commands:]
+
+"dump"_dump.html
+
+[Default:] none

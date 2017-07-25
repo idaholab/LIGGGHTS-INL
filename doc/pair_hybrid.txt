@@ -1,0 +1,162 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+pair_style hybrid command :h3
+pair_style hybrid/overlay command :h3
+
+[Syntax:]
+
+pair_style hybrid style1 args style2 args ...
+pair_style hybrid/overlay style1 args style2 args ... :pre
+
+style1,style2 = list of one or more pair styles and their arguments :ul
+
+[Examples:]
+
+none :pre
+
+
+[Description:]
+
+The {hybrid} and {hybrid/overlay} styles enable the use of multiple
+pair styles in one simulation.  With the {hybrid} style, exactly one
+pair style is assigned to each pair of atom types.  With the
+{hybrid/overlay} style, one or more pair styles can be assigned to
+each pair of atom types.  The assignment of pair styles to type pairs
+is made via the "pair_coeff"_pair_coeff.html command.
+
+All pair styles that will be used are listed as "sub-styles" following
+the {hybrid} or {hybrid/overlay} keyword, in any order.  Each
+sub-style's name is followed by its usual arguments, as illustrated in
+the example above.  See the doc pages of individual pair styles for a
+listing and explanation of the appropriate arguments.
+
+Note that an individual pair style can be used multiple times as a
+sub-style.  For efficiency this should only be done if your model
+requires it.
+
+In the pair_coeff commands, the name of a pair style must be added
+after the I,J type specification, with the remaining coefficients
+being those appropriate to that style.  If the pair style is used
+multiple times in the pair_style command with, then an additional
+numeric argument must also be included which is the number from 1 to M
+where M is the number of times the sub-style was listed in the pair
+style command.  The extra number indicates which instance of the
+sub-style these coefficients apply to.
+
+If pair coefficients are specified in the data file read via the
+"read_data"_read_data.html command, then the same rule applies.
+
+For the {hybrid} style, each atom type pair I,J is assigned to exactly
+one sub-style.  Just as with a simulation using a single pair style,
+if you specify the same atom type pair in a second pair_coeff command,
+the previous assignment will be overwritten.
+
+For the {hybrid/overlay} style, each atom type pair I,J can be
+assigned to one or more sub-styles.  If you specify the same atom type
+pair in a second pair_coeff command with a new sub-style, then the
+second sub-style is added to the list of potentials that will be
+calculated for two interacting atoms of those types.  If you specify
+the same atom type pair in a second pair_coeff command with a
+sub-style that has already been defined for that pair of atoms, then
+the new pair coefficients simply override the previous ones, as in the
+normal usage of the pair_coeff command.
+
+Coefficients must be defined for each pair of atoms types via the
+"pair_coeff"_pair_coeff.html command as described above, or in the
+data file or restart files read by the "read_data"_read_data.html or
+"read_restart"_read_restart.html commands, or by mixing as described
+below.
+
+For both the {hybrid} and {hybrid/overlay} styles, every atom type
+pair I,J (where I <= J) must be assigned to at least one sub-style via
+the "pair_coeff"_pair_coeff.html command as in the examples above, or
+in the data file read by the "read_data"_read_data.html, or by mixing
+as described below.
+
+If you want there to be no interactions between a particular pair of
+atom types, you have 3 choices.  You can assign the type pair to some
+sub-style and use the "neigh_modify exclude type"_neigh_modify.html
+command.  You can assign it to some sub-style and set the coefficients
+so that there is effectively no interaction. Or, for {hybrid} and
+{hybrid/overlay} simulations, you
+can use this form of the pair_coeff command in your input script:
+
+pair_coeff	2 3 none :pre
+
+or this form in the "Pair Coeffs" section of the data file:
+
+3 none :pre
+
+If an assignment to {none} is made in a simulation with the
+{hybrid/overlay} pair style, it wipes out all previous assignments of
+that atom type pair to sub-styles.
+
+Note that you may need to use an "atom_style"_atom_style.html hybrid
+command in your input script, if atoms in the simulation will need
+attributes from several atom styles, due to using multiple pair
+potentials.
+
+
+:line
+
+You can use the pair_coeff none setting or the
+"neigh_modify exclude"_neigh_modify.html command to exclude certain
+type pairs from the neighbor list
+
+:line
+
+Since the {hybrid} and {hybrid/overlay} styles delegate computation
+to the individual sub-styles, the suffix versions of the {hybrid}
+and {hybrid/overlay} styles are used to propagate the corresponding
+suffix to all sub-styles, if those versions exist. Otherwise the
+non-accelerated version will be used.
+
+:line
+
+[Mixing, shift, table, tail correction, restart, rRESPA info]:
+
+Any pair potential settings made via the
+"pair_modify"_pair_modify.html command are passed along to all
+sub-styles of the hybrid potential.
+
+For atom type pairs I,J and I != J, if the sub-style assigned to I,I
+and J,J is the same, and if the sub-style allows for mixing, then the
+coefficients for I,J can be mixed.  This means you do not have to
+specify a pair_coeff command for I,J since the I,J type pair will be
+assigned automatically to the I,I sub-style and its coefficients
+generated by the mixing rule used by that sub-style.  For the
+{hybrid/overlay} style, there is an additional requirement that both
+the I,I and J,J pairs are assigned to a single sub-style.  See the
+"pair_modify" command for details of mixing rules.  See the See the
+doc page for the sub-style to see if allows for mixing.
+
+The hybrid pair styles supports the "pair_modify"_pair_modify.html
+shift, table, and tail options for an I,J pair interaction, if the
+associated sub-style supports it.
+
+For the hybrid pair styles, the list of sub-styles and their
+respective settings are written to "binary restart
+files"_restart.html, so a "pair_style"_pair_style.html command does
+not need to specified in an input script that reads a restart file.
+However, the coefficient information is not stored in the restart
+file.  Thus, pair_coeff commands need to be re-specified in the
+restart input script.
+
+These pair styles support the use of the {inner}, {middle}, and
+{outer} keywords of the "run_style respa"_run_style.html command, if
+their sub-styles do.
+
+[Restrictions:] none
+
+
+[Related commands:]
+
+"pair_coeff"_pair_coeff.html
+
+[Default:] none

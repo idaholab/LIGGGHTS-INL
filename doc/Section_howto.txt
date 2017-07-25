@@ -1,0 +1,1032 @@
+"Previous Section"_Section_packages.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_modify.html :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+8. How-to discussions :h3
+
+This section describes how to perform common tasks using LIGGGHTS(R)-INL.
+
+<!-- RST
+
+.. contents:: 
+		:local:
+		:depth: 1
+   
+END_RST -->
+
+<!-- HTML_ONLY -->
+8.1 "Restarting a simulation"_#howto_1
+8.2 "2d simulations"_#howto_2
+8.3 "Running multiple simulations from one input script"_#howto_3
+8.4 "Granular models"_#howto_4
+8.5 "Coupling LIGGGHTS(R)-INL to other codes"_#howto_5
+8.6 "Visualizing LIGGGHTS(R)-INL snapshots"_#howto_6
+8.7 "Triclinic (non-orthogonal) simulation boxes"_#howto_7
+8.8 "Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)"_#howto_8
+8.9 "Walls"_#howto_9
+8.10 "Library interface to LIGGGHTS(R)-INL"_#howto_10 :all(b)
+<!--END_HTML_ONLY -->
+
+The example input scripts included in the LIGGGHTS(R)-INL distribution and
+highlighted in "Section_example"_Section_example.html also show how to
+setup and run various kinds of simulations.
+
+:line
+:line
+
+8.1 Restarting a simulation :link(howto_1),h4
+
+There are 3 ways to continue a long LIGGGHTS(R)-INL simulation.  Multiple
+"run"_run.html commands can be used in the same input script.  Each
+run will continue from where the previous run left off.  Or binary
+restart files can be saved to disk using the "restart"_restart.html
+command.  At a later time, these binary files can be read via a
+"read_restart"_read_restart.html command in a new script.  Or they can
+be converted to text data files using the "-r command-line
+switch"_Section_start.html#start_7 and read by a
+"read_data"_read_data.html command in a new script.
+
+The "read_restart"_read_restart.html command typically replaces
+the "create_box"create_box.html command in the input script that restarts
+the simulation.
+
+Note that while the internal state of the simulation is stored in the
+restart file, most material properties and simulation settings are
+not stored in the restart file. Be careful when changing settings and/or
+material parameters when restarting a simulation.
+
+The following commands do not need to be repeated because
+their settings are included in the restart file: {units, atom_style}.
+
+As an alternate approach, the restart file could be converted to a data
+file as follows:
+
+lmp_g++ -r tmp.restart.50 tmp.restart.data :pre
+
+Then, the "read_data"read_data.html command can be used to restart the
+simulation.
+
+"reset_timestep"_reset_timestep.html command can be used to tell
+LIGGGHTS(R)-INL the current timestep.
+
+:line
+
+8.2 2d simulations :link(howto_2),h4
+
+Use the "dimension"_dimension.html command to specify a 2d simulation.
+
+Make the simulation box periodic in z via the "boundary"_boundary.html
+command.  This is the default.
+
+If using the "create box"_create_box.html command to define a
+simulation box, set the z dimensions narrow, but finite, so that the
+create_atoms command will tile the 3d simulation box with a single z
+plane of atoms - e.g.
+
+"create box"_create_box.html 1 -10 10 -10 10 -0.25 0.25 :pre
+
+If using the "read data"_read_data.html command to read in a file of
+atom coordinates, set the "zlo zhi" values to be finite but narrow,
+similar to the create_box command settings just described.  For each
+atom in the file, assign a z coordinate so it falls inside the
+z-boundaries of the box - e.g. 0.0.
+
+Use the "fix enforce2d"_fix_enforce2d.html command as the last
+defined fix to insure that the z-components of velocities and forces
+are zeroed out every timestep.  The reason to make it the last fix is
+so that any forces induced by other fixes will be zeroed out.
+
+Many of the example input scripts included in the LIGGGHTS(R)-INL distribution
+are for 2d models.
+
+IMPORTANT NOTE: Some models in LIGGGHTS(R)-INL treat particles as finite-size
+spheres, as opposed to point particles.  In 2d, the particles will
+still be spheres, not disks, meaning their moment of inertia will be
+the same as in 3d.
+
+:line
+
+8.3 Running multiple simulations from one input script :link(howto_3),h4
+
+This can be done in several ways.  See the documentation for
+individual commands for more details on how these examples work.
+
+If "multiple simulations" means continue a previous simulation for
+more timesteps, then you simply use the "run"_run.html command
+multiple times.  For example, this script
+
+units lj
+atom_style atomic
+read_data data.lj
+run 10000
+run 10000
+run 10000
+run 10000
+run 10000 :pre
+
+would run 5 successive simulations of the same system for a total of
+50,000 timesteps.
+
+If you wish to run totally different simulations, one after the other,
+the "clear"_clear.html command can be used in between them to
+re-initialize LIGGGHTS(R)-INL.  For example, this script
+
+units lj
+atom_style atomic
+read_data data.lj
+run 10000
+clear
+units lj
+atom_style atomic
+read_data data.lj.new
+run 10000 :pre
+
+would run 2 independent simulations, one after the other.
+
+For large numbers of independent simulations, you can use
+"variables"_variable.html and the "next"_next.html and
+"jump"_jump.html commands to loop over the same input script
+multiple times with different settings.  For example, this
+script, named in.polymer
+
+variable d index run1 run2 run3 run4 run5 run6 run7 run8
+shell cd $d
+read_data data.polymer
+run 10000
+shell cd ..
+clear
+next d
+jump in.polymer :pre
+
+would run 8 simulations in different directories, using a data.polymer
+file in each directory.  The same concept could be used to run the
+same system at 8 different temperatures, using a temperature variable
+and storing the output in different log and dump files, for example
+
+variable a loop 8
+variable t index 0.8 0.85 0.9 0.95 1.0 1.05 1.1 1.15
+log log.$a
+read data.polymer
+velocity all create $t 352839
+fix 1 all nvt $t $t 100.0
+dump 1 all atom 1000 dump.$a
+run 100000
+next t
+next a
+jump in.polymer :pre
+
+All of the above examples work whether you are running on 1 or
+multiple processors, but assumed you are running LIGGGHTS(R)-INL on a single
+partition of processors.  LIGGGHTS(R)-INL can be run on multiple partitions via
+the "-partition" command-line switch as described in "this
+section"_Section_start.html#start_7 of the manual.
+
+In the last 2 examples, if LIGGGHTS(R)-INL were run on 3 partitions, the same
+scripts could be used if the "index" and "loop" variables were
+replaced with {universe}-style variables, as described in the
+"variable"_variable.html command.  Also, the "next t" and "next a"
+commands would need to be replaced with a single "next a t" command.
+With these modifications, the 8 simulations of each script would run
+on the 3 partitions one after the other until all were finished.
+Initially, 3 simulations would be started simultaneously, one on each
+partition.  When one finished, that partition would then start
+the 4th simulation, and so forth, until all 8 were completed.
+
+:line
+
+8.4 Granular models :link(howto_4),h4
+
+Granular system are composed of spherical particles with a diameter,
+as opposed to point particles.  This means they have an angular
+velocity and torque can be imparted to them to cause them to rotate.
+
+To run a simulation of a granular model, you will want to use
+the following commands:
+
+"atom_style sphere"_atom_style.html
+"fix nve/sphere"_fix_nve_sphere.html
+"fix gravity"_fix_gravity.html :ul
+
+This compute
+
+"compute erotate/sphere"_compute_erotate_sphere.html :ul
+
+calculates rotational kinetic energy which can be "output with
+thermodynamic info"_Section_howto.html#howto_8.
+
+Use a number of particle-particle and particle-wall contact models,
+which compute forces and torques between interacting pairs of particles
+and between particles and primitive walls or mesh elements. Details
+can be found here:
+
+"pair_style gran"_pair_gran.html
+"List of all contact models"_Section_gran_models.html :ul
+
+These commands implement fix options specific to granular systems:
+
+"fix freeze"_fix_freeze.html
+"fix pour"_fix_pour.html
+"fix viscous"_fix_viscous.html
+"fix wall/gran"_fix_wall_gran.html :ul
+
+"fix wall/gran"_fix_wall_gran.html commands can define two types of
+walls: primitive and mesh. Mesh walls are defined using a
+"fix mesh/surface"_fix_mesh_surface.html or related command.
+
+The fix style {freeze} zeroes both the force and torque of frozen
+atoms, and should be used for granular system instead of the fix style
+{setforce}.
+
+For computational efficiency, you can eliminate needless pairwise
+computations between frozen atoms by using this command:
+
+"neigh_modify"_neigh_modify.html exclude :ul
+
+:line
+
+8.5 Coupling LIGGGHTS(R)-INL to other codes :link(howto_5),h4
+
+LIGGGHTS(R)-INL is designed to allow it to be coupled to other codes.  For
+example, a quantum mechanics code might compute forces on a subset of
+atoms and pass those forces to LIGGGHTS(R)-INL.  Or a continuum finite element
+(FE) simulation might use atom positions as boundary conditions on FE
+nodal points, compute a FE solution, and return interpolated forces on
+MD atoms.
+
+LIGGGHTS(R)-INL can be coupled to other codes in at least 3 ways.  Each has
+advantages and disadvantages, which you'll have to think about in the
+context of your application.
+
+(1) Define a new "fix"_fix.html command that calls the other code.  In
+this scenario, LIGGGHTS(R)-INL is the driver code.  During its timestepping,
+the fix is invoked, and can make library calls to the other code,
+which has been linked to LIGGGHTS(R)-INL as a library.  This is the way the
+"POEMS"_poems package that performs constrained rigid-body motion on
+groups of atoms is hooked to LIGGGHTS(R)-INL.  See the
+"fix_poems"_fix_poems.html command for more details.  See "this
+section"_Section_modify.html of the documentation for info on how to add
+a new fix to LIGGGHTS(R)-INL.
+
+:link(poems,http://www.rpi.edu/~anderk5/lab)
+
+(2) Define a new LIGGGHTS(R)-INL command that calls the other code.  This is
+conceptually similar to method (1), but in this case LIGGGHTS(R)-INL and the
+other code are on a more equal footing.  Note that now the other code
+is not called during the timestepping of a LIGGGHTS(R)-INL run, but between
+runs.  The LIGGGHTS(R)-INL input script can be used to alternate LIGGGHTS(R)-INL runs
+with calls to the other code, invoked via the new command.  The
+"run"_run.html command facilitates this with its {every} option, which
+makes it easy to run a few steps, invoke the command, run a few steps,
+invoke the command, etc.
+
+In this scenario, the other code can be called as a library, as in
+(1), or it could be a stand-alone code, invoked by a system() call
+made by the command (assuming your parallel machine allows one or more
+processors to start up another program).  In the latter case the
+stand-alone code could communicate with LIGGGHTS(R)-INL thru files that the
+command writes and reads.
+
+See "Section_modify"_Section_modify.html of the documentation for how
+to add a new command to LIGGGHTS(R)-INL.
+
+(3) Use LIGGGHTS(R)-INL as a library called by another code.  In this case the
+other code is the driver and calls LIGGGHTS(R)-INL as needed.  Or a wrapper
+code could link and call both LIGGGHTS(R)-INL and another code as libraries.
+Again, the "run"_run.html command has options that allow it to be
+invoked with minimal overhead (no setup or clean-up) if you wish to do
+multiple short runs, driven by another program.
+
+Examples of driver codes that call LIGGGHTS(R)-INL as a library are included in
+the examples/COUPLE directory of the LIGGGHTS(R)-INL distribution; see
+examples/COUPLE/README for more details:
+
+simple: simple driver programs in C++ and C which invoke LIGGGHTS(R)-INL as a
+library :ulb,l
+
+lammps_quest: coupling of LIGGGHTS(R)-INL and "Quest"_quest, to run classical
+MD with quantum forces calculated by a density functional code :l
+
+lammps_spparks: coupling of LIGGGHTS(R)-INL and "SPPARKS"_spparks, to couple
+a kinetic Monte Carlo model for grain growth using MD to calculate
+strain induced across grain boundaries :l,ule
+
+:link(quest,http://dft.sandia.gov/Quest)
+:link(spparks,http://www.sandia.gov/~sjplimp/spparks.html)
+
+"This section"_Section_start.html#start_5 of the documentation
+describes how to build LIGGGHTS(R)-INL as a library.  Once this is done, you
+can interface with LIGGGHTS(R)-INL either via C++, C, Fortran, or Python (or
+any other language that supports a vanilla C-like interface).  For
+example, from C++ you could create one (or more) "instances" of
+LIGGGHTS(R)-INL, pass it an input script to process, or execute individual
+commands, all by invoking the correct class methods in LIGGGHTS(R)-INL.  From C
+or Fortran you can make function calls to do the same things.  See
+"Section_python"_Section_python.html of the manual for a description
+of the Python wrapper provided with LIGGGHTS(R)-INL that operates through the
+LIGGGHTS(R)-INL library interface.
+
+The files src/library.cpp and library.h contain the C-style interface
+to LIGGGHTS(R)-INL.  See "Section_howto 19"_Section_howto.html#howto_19 of the
+manual for a description of the interface and how to extend it for
+your needs.
+
+Note that the lammps_open() function that creates an instance of
+LIGGGHTS(R)-INL takes an MPI communicator as an argument.  This means that
+instance of LIGGGHTS(R)-INL will run on the set of processors in the
+communicator.  Thus the calling code can run LIGGGHTS(R)-INL on all or a subset
+of processors.  For example, a wrapper script might decide to
+alternate between LIGGGHTS(R)-INL and another code, allowing them both to run
+on all the processors.  Or it might allocate half the processors to
+LIGGGHTS(R)-INL and half to the other code and run both codes simultaneously
+before syncing them up periodically.  Or it might instantiate multiple
+instances of LIGGGHTS(R)-INL to perform different calculations.
+
+:line
+
+8.6 Visualizing LIGGGHTS(R)-INL snapshots :link(howto_6),h4
+
+LIGGGHTS(R)-INL itself does not do visualization, but snapshots from LIGGGHTS(R)-INL
+simulations can be visualized (and analyzed) in a variety of ways.
+
+LIGGGHTS(R)-INL snapshots are created by the "dump"_dump.html command which can
+create files in several formats.  The native LIGGGHTS(R)-INL dump format is a
+text file (see "dump atom" or "dump custom").
+
+A Python-based toolkit (LPP) distributed by our group can read native LIGGGHTS(R)-INL
+dump files, including custom dump files with additional columns of
+user-specified atom information, and convert them to VTK file formats
+that can be read with Paraview.
+
+Also, there exist a number of "dump"_dump.html commands that output to
+VTK natively.
+
+:line
+
+8.7 Triclinic (non-orthogonal) simulation boxes :link(howto_7),h4
+
+By default, LIGGGHTS(R)-INL uses an orthogonal simulation box to encompass the
+particles.  The "boundary"_boundary.html command sets the boundary
+conditions of the box (periodic, non-periodic, etc).  The orthogonal
+box has its "origin" at (xlo,ylo,zlo) and is defined by 3 edge vectors
+starting from the origin given by [a] = (xhi-xlo,0,0); [b] =
+(0,yhi-ylo,0); [c] = (0,0,zhi-zlo).  The 6 parameters
+(xlo,xhi,ylo,yhi,zlo,zhi) are defined at the time the simulation box
+is created, e.g. by the "create_box"_create_box.html or
+"read_data"_read_data.html or "read_restart"_read_restart.html
+commands.  Additionally, LIGGGHTS(R)-INL defines box size parameters lx,ly,lz
+where lx = xhi-xlo, and similarly in the y and z dimensions.  The 6
+parameters, as well as lx,ly,lz, can be output via the "thermo_style
+custom"_thermo_style.html command.
+
+LIGGGHTS(R)-INL also allows simulations to be performed in triclinic
+(non-orthogonal) simulation boxes shaped as a parallelepiped with
+triclinic symmetry.  The parallelepiped has its "origin" at
+(xlo,ylo,zlo) and is defined by 3 edge vectors starting from the
+origin given by [a] = (xhi-xlo,0,0); [b] = (xy,yhi-ylo,0); [c] =
+(xz,yz,zhi-zlo).  {xy,xz,yz} can be 0.0 or positive or negative values
+and are called "tilt factors" because they are the amount of
+displacement applied to faces of an originally orthogonal box to
+transform it into the parallelepiped.  In LIGGGHTS(R)-INL the triclinic
+simulation box edge vectors [a], [b], and [c] cannot be arbitrary
+vectors.  As indicated, [a] must lie on the positive x axis.  [b] must
+lie in the xy plane, with strictly positive y component. [c] may have
+any orientation with strictly positive z component.  The requirement
+that [a], [b], and [c] have strictly positive x, y, and z components,
+respectively, ensures that [a], [b], and [c] form a complete
+right-handed basis.  These restrictions impose no loss of generality,
+since it is possible to rotate/invert any set of 3 crystal basis
+vectors so that they conform to the restrictions.
+
+For example, assume that the 3 vectors [A],[B],[C] are the edge
+vectors of a general parallelepiped, where there is no restriction on
+[A],[B],[C] other than they form a complete right-handed basis i.e.
+[A] x [B] . [C] > 0.  The equivalent LIGGGHTS(R)-INL [a],[b],[c] are a linear
+rotation of [A], [B], and [C] and can be computed as follows:
+
+:c,image(Eqs/transform.jpg)
+
+where A = |[A]| indicates the scalar length of [A]. The ^ hat symbol
+indicates the corresponding unit vector. {beta} and {gamma} are angles
+between the vectors described below. Note that by construction,
+[a], [b], and [c] have strictly positive x, y, and z components, respectively.
+If it should happen that
+[A], [B], and [C] form a left-handed basis, then the above equations
+are not valid for [c]. In this case, it is necessary
+to first apply an inversion. This can be achieved
+by interchanging two basis vectors or by changing the sign of one of them.
+
+For consistency, the same rotation/inversion applied to the basis vectors
+must also be applied to atom positions, velocities,
+and any other vector quantities.
+This can be conveniently achieved by first converting to
+fractional coordinates in the
+old basis and then converting to distance coordinates in the new basis.
+The transformation is given by the following equation:
+
+:c,image(Eqs/rotate.jpg)
+
+where {V} is the volume of the box, [X] is the original vector quantity and
+[x] is the vector in the LIGGGHTS(R)-INL basis.
+
+There is no requirement that a triclinic box be periodic in any
+dimension, though it typically should be in at least the 2nd dimension
+of the tilt (y in xy) if you want to enforce a shift in periodic
+boundary conditions across that boundary.  Some commands that work
+with triclinic boxes, e.g. the "fix deform"_fix_deform.html and "fix
+npt"_fix_nh.html commands, require periodicity or non-shrink-wrap
+boundary conditions in specific dimensions.  See the command doc pages
+for details.
+
+The 9 parameters (xlo,xhi,ylo,yhi,zlo,zhi,xy,xz,yz) are defined at the
+time the simluation box is created.  This happens in one of 3 ways.
+If the "create_box"_create_box.html command is used with a region of
+style {prism}, then a triclinic box is setup.  See the
+"region"_region.html command for details.  If the
+"read_data"_read_data.html command is used to define the simulation
+box, and the header of the data file contains a line with the "xy xz
+yz" keyword, then a triclinic box is setup.  See the
+"read_data"_read_data.html command for details.  Finally, if the
+"read_restart"_read_restart.html command reads a restart file which
+was written from a simulation using a triclinic box, then a triclinic
+box will be setup for the restarted simulation.
+
+Note that you can define a triclinic box with all 3 tilt factors =
+0.0, so that it is initially orthogonal.  This is necessary if the box
+will become non-orthogonal, e.g. due to the "fix npt"_fix_nh.html or
+"fix deform"_fix_deform.html commands.  Alternatively, you can use the
+"change_box"_change_box.html command to convert a simulation box from
+orthogonal to triclinic and vice versa.
+
+As with orthogonal boxes, LIGGGHTS(R)-INL defines triclinic box size parameters
+lx,ly,lz where lx = xhi-xlo, and similarly in the y and z dimensions.
+The 9 parameters, as well as lx,ly,lz, can be output via the
+"thermo_style custom"_thermo_style.html command.
+
+To avoid extremely tilted boxes (which would be computationally
+inefficient), LIGGGHTS(R)-INL normally requires that no tilt factor can skew
+the box more than half the distance of the parallel box length, which
+is the 1st dimension in the tilt factor (x for xz).  This is required
+both when the simulation box is created, e.g. via the
+"create_box"_create_box.html or "read_data"_read_data.html commands,
+as well as when the box shape changes dynamically during a simulation,
+e.g. via the "fix deform"_fix_deform.html command.
+
+For example, if xlo = 2 and xhi = 12, then the x box length is 10 and
+the xy tilt factor must be between -5 and 5.  Similarly, both xz and
+yz must be between -(xhi-xlo)/2 and +(yhi-ylo)/2.  Note that this is
+not a limitation, since if the maximum tilt factor is 5 (as in this
+example), then configurations with tilt = ..., -15, -5, 5, 15, 25,
+... are geometrically all equivalent.  If the box tilt exceeds this
+limit during a dynamics run (e.g. via the "fix deform"_fix_deform.html
+command), then the box is "flipped" to an equivalent shape with a tilt
+factor within the bounds, so the run can continue.  See the "fix
+deform"_fix_deform.html doc page for further details.
+
+One exception to this rule is if the 1st dimension in the tilt
+factor (x for xy) is non-periodic.  In that case, the limits on the
+tilt factor are not enforced, since flipping the box in that dimension
+does not change the atom positions due to non-periodicity.  In this
+mode, if you tilt the system to extreme angles, the simulation will
+simply become inefficient, due to the highly skewed simulation box.
+
+The limitation on not creating a simulation box with a tilt factor
+skewing the box more than half the distance of the parallel box length
+can be overridden via the "box"_box.html command.  Setting the {tilt}
+keyword to {large} allows any tilt factors to be specified.
+
+Note that if a simulation box has a large tilt factor, LIGGGHTS(R)-INL will run
+less efficiently, due to the large volume of communication needed to
+acquire ghost atoms around a processor's irregular-shaped sub-domain.
+For extreme values of tilt, LIGGGHTS(R)-INL may also lose atoms and generate an
+error.
+
+Triclinic crystal structures are often defined using three lattice
+constants {a}, {b}, and {c}, and three angles {alpha}, {beta} and
+{gamma}. Note that in this nomenclature, the a, b, and c lattice
+constants are the scalar lengths of the edge vectors [a], [b], and [c]
+defined above.  The relationship between these 6 quantities
+(a,b,c,alpha,beta,gamma) and the LIGGGHTS(R)-INL box sizes (lx,ly,lz) =
+(xhi-xlo,yhi-ylo,zhi-zlo) and tilt factors (xy,xz,yz) is as follows:
+
+:c,image(Eqs/box.jpg)
+
+The inverse relationship can be written as follows:
+
+:c,image(Eqs/box_inverse.jpg)
+
+The values of {a}, {b}, {c} , {alpha}, {beta} , and {gamma} can be printed
+out or accessed by computes using the
+"thermo_style custom"_thermo_style.html keywords
+{cella}, {cellb}, {cellc}, {cellalpha}, {cellbeta}, {cellgamma},
+respectively.
+
+As discussed on the "dump"_dump.html command doc page, when the BOX
+BOUNDS for a snapshot is written to a dump file for a triclinic box,
+an orthogonal bounding box which encloses the triclinic simulation box
+is output, along with the 3 tilt factors (xy, xz, yz) of the triclinic
+box, formatted as follows:
+
+ITEM: BOX BOUNDS xy xz yz
+xlo_bound xhi_bound xy
+ylo_bound yhi_bound xz
+zlo_bound zhi_bound yz :pre
+
+This bounding box is convenient for many visualization programs and is
+calculated from the 9 triclinic box parameters
+(xlo,xhi,ylo,yhi,zlo,zhi,xy,xz,yz) as follows:
+
+xlo_bound = xlo + MIN(0.0,xy,xz,xy+xz)
+xhi_bound = xhi + MAX(0.0,xy,xz,xy+xz)
+ylo_bound = ylo + MIN(0.0,yz)
+yhi_bound = yhi + MAX(0.0,yz)
+zlo_bound = zlo
+zhi_bound = zhi :pre
+
+These formulas can be inverted if you need to convert the bounding box
+back into the triclinic box parameters, e.g. xlo = xlo_bound -
+MIN(0.0,xy,xz,xy+xz).
+
+:line
+
+8.8 Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables) :link(howto_8),h4
+
+There are four basic kinds of LIGGGHTS(R)-INL output:
+
+"Thermodynamic output"_thermo_style.html, which is a list
+of quantities printed every few timesteps to the screen and logfile. :ulb,l
+
+"Dump files"_dump.html, which contain snapshots of atoms and various
+per-atom values and are written at a specified frequency. :l
+
+Certain fixes can output user-specified quantities to files: "fix
+ave/time"_fix_ave_time.html for time averaging, "fix
+ave/spatial"_fix_ave_spatial.html for spatial averaging, and "fix
+print"_fix_print.html for single-line output of
+"variables"_variable.html.  Fix print can also output to the
+screen. :l
+
+"Restart files"_restart.html. :l,ule
+
+A simulation prints one set of thermodynamic output and (optionally)
+restart files.  It can generate any number of dump files and fix
+output files, depending on what "dump"_dump.html and "fix"_fix.html
+commands you specify.
+
+As discussed below, LIGGGHTS(R)-INL gives you a variety of ways to determine
+what quantities are computed and printed when the thermodynamics,
+dump, or fix commands listed above perform output.  Throughout this
+discussion, note that users can also "add their own computes and fixes
+to LIGGGHTS(R)-INL"_Section_modify.html which can then generate values that can
+then be output with these commands.
+
+The following sub-sections discuss different LIGGGHTS(R)-INL command related
+to output and the kind of data they operate on and produce:
+
+"Global/per-atom/local data"_#global
+"Scalar/vector/array data"_#scalar
+"Thermodynamic output"_#thermo
+"Dump file output"_#dump
+"Fixes that write output files"_#fixoutput
+"Computes that process output quantities"_#computeoutput
+"Fixes that process output quantities"_#fixoutput
+"Computes that generate values to output"_#compute
+"Fixes that generate values to output"_#fix
+"Variables that generate values to output"_#variable
+"Summary table of output options and data flow between commands"_#table :ul
+
+Global/per-atom/local data :h5,link(global)
+
+Various output-related commands work with three different styles of
+data: global, per-atom, or local.  A global datum is one or more
+system-wide values, e.g. the temperature of the system.  A per-atom
+datum is one or more values per atom, e.g. the kinetic energy of each
+atom.  Local datums are calculated by each processor based on the
+atoms it owns, but there may be zero or more per atom, e.g. a list of
+bond distances.
+
+Scalar/vector/array data :h5,link(scalar)
+
+Global, per-atom, and local datums can each come in three kinds: a
+single scalar value, a vector of values, or a 2d array of values.  The
+doc page for a "compute" or "fix" or "variable" that generates data
+will specify both the style and kind of data it produces, e.g. a
+per-atom vector.
+
+When a quantity is accessed, as in many of the output commands
+discussed below, it can be referenced via the following bracket
+notation, where ID in this case is the ID of a compute.  The leading
+"c_" would be replaced by "f_" for a fix, or "v_" for a variable:
+
+c_ID | entire scalar, vector, or array
+c_ID\[I\] | one element of vector, one column of array
+c_ID\[I\]\[J\] | one element of array :tb(s=|)
+
+In other words, using one bracket reduces the dimension of the data
+once (vector -> scalar, array -> vector).  Using two brackets reduces
+the dimension twice (array -> scalar).  Thus a command that uses
+scalar values as input can typically also process elements of a vector
+or array.
+
+Thermodynamic output :h5,link(thermo)
+
+The frequency and format of thermodynamic output is set by the
+"thermo"_thermo.html, "thermo_style"_thermo_style.html, and
+"thermo_modify"_thermo_modify.html commands.  The
+"thermo_style"_thermo_style.html command also specifies what values
+are calculated and written out.  Pre-defined keywords can be specified
+(e.g. press, etotal, etc).  Three additional kinds of keywords can
+also be specified (c_ID, f_ID, v_name), where a "compute"_compute.html
+or "fix"_fix.html or "variable"_variable.html provides the value to be
+output.  In each case, the compute, fix, or variable must generate
+global values for input to the "thermo_style custom"_dump.html
+command.
+
+Note that thermodynamic output values can be "extensive" or
+"intensive".  The former scale with the number of atoms in the system
+(e.g. total energy), the latter do not (e.g. temperature).  The
+setting for "thermo_modify norm"_thermo_modify.html determines whether
+extensive quantities are normalized or not.  Computes and fixes
+produce either extensive or intensive values; see their individual doc
+pages for details.  "Equal-style variables"_variable.html produce only
+intensive values; you can include a division by "natoms" in the
+formula if desired, to make an extensive calculation produce an
+intensive result.
+
+Dump file output :h5,link(dump)
+
+Dump file output is specified by the "dump"_dump.html and
+"dump_modify"_dump_modify.html commands.  There are several
+pre-defined formats (dump atom, dump xtc, etc).
+
+There is also a "dump custom"_dump.html format where the user
+specifies what values are output with each atom.  Pre-defined atom
+attributes can be specified (id, x, fx, etc).  Three additional kinds
+of keywords can also be specified (c_ID, f_ID, v_name), where a
+"compute"_compute.html or "fix"_fix.html or "variable"_variable.html
+provides the values to be output.  In each case, the compute, fix, or
+variable must generate per-atom values for input to the "dump
+custom"_dump.html command.
+
+There is also a "dump local"_dump.html format where the user specifies
+what local values to output.  A pre-defined index keyword can be
+specified to enumuerate the local values.  Two additional kinds of
+keywords can also be specified (c_ID, f_ID), where a
+"compute"_compute.html or "fix"_fix.html or "variable"_variable.html
+provides the values to be output.  In each case, the compute or fix
+must generate local values for input to the "dump local"_dump.html
+command.
+
+Fixes that write output files :h5,link(fixoutput)
+
+Several fixes take various quantities as input and can write output
+files: "fix ave/time"_fix_ave_time.html, "fix
+ave/spatial"_fix_ave_spatial.html, "fix ave/histo"_fix_ave_histo.html,
+"fix ave/correlate"_fix_ave_correlate.html, and "fix
+print"_fix_print.html.
+
+The "fix ave/time"_fix_ave_time.html command enables direct output to
+a file and/or time-averaging of global scalars or vectors.  The user
+specifies one or more quantities as input.  These can be global
+"compute"_compute.html values, global "fix"_fix.html values, or
+"variables"_variable.html of any style except the atom style which
+produces per-atom values.  Since a variable can refer to keywords used
+by the "thermo_style custom"_thermo_style.html command (like temp or
+press) and individual per-atom values, a wide variety of quantities
+can be time averaged and/or output in this way.  If the inputs are one
+or more scalar values, then the fix generate a global scalar or vector
+of output.  If the inputs are one or more vector values, then the fix
+generates a global vector or array of output.  The time-averaged
+output of this fix can also be used as input to other output commands.
+
+The "fix ave/spatial"_fix_ave_spatial.html command enables direct
+output to a file of spatial-averaged per-atom quantities like those
+output in dump files, within 1d layers of the simulation box.  The
+per-atom quantities can be atom density (mass or number) or atom
+attributes such as position, velocity, force.  They can also be
+per-atom quantities calculated by a "compute"_compute.html, by a
+"fix"_fix.html, or by an atom-style "variable"_variable.html.  The
+spatial-averaged output of this fix can also be used as input to other
+output commands.
+
+The "fix ave/histo"_fix_ave_histo.html command enables direct output
+to a file of histogrammed quantities, which can be global or per-atom
+or local quantities.  The histogram output of this fix can also be
+used as input to other output commands.
+
+The "fix ave/correlate"_fix_ave_correlate.html command enables direct
+output to a file of time-correlated quantities, which can be global
+scalars.  The correlation matrix output of this fix can also be used
+as input to other output commands.
+
+The "fix print"_fix_print.html command can generate a line of output
+written to the screen and log file or to a separate file, periodically
+during a running simulation.  The line can contain one or more
+"variable"_variable.html values for any style variable except the atom
+style).  As explained above, variables themselves can contain
+references to global values generated by "thermodynamic
+keywords"_thermo_style.html, "computes"_compute.html,
+"fixes"_fix.html, or other "variables"_variable.html, or to per-atom
+values for a specific atom.  Thus the "fix print"_fix_print.html
+command is a means to output a wide variety of quantities separate
+from normal thermodynamic or dump file output.
+
+Computes that process output quantities :h5,link(computeoutput)
+
+The "compute reduce"_compute_reduce.html and "compute
+reduce/region"_compute_reduce.html commands take one or more per-atom
+or local vector quantities as inputs and "reduce" them (sum, min, max,
+ave) to scalar quantities.  These are produced as output values which
+can be used as input to other output commands.
+
+The "compute slice"_compute_slice.html command take one or more global
+vector or array quantities as inputs and extracts a subset of their
+values to create a new vector or array.  These are produced as output
+values which can be used as input to other output commands.
+
+The "compute property/atom"_compute_property_atom.html command takes a
+list of one or more pre-defined atom attributes (id, x, fx, etc) and
+stores the values in a per-atom vector or array.  These are produced
+as output values which can be used as input to other output commands.
+The list of atom attributes is the same as for the "dump
+custom"_dump.html command.
+
+The "compute property/local"_compute_property_local.html command takes
+a list of one or more pre-defined local attributes (bond info, angle
+info, etc) and stores the values in a local vector or array.  These
+are produced as output values which can be used as input to other
+output commands.
+
+The "compute atom/molecule"_compute_atom_molecule.html command takes a
+list of one or more per-atom quantities (from a compute, fix, per-atom
+variable) and sums the quantities on a per-molecule basis.  It
+produces a global vector or array as output values which can be used
+as input to other output commands.
+
+Fixes that process output quantities :h5,link(fixoutput)
+
+The "fix ave/atom"_fix_ave_atom.html command performs time-averaging
+of per-atom vectors.  The per-atom quantities can be atom attributes
+such as position, velocity, force.  They can also be per-atom
+quantities calculated by a "compute"_compute.html, by a
+"fix"_fix.html, or by an atom-style "variable"_variable.html.  The
+time-averaged per-atom output of this fix can be used as input to
+other output commands.
+
+The "fix store/state"_fix_store_state.html command can archive one or
+more per-atom attributes at a particular time, so that the old values
+can be used in a future calculation or output.  The list of atom
+attributes is the same as for the "dump custom"_dump.html command,
+including per-atom quantities calculated by a "compute"_compute.html,
+by a "fix"_fix.html, or by an atom-style "variable"_variable.html.
+The output of this fix can be used as input to other output commands.
+
+Computes that generate values to output :h5,link(compute)
+
+Every "compute"_compute.html in LIGGGHTS(R)-INL produces either global or
+per-atom or local values.  The values can be scalars or vectors or
+arrays of data.  These values can be output using the other commands
+described in this section.  The doc page for each compute command
+describes what it produces.  Computes that produce per-atom or local
+values have the word "atom" or "local" in their style name.  Computes
+without the word "atom" or "local" produce global values.
+
+Fixes that generate values to output :h5,link(fix)
+
+Some "fixes"_fix.html in LIGGGHTS(R)-INL produces either global or per-atom or
+local values which can be accessed by other commands.  The values can
+be scalars or vectors or arrays of data.  These values can be output
+using the other commands described in this section.  The doc page for
+each fix command tells whether it produces any output quantities and
+describes them.
+
+Variables that generate values to output :h5,link(variable)
+
+Every "variables"_variable.html defined in an input script generates
+either a global scalar value or a per-atom vector (only atom-style
+variables) when it is accessed.  The formulas used to define equal-
+and atom-style variables can contain references to the thermodynamic
+keywords and to global and per-atom data generated by computes, fixes,
+and other variables.  The values generated by variables can be output
+using the other commands described in this section.
+
+Summary table of output options and data flow between commands :h5,link(table)
+
+This table summarizes the various commands that can be used for
+generating output from LIGGGHTS(R)-INL.  Each command produces output data of
+some kind and/or writes data to a file.  Most of the commands can take
+data from other commands as input.  Thus you can link many of these
+commands together in pipeline form, where data produced by one command
+is used as input to another command and eventually written to the
+screen or to a file.  Note that to hook two commands together the
+output and input data types must match, e.g. global/per-atom/local
+data and scalar/vector/array data.
+
+Also note that, as described above, when a command takes a scalar as
+input, that could be an element of a vector or array.  Likewise a
+vector input could be a column of an array.
+
+Command: Input: Output:
+"thermo_style custom"_thermo_style.html: global scalars: screen, log file:
+"dump custom"_dump.html: per-atom vectors: dump file:
+"dump local"_dump.html: local vectors: dump file:
+"fix print"_fix_print.html: global scalar from variable: screen, file:
+"print"_print.html: global scalar from variable: screen:
+"computes"_compute.html: N/A: global/per-atom/local scalar/vector/array:
+"fixes"_fix.html: N/A: global/per-atom/local scalar/vector/array:
+"variables"_variable.html: global scalars, per-atom vectors: global scalar, per-atom vector:
+"compute reduce"_compute_reduce.html: per-atom/local vectors: global scalar/vector:
+"compute slice"_compute_slice.html: global vectors/arrays: global vector/array:
+"compute property/atom"_compute_property_atom.html: per-atom vectors: per-atom vector/array:
+"compute property/local"_compute_property_local.html: local vectors: local vector/array:
+"compute atom/molecule"_compute_atom_molecule.html: per-atom vectors: global vector/array:
+"fix ave/atom"_fix_ave_atom.html: per-atom vectors: per-atom vector/array:
+"fix ave/time"_fix_ave_time.html: global scalars/vectors: global scalar/vector/array, file:
+"fix ave/spatial"_fix_ave_spatial.html: per-atom vectors: global array, file:
+"fix ave/histo"_fix_ave_histo.html: global/per-atom/local scalars and vectors: global array, file:
+"fix ave/correlate"_fix_ave_correlate.html: global scalars: global array, file:
+"fix store/state"_fix_store_state.html: per-atom vectors: per-atom vector/array:
+:tb(s=:)
+
+:line
+
+8.9 Walls :link(howto_9),h4
+
+Walls are typically used to bound particle motion,
+i.e. to serve as a boundary condition.
+
+Walls in LIGGGHTS(R)-INL for granular simulations are
+typically defined using "fix wall/gran"_fix_wall_gran.html.
+This command can define two types of
+walls: primitive and mesh. Mesh walls are defined using a
+"fix mesh/surface"_fix_mesh_surface.html or related command.
+
+Also. walls can be constructed made of particles
+
+Rough walls, built of particles, can be created in various ways.  The
+particles themselves can be generated like any other particle, via the
+"lattice"_lattice.html and "create_atoms"_create_atoms.html commands,
+or read in via the "read_data"_read_data.html command.
+
+Their motion can be constrained by many different commands, so that
+they do not move at all, move together as a group at constant velocity
+or in response to a net force acting on them, move in a prescribed
+fashion (e.g. rotate around a point), etc.  Note that if a time
+integration fix like "fix nve"_fix_nve.html
+is not used with the group that contains wall particles, their
+positions and velocities will not be updated.
+
+"fix aveforce"_fix_aveforce.html - set force on particles to average value, so they move together
+"fix setforce"_fix_setforce.html - set force on particles to a value, e.g. 0.0
+"fix freeze"_fix_freeze.html - freeze particles for use as granular walls
+"fix nve/noforce"_fix_nve_noforce.html - advect particles by their velocity, but without force
+"fix move"_fix_move.html - prescribe motion of particles by a linear velocity, oscillation, rotation, variable :ul
+
+The "fix move"_fix_move.html command offers the most generality, since
+the motion of individual particles can be specified with
+"variable"_variable.html formula which depends on time and/or the
+particle position.
+
+For rough walls, it may be useful to turn off pairwise interactions
+between wall particles via the "neigh_modify
+exclude"_neigh_modify.html command.
+
+Rough walls can also be created by specifying frozen particles that do
+not move and do not interact with mobile particles, and then tethering
+other particles to the fixed particles, via a "bond"_bond_style.html.
+The bonded particles do interact with other mobile particles.
+
+"fix wall/reflect"_fix_wall_reflect.html - reflective flat walls
+"fix wall/region"_fix_wall_region.html - use region surface as wall :ul
+
+The "fix wall/region"_fix_wall_region.html command offers the most
+generality, since the region surface is treated as a wall, and the
+geometry of the region can be a simple primitive volume (e.g. a
+sphere, or cube, or plane), or a complex volume made from the union
+and intersection of primitive volumes.  "Regions"_region.html can also
+specify a volume "interior" or "exterior" to the specified primitive
+shape or {union} or {intersection}.  "Regions"_region.html can also be
+"dynamic" meaning they move with constant velocity, oscillate, or
+rotate.
+
+:line
+
+8.10 Library interface to LIGGGHTS(R)-INL :link(howto_10),h4
+
+As described in "Section_start 5"_Section_start.html#start_5, LIGGGHTS(R)-INL
+can be built as a library, so that it can be called by another code,
+used in a "coupled manner"_Section_howto.html#howto_10 with other
+codes, or driven through a "Python interface"_Section_python.html.
+
+All of these methodologies use a C-style interface to LIGGGHTS(R)-INL that is
+provided in the files src/library.cpp and src/library.h.  The
+functions therein have a C-style argument list, but contain C++ code
+you could write yourself in a C++ application that was invoking LIGGGHTS(R)-INL
+directly.  The C++ code in the functions illustrates how to invoke
+internal LIGGGHTS(R)-INL operations.  Note that LIGGGHTS(R)-INL classes are defined
+within a LIGGGHTS(R)-INL namespace (LAMMPS_NS) if you use them from another C++
+application.
+
+Library.cpp contains these 4 functions:
+
+void lammps_open(int, char **, MPI_Comm, void **);
+void lammps_close(void *);
+void lammps_file(void *, char *);
+char *lammps_command(void *, char *); :pre
+
+The lammps_open() function is used to initialize LIGGGHTS(R)-INL, passing in a
+list of strings as if they were "command-line
+arguments"_Section_start.html#start_7 when LIGGGHTS(R)-INL is run in
+stand-alone mode from the command line, and a MPI communicator for
+LIGGGHTS(R)-INL to run under.  It returns a ptr to the LIGGGHTS(R)-INL object that is
+created, and which is used in subsequent library calls.  The
+lammps_open() function can be called multiple times, to create
+multiple instances of LIGGGHTS(R)-INL.
+
+LIGGGHTS(R)-INL will run on the set of processors in the communicator.  This
+means the calling code can run LIGGGHTS(R)-INL on all or a subset of
+processors.  For example, a wrapper script might decide to alternate
+between LIGGGHTS(R)-INL and another code, allowing them both to run on all the
+processors.  Or it might allocate half the processors to LIGGGHTS(R)-INL and
+half to the other code and run both codes simultaneously before
+syncing them up periodically.  Or it might instantiate multiple
+instances of LIGGGHTS(R)-INL to perform different calculations.
+
+The lammps_close() function is used to shut down an instance of LIGGGHTS(R)-INL
+and free all its memory.
+
+The lammps_file() and lammps_command() functions are used to pass a
+file or string to LIGGGHTS(R)-INL as if it were an input script or single
+command in an input script.  Thus the calling code can read or
+generate a series of LIGGGHTS(R)-INL commands one line at a time and pass it
+thru the library interface to setup a problem and then run it,
+interleaving the lammps_command() calls with other calls to extract
+information from LIGGGHTS(R)-INL, perform its own operations, or call another
+code's library.
+
+Other useful functions are also included in library.cpp.  For example:
+
+void *lammps_extract_global(void *, char *)
+void *lammps_extract_atom(void *, char *)
+void *lammps_extract_compute(void *, char *, int, int)
+void *lammps_extract_fix(void *, char *, int, int, int, int)
+void *lammps_extract_variable(void *, char *, char *)
+int lammps_get_natoms(void *)
+void lammps_get_coords(void *, double *)
+void lammps_put_coords(void *, double *) :pre
+
+These can extract various global or per-atom quantities from LIGGGHTS(R)-INL as
+well as values calculated by a compute, fix, or variable.  The "get"
+and "put" operations can retrieve and reset atom coordinates.
+See the library.cpp file and its associated header file library.h for
+details.
+
+The key idea of the library interface is that you can write any
+functions you wish to define how your code talks to LIGGGHTS(R)-INL and add
+them to src/library.cpp and src/library.h, as well as to the "Python
+interface"_Section_python.html.  The routines you add can access or
+change any LIGGGHTS(R)-INL data you wish.  The examples/COUPLE and python
+directories have example C++ and C and Python codes which show how a
+driver code can link to LIGGGHTS(R)-INL as a library, run LIGGGHTS(R)-INL on a subset of
+processors, grab data from LIGGGHTS(R)-INL, change it, and put it back into
+LIGGGHTS(R)-INL.
+
+:line
+:line
+
+:link(Berendsen)
+[(Berendsen)] Berendsen, Grigera, Straatsma, J Phys Chem, 91,
+6269-6271 (1987).
+
+:link(Cornell)
+[(Cornell)] Cornell, Cieplak, Bayly, Gould, Merz, Ferguson,
+Spellmeyer, Fox, Caldwell, Kollman, JACS 117, 5179-5197 (1995).
+
+:link(Horn)
+[(Horn)] Horn, Swope, Pitera, Madura, Dick, Hura, and Head-Gordon,
+J Chem Phys, 120, 9665 (2004).
+
+:link(Ikeshoji)
+[(Ikeshoji)] Ikeshoji and Hafskjold, Molecular Physics, 81, 251-261
+(1994).
+
+:link(MacKerell)
+[(MacKerell)] MacKerell, Bashford, Bellott, Dunbrack, Evanseck, Field,
+Fischer, Gao, Guo, Ha, et al, J Phys Chem, 102, 3586 (1998).
+
+:link(Mayo)
+[(Mayo)] Mayo, Olfason, Goddard III, J Phys Chem, 94, 8897-8909
+(1990).
+
+:link(Jorgensen)
+[(Jorgensen)] Jorgensen, Chandrasekhar, Madura, Impey, Klein, J Chem
+Phys, 79, 926 (1983).
+
+:link(Price)
+[(Price)] Price and Brooks, J Chem Phys, 121, 10096 (2004).
+
+:link(Shinoda)
+[(Shinoda)] Shinoda, Shiga, and Mikami, Phys Rev B, 69, 134103 (2004).

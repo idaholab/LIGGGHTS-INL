@@ -1,0 +1,123 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix insert/fragments command :h3
+
+[Syntax:]
+
+fix ID group-ID insert/fragments seed seed_value distributiontemplate dist-ID general_keywords general_values fragment_keywords fragment_values ... :pre
+
+ID, group-ID are documented in "fix"_fix.html command :ulb,l
+insert/fragments = style names of this fix command :l
+seed = obligatory keyword :l
+seed_value = random # seed (prime number greater than 10000) :l
+distributiontemplate = obligatory keyword :l
+dist-ID = ID of a "fix_particledistribution_discrete"_fix_particledistribution_discrete.html to be used for particle insertion :l
+one or more general keyword/value pairs can be appended :l
+general_keywords = {every} or {verbose} :l
+  {every} value = ev
+    once = value to signalise that isertion takes place only once (the step after the fix is issued)
+    ev = every how many time-steps eligible particles are replaced by fragments
+  {verbose} = yes or no :pre
+
+following the general keyword/value section, one or more fragment keyword/value pairs can be appended for the fix insert/fragments command :l
+fragment_keywords = {region} or {type_replace} or {check_bound_sphere} :l
+  {region} value = region-ID
+    region-ID = ID of the region where the particles will be generated (positive integer)
+  {type_replace} values = vol
+    vol =  atom type (material type) of the particles to be replaced
+  {check_bound_sphere} values = yes or no
+    yes =  do check if the bounding sphere of the fragment is < 1 (length units)
+    no =  do check  the bounding sphere of the fragment :pre
+
+:ule
+
+[Examples:]
+
+region  replacereg block -0.1 0.1 -0.1 0.1 0. 0.1 units box
+fix     replace all insert/fragments seed 123457 distributiontemplate pdfragments every 1 region ins type_replace 1 :pre
+
+[Description:]
+
+Replace granular particles every few timesteps by a predefined set
+of fragment particles. A particle is eligible to be replaced if it
+is within the specified region, as defined via the {region} keyword
+and if it is of the atom type specified via the {type_replace} 
+keyword.
+
+The {verbose} keyword controls whether statistics about particle
+insertion is output to the screen each time particles are inserted.
+
+This command must use the distributiontemplate keyword to refer to a
+"fix_particledistribution_discrete"_fix_particledistribution_discrete.html 
+(defined by dist-fix-ID) that defines the properties of the
+inserted particles. This 
+"fix_particledistribution_discrete"_fix_particledistribution_discrete.html 
+must hold exactly one particle template of type
+"fix_particletemplate_multiplespheres"_fix_particletemplate_multiplespheres.html
+that has a bounding radius of <= 1. It is required to use the
+{relative} = yes option as described in 
+"fix_particletemplate_sphere"_fix_particletemplate_sphere.html
+
+The frequency of the insertion/replacement can be controlled via the
+{every} keyword. At each insertion step, fix insert/fragments replaces 
+all eligible particles. Note that in general the particles to be 
+replaced have different radii, so the fragment defined by the
+"fix_particletemplate_multiplespheres"_fix_particletemplate_multiplespheres.html
+is scaled down with the particle radius. 
+
+Inserted particles are assigned the atom type specified by the
+particledistribution defined via the 
+"fix_particledistribution_discrete"_fix_particledistribution_discrete.html 
+and are assigned to 4 groups: the default group "all" and the group
+specified in the fix insert command, as well as the groups specified
+in the "fix_particledistribution_discrete"_fix_particledistribution_discrete.html and 
+"fix_particletemplate_sphere"_fix_particletemplate_sphere.html
+command (all of which can also be "all").
+
+As all particles should be inserted within the hull of existing
+particles, no overlapcheck is performed. 
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+Information about this fix is written to "binary restart
+files"_restart.html.  This means you can restart a simulation
+while inserting particles, when the restart file was written during the
+insertion operation.
+
+None of the "fix_modify"_fix_modify.html options are relevant to this
+fix. A global vector is stored by this fix for access by various "output
+commands"_Section_howto.html#4_15. The first component of the vector is the
+number of particles already inserted, the second component is the mass
+of particles already inserted. No parameter of this fix can be
+used with the {start/stop} keywords of the "run"_run.html command.
+This fix is not invoked during "energy minimization"_minimize.html.
+
+[Restrictions:]
+
+The {overlapcheck} = 'yes' option performs an inherently serial operation
+and will thus not scale well in parallel. For this reason, if you
+want to generate large systems, you are advised to turn {overlapcheck}
+off and let the packing relax afterwards to generate a valid packing.
+
+Option {all_in} = 'yes' will not work if the "region"_region.html used
+is a tet mesh region. 
+
+Keywords {duration} and {extrude_length} can not be used together.
+
+Currently {all_in yes} is not yet supported for all types of insertion.
+
+Dynamic regions are not supported as insertion region.
+
+[Related commands:]
+
+"fix_insert_stream"_fix_insert_stream.html, "fix_insert_rate_region"_fix_insert_rate_region.html,
+"region"_region.html
+
+[Default:] none
+

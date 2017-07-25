@@ -1,0 +1,37 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+quit command :h3
+
+[Syntax:]
+
+quit :pre
+
+[Examples:]
+
+quit
+if "$n > 10000" then quit :pre
+
+[Description:]
+
+This command causes LIGGGHTS(R)-INL to exit, after shutting down all
+output cleanly.
+
+It can be used as a debug statement in an input script, to terminate
+the script at some intermediate point.
+
+It can also be used as an invoked command inside the
+"then" or "else" portion of an "if"_if.html command.
+
+[Restrictions:] none
+
+[Related commands:]
+
+"if"_if.html
+
+[Default:] none

@@ -1,0 +1,83 @@
+# Example to show usage of spheres and multispheres
+
+atom_style	sphere
+atom_modify	map array sort 0 0
+boundary	f f f
+newton		off
+
+communicate	single vel yes
+
+units		si
+
+region		reg block -0.1 0.1 -0.1 0.1 0. 0.5 units box
+create_box	1 reg
+
+neighbor	    0.004 bin
+neigh_modify	delay 0
+
+#Material properties required for new pair styles
+
+fix 		m1 all property/global youngsModulus peratomtype 1.e7
+fix 		m2 all property/global poissonsRatio peratomtype 0.45
+fix 		m3 all property/global coefficientRestitution peratomtypepair 1 0.3
+fix 		m4 all property/global coefficientFriction peratomtypepair 1 0.5
+fix 		m5 all property/global characteristicVelocity scalar 2.
+
+#New pair style
+pair_style gran model hertz tangential history
+pair_coeff	* *
+
+timestep	0.00001
+
+fix		gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+fix zwalls all wall/gran model hertz tangential history primitive type 1 zplane 0.0
+
+# initialize groups; one for spheres and one for multispheres
+# NOTE: we will use them to apply different integrators for those groups
+group multispheres initialize
+group spheres initialize
+
+#distributions for insertion
+# NOTE: Please notice, that we use different groups for the multisphere and sphere template.
+fix pts1 multispheres particletemplate/multisphere 999667 atom_type 1 density constant 2500 nspheres 50 ntry 1000000 spheres file data/stone1.multisphere scale 0.001 type 1
+fix pts2 spheres particletemplate/sphere 49979693 atom_type 1 density constant 2500 radius constant 1e-2
+fix pdd1 all particledistribution/discrete 999671 2 pts1 0.5 pts2 0.5
+
+#region and insertion
+# use whole simulation domain for particle creation
+fix ins all insert/pack seed 999683 distributiontemplate pdd1 vel constant 0. 0. -1. &
+		insert_every once overlapcheck yes orientation random region reg ntry_mc 10000 particles_in_region 50
+
+#integrator for multisphere rigid bodies
+# NOTE: Here we make use of the two different groups for spheres and multispheres.
+fix		intMS multispheres multisphere # use multisphere group
+fix		intSphere spheres nve/sphere # use sphere group
+
+#output settings, include total thermal energy
+compute		1 all erotate/sphere
+fix		ts all check/timestep/gran 1000 0.1 0.1
+thermo_style	custom step atoms ke c_1 f_ts[1] f_ts[2] vol
+thermo		1000
+thermo_modify	lost ignore norm no
+compute_modify	thermo_temp dynamic yes
+
+#compute rigid body properties
+compute		xcm_single all multisphere/single id 2 property xcm
+compute		id all multisphere property id_multisphere
+compute		xcm all multisphere property xcm
+compute		quat all multisphere property quat
+
+#dump
+dump		dmp all custom 200 post/dump*.multi id type mol x y z vx vy vz fx fy fz omegax omegay omegaz radius
+dump		dmp2 multispheres local	200 post/dump.clumps c_id c_xcm[1] c_xcm[2] c_xcm[3] c_quat[1] c_quat[2] c_quat[3] c_quat[4]
+
+#fix print
+variable        xcm1 equal c_xcm_single[1]
+variable        xcm2 equal c_xcm_single[2]
+variable        xcm3 equal c_xcm_single[3]
+fix 		extra all print 200 "${xcm1} ${xcm2} ${xcm3}" file post/out.txt screen no title "xcm1 xcm2 xcm3"
+
+#insert particles
+#run 		6000
+run		40000 upto

@@ -1,0 +1,56 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+gran rolling_friction cdt model :h3
+
+[Syntax:]
+
+rolling_friction cdt \[other model_type/model_name pairs as described "here"_pair_gran.html \] keyword values :pre
+zero or more keyword/value pairs may be appended to the end (after all models are specified) :l
+  {torsionTorque} values = 'on' or 'off'
+    on = also the normal, relative rotation (torsion) contributes to the resulting torque
+    off = only the tangential, relative rotation contributes to the resulting torque :pre
+
+[Description:]
+
+This model can be used as part of "pair gran"_pair_gran.html and
+"fix wall/gran"_fix_wall_gran.html
+
+The constant directional torque (CDT) model adds an additional torque
+contribution, equal to
+
+torque_rf = rmu*k_n*delta_n*w_r_shear/mag(w_r_shear)*(R*).
+
+w_r_shear is the projection of w_r into the shear plane, where w_r = w1-w2
+
+If the rolling friction model is activated, the coefficient of rolling friction (rmu) must be defined as
+
+fix id all property/global coefficientRollingFriction peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+    (value_ij=value for the coefficient of rolling friction between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation) :pre
+
+IMPORTANT NOTE: You have to use atom styles beginning from 1, e.g. 1,2,3,...
+
+[Torque information:]
+
+By default the relative, normal rotation (torsion) is subtracted and does not contribute to the resulting torque. By setting the {torsionTorque} keyword to 'on', the full relative rotation contributes to the rolling friciton torque.
+
+[Coarse-graining information:]
+
+Using "coarsegraining"_coarsegraining.html in
+combination with this command might lead to
+different dynamics or system state and thus to 
+inconsistancies.
+
+NOTE: "Coarsegraining"_coarsegraining.html may or 
+may not be available in LIGGGHTS(R)-INL.
+
+[Default:]
+
+{torsionTorque} = 'off'
+
+[(Ai)] Jun Ai, Jian-Fei Chen, J. Michael Rotter, Jin Y. Ooi, Powder Technology, 206 (3), p 269-282 (2011).
