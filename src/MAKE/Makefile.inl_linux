@@ -1,4 +1,6 @@
-# mpi = mpic++, VTK 6.2 (alternative compilation, might need modification)
+# mpi = mpic++, VTK 7.1 (alternative compilation, might need modification)
+
+# Note: the path to VTK libs is specifically configured for INL FALCON HPC
 
 SHELL = /bin/sh
 
@@ -34,7 +36,7 @@ SHLIBFLAGS =	-shared
 # LAMMPS ifdef settings, OPTIONAL
 # see possible settings in doc/Section_start.html#2_2 (step 4)
 
-LMP_INC =	-DLAMMPS_GZIP #-DLAMMPS_VTK
+LMP_INC =	-DLAMMPS_GZIP -DLAMMPS_VTK
 
 # MPI library, REQUIRED
 # see discussion in doc/Section_start.html#2_2 (step 5)
@@ -74,9 +76,9 @@ JPG_LIB =
 # PATH = path for VTK library
 # LIB = name of VTK library
 
-VTK_INC =#	-I/usr/include/vtk-6.2
-VTK_PATH =	#-L/usr/lib/x86_64-linux-gnu
-VTK_LIB =#	-lvtkCommonCore-6.2 -lvtkIOCore-6.2 -lvtkIOXML-6.2 -lvtkIOLegacy-6.2 -lvtkCommonDataModel-6.2 -lvtkIOParallel-6.2 -lvtkParallelCore-6.2 -lvtkParallelMPI-6.2 -lvtkIOImage-6.2 -lvtkCommonExecutionModel-6.2 -lvtkFiltersCore-6.2 -lvtkIOParallelXML-6.2
+VTK_INC =	-I/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/include/vtk-7.1
+VTK_PATH =	-L/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/lib
+VTK_LIB =	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
 
 # ---------------------------------------------------------------------
 # build rules and dependencies
