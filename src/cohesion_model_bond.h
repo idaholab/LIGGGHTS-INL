@@ -524,6 +524,8 @@ namespace ContactModels {
 
                 if (create_bond_B)
                     createBond(scdata, r);
+		else
+                    return;
             }
             else
                 return;

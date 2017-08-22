@@ -1,0 +1,110 @@
+#Particle fragmentation
+echo both
+atom_style	granular
+atom_modify	map array
+boundary	m m m
+newton		off
+
+communicate	single vel yes
+
+units		si
+
+region		reg block -0.25 0.25 -0.15 0.15 -0.15 0.15 units box
+create_box	2 reg
+
+neighbor	0.01 bin
+neigh_modify	delay 0
+#atom_modify   sort 0 0.01
+
+#Material properties required for new pair styles
+
+fix 		m1 all property/global youngsModulus peratomtype 5.e6 5.e6
+fix 		m2 all property/global poissonsRatio peratomtype 0.45 0.45
+fix 		m3 all property/global coefficientRestitution peratomtypepair 2 0.3 0.3 0.3 0.3
+fix 		m4 all property/global coefficientFriction peratomtypepair 2 0.5 0.5 0.5 0.5
+
+fix     m5 all property/global radiusMultiplierBond peratomtypepair 2 1 1 1 1
+fix     m6 all property/global normalBondStiffnessPerUnitArea peratomtypepair 2 1e7 1e7 1e7 1e7
+fix     m7 all property/global tangentialBondStiffnessPerUnitArea peratomtypepair 2 1e6 1e6 1e6 1e6
+fix     m8 all property/global maxDistanceBond peratomtypepair 2 0.5 0.5 0.5 0.5
+
+fix     m9 all property/global dampingNormalForceBond peratomtypepair 2 0. 0. 0. 0.
+fix     m10 all property/global dampingTangentialForceBond peratomtypepair 2 0. 0. 0. 0.
+fix     m11 all property/global dampingNormalTorqueBond peratomtypepair 2 0. 0. 0. 0.
+fix     m12 all property/global dampingTangentialTorqueBond peratomtypepair 2 0. 0. 0. 0.
+
+fix     m13 all property/global tsCreateBond scalar 0.
+fix     m14 all property/global createDistanceBond peratomtypepair 2 0.007 0.007 0.007 0.007
+
+#New pair style
+pair_style      gran model hertz tangential history cohesion bond createBondAlways off
+pair_coeff	* *
+
+timestep	0.00001
+
+# no gravity
+#fix		gravi all gravity 9.81 vector 0.0 0.0 -1.0
+
+#granular walls
+fix		bx all mesh/surface file meshes/box.stl      type 1
+fix   wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes bx
+
+#apply nve integration to all particles that are inserted as single particles
+#initialize group as empty
+group           spheres region reg
+fix		integrsp spheres nve/sphere
+
+#integrator for multisphere rigid bodies
+#initialize group as empty
+group           multispheres region reg
+fix		integrms multispheres multisphere
+
+
+#distributions for insertion
+fix pts multispheres particletemplate/multisphere 999667 atom_type 1 density constant 2500 nspheres 3 &
+		ntry 10000000 spheres file data/particle3.txt scale 1.0 type 1
+fix pdins all particledistribution/discrete 999683 1 pts 1.0
+
+#region and insertion - 2 orientations to test
+region		factory block -0.201 -0.199 -0.03 0.03 -0.00001 0.00001 units box
+variable        sqrt2half equal sqrt(2.)/2.
+
+fix		ins all insert/rate/region seed 999999937 distributiontemplate pdins vel constant 1. 0. 0. &
+		nparticles 2 particlerate 4000 insert_every 100 overlapcheck yes all_in no &
+		orientation random maxattempt 10 region factory ntry_mc 1000000 
+fix ins2 all insert/rate/region seed 999727 distributiontemplate pdins vel constant 1. 0. 0. &
+		nparticles 2 particlerate 4000 insert_every 100 overlapcheck yes all_in no &
+		orientation constant ${sqrt2half} 0. ${sqrt2half} 0. maxattempt 10 region factory ntry_mc 1000000
+
+run 0
+
+#define fragments for particle replacement, particle radii are relative
+fix fragments spheres particletemplate/multiplespheres 999671 atom_type 2 density constant 2500 relative yes nspheres 3 ntry 10000000 &
+		spheres file data/particle3_fragments.txt scale 1.0 bonded yes
+fix pdfragments all particledistribution/discrete 999721 1 fragments 1.
+
+#fix to replace particles, only particles in region replacereg direction are replaced
+region		replacereg block -0.05 0.05 INF INF INF INF units box
+fix replace all insert/fragments seed 999749 distributiontemplate pdfragments &
+                every 50 region replacereg type_replace 1
+
+#output settings, include total thermal energy
+fix				ts all check/timestep/gran 400 0.1 0.1
+compute		rke all erotate/sphere
+thermo_style	custom step atoms ke c_rke f_ts[1] f_ts[2] vol
+thermo		400
+thermo_modify	lost ignore norm no
+compute_modify	thermo_temp dynamic yes
+compute  cmpbond all  pair/gran/local/bond
+
+#insert the first particles so that dump is not empty
+run		1
+dump		dmp all custom/vtk 400 post/bonded*.vtk id type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius f_bond_random_id
+dump		dmp2 all local/gran/vtk 400 post/bonddump*.vtk cmpbond
+dump 		dmpstl all mesh/stl 400 post/dump*.stl
+
+run             400 upto
+undump          dmpstl
+
+#insert particles
+run		40000 upto
