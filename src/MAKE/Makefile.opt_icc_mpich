@@ -11,18 +11,12 @@ SHELL = /bin/sh
 # specify flags and libraries needed for your compiler
 
 CC =		mpic++
-# Optimized version
-CCFLAGS =	-O2  -restrict
-# Debug version
-#CCFLAGS =	-Og -g -pg -fPIC
+CCFLAGS =	-O3  -restrict
 SHFLAGS =	-fPIC
 DEPFLAGS =	-M
 
 LINK =		mpic++
-# Optimized version
-LINKFLAGS =	-O2 -fPIC
-# Debug version
-#LINKFLAGS =	-Og -g -pg -fPIC
+LINKFLAGS =	-O3 -fPIC
 LIB =		-lstdc++
 SIZE =		size
 
