@@ -38,7 +38,7 @@
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -288,9 +288,9 @@ void PairSphArtviscTenscorr::write_restart(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSphArtviscTenscorr::read_restart(FILE *fp)
+void PairSphArtviscTenscorr::read_restart(FILE *fp, const int major, const int minor)
 {
-  read_restart_settings(fp);
+  read_restart_settings(fp, major, minor);
   allocate();
 
   int i,j;
@@ -316,7 +316,7 @@ void PairSphArtviscTenscorr::write_restart_settings(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSphArtviscTenscorr::read_restart_settings(FILE *fp)
+void PairSphArtviscTenscorr::read_restart_settings(FILE *fp, const int major, const int minor)
 {
   if (comm->me == 0) {
     fread(&artVisc_flag,sizeof(int),1,fp);

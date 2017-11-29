@@ -4,6 +4,7 @@ atom_modify	map array
 boundary	s s s
 newton		off
 
+hard_particles yes
 communicate	single vel yes
 
 units		si

@@ -1,0 +1,80 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+compute surface command :h3
+
+[Syntax:]
+
+compute ID group-ID surface general_keyword general_values arg mode input1 input2 ... keyword args ... :pre
+
+ID, group-ID are documented in "compute"_compute.html command :ulb,l
+surface = style name of this compute command  :l
+general_keywords general_values are documented in "compute"_compute.html" :l
+zero or more keyword/value pairs may be appended :l
+keyword = {angle} or {point_up} or {n_vec_up} or {use_com} :l
+  {angle} values = ang
+    ang = maximum contact angle of particle (degrees)
+  {point_up} values = px py pz
+    px, py, pz = coordinates of point UP (length units)
+  {n_vec_up} values = nx ny nz
+    nx, ny, nz = coordinates of normal vector NUP (length units)
+  {use_com} values = yes or no
+    yes = do use particle center of mass for calculation for vector NUP
+    no = do not use particle center of mass for calculation for vector NUP :pre
+:ule
+
+[Examples:]
+
+compute surf all surface point_up 0.05 0.05 0.05 n_vec_up 1. 1. 0. angle 30 :pre
+
+[Description:]
+
+Define a calculation that computes if a particle is on the surface
+of a particle packing, based on two very simple geometric criteria, which
+are based on NUP, a normal vector pointing "upwards", and COM, the center of
+mass of the fix group
+
+The detection is based on 2 criteria:
+
+(1) the particle is above the plane defined by point COM and vector NUP
+
+AND
+
+(2) the particle must not have any neighboring particle, where the angle
+of the neighboring particle to NUP is smaller than {angle}.
+
+The vector NUP can be defined in 2 ways: as (a) vector from center of mass
+ of the fix group to UP (as defined by {point_up} ), this is done by using the {use_com}
+keyword, or (b) directly via the {n_vec_up} keyword.
+
+A note on keywords: {angle} must be defined, and either - for case (a) -
+{use_com} and {point_up} must be defined, or - for case (b) - {n_vec_up}
+must be defined.
+
+Please note that the list of neighbors is looped to calculate criterion
+(2), which will depend on your "neighbor"_neighbor.html and
+"neigh_modify"_neigh_modify.html settings.
+
+IMPORTANT NOTE: Please take into account that this is a very coarse
+approach, and also "inner surfaces" within the particle packing
+may be detected.
+
+[Output info:]
+
+This compute calculates a compute calculates a per-atom vector, which
+equals 1 if the particle is on the surface, and 0 if the particle
+is not on the surface. These values can
+be used by any command that uses per-atom vector values from a
+compute as input.  See "Section_howto 15"_Section_howto.html#howto_8
+for an overview of LIGGGHTS(R)-INL output options.
+
+[Restrictions:] none
+
+[Related commands:] none
+
+[Default:] none

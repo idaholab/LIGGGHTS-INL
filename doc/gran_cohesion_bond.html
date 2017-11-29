@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>gran cohesion bond model &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -81,7 +82,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
@@ -105,8 +109,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -119,24 +125,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>gran cohesion bond model</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/gran_cohesion_bond.txt" rel="nofollow"> View page source</a> 
+      <li>gran cohesion bond model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/gran_cohesion_bond.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
 </div>
@@ -189,11 +212,11 @@ cohesion bond [other model_type/model_name pairs as described <a class="referenc
   off = disable dissipation
 <em>computeDissipatedEnergy</em> values = 'on' or 'off'
   on = the cohesion model saves the dissipated energy for each contact for the
-  use in <tt class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">calculate/dissipated_energy</span></tt>
+  use in <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">calculate/dissipated_energy</span></code>
   of = no values are saved
 <em>computeElasticPotential</em> values = 'on' or 'off'
   on = the bond model saves the current elastic potential for each contact for
-  the use in <tt class="xref doc docutils literal"><span class="pre">fix</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">calculate/cohesion_elastic_energy</span></tt>
+  the use in <code class="xref doc docutils literal"><span class="pre">fix</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">calculate/cohesion_elastic_energy</span></code>
   of = no values are saved
 <em>druckerPrager</em> values = 'on' or 'off'
   on = a Drucker-Prager type model is used for the tangential limiting stress
@@ -207,7 +230,7 @@ cohesion bond [other model_type/model_name pairs as described <a class="referenc
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>This model can be used as part of <a class="reference internal" href="pair_gran.html"><em>pair gran</em></a> and
 <a class="reference internal" href="fix_wall_gran.html"><em>fix wall/gran</em></a></p>
-<p>This bond model implements the parallel bond model from <a class="reference internal" href="#potyondycundall2004"><em>Potyondy and Cundall</em></a> ,
+<p>This bond model implements the parallel bond model from <a class="reference internal" href="#potyondycundall2004"><span>Potyondy and Cundall</span></a> ,
 while facilitating some user customization.</p>
 <p>The current implementation creates the bond with zero forces and torques between
 the bonded particles. Due to relative motion forces and torques will act on the particles, where the
@@ -225,8 +248,14 @@ torque (Tn, Tt)) are calculated incrementally:</p>
 <span class="n">I</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">rb</span><span class="o">^</span><span class="mi">4</span>
 </pre></div>
 </div>
-<p>The beam radius (rb) is defined by the product of the minimum radius of the bonded particles and the
-user-defined <em>radiusMultiplierBond</em>. The <em>normalBondStiffnessPerUnitArea</em> <em>kn</em> and
+<p>The beam radius (rb) is defined by the product of the minimum radius of the
+bonded particles and the user-defined <em>radiusMultiplierBond</em>. With the default
+<em>radiusMultiplierBond</em> = 1 the beam that is located between two particles is a
+cylinder with radius equal to the minimum radius of the two particles. The
+<em>radiusMultiplierBond</em> allows to shrink (or grow) the beam that represents the
+bond between these two particles. Clearly, a thicker beam will make the system
+more stiff, while a thinner beam will decrease the stiffness (for constant kn
+and kt). The <em>normalBondStiffnessPerUnitArea</em> <em>kn</em> and
 <em>tangentialBondStiffnessPerUnitArea</em> <em>kt</em> are also user-defined properties.</p>
 <p>The stress flags (<em>tensionStress</em>, <em>compressionStress</em>, <em>shearStress</em>, <em>normalTorqueStress</em>, and
 <em>shearTorqueStress</em>) allow to disable the calculation of the corresponding force/torque componant
@@ -253,7 +282,7 @@ the cut-off for the neighbor list build. For unrealistically high values, this m
 to a neighbor list overflow.</p>
 </div>
 <p>In order to stabalize the system a kind of energy dissipation is required. By default the model uses the approach as
-suggested by <a class="reference internal" href="#potyondycundall2004"><em>Potyondy and Cundall</em></a>. Thus for each degree of freedom a damping
+suggested by <a class="reference internal" href="#potyondycundall2004"><span>Potyondy and Cundall</span></a>. Thus for each degree of freedom a damping
 force/torque is added that is defined by (normal force example)</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">Fd</span> <span class="o">=</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Fn</span><span class="p">)</span> <span class="o">*</span> <span class="n">sign</span><span class="p">(</span><span class="n">v_n</span><span class="p">)</span>
 </pre></div>
@@ -265,10 +294,11 @@ properties <em>dampingNormalForceBond</em>, <em>dampingTangentialForceBond</em>,
 <p>As the damping model above is sensitive to the sign of the normal velocity this model can
 cause instabilities when a system under loading is considered. In this case the
 <em>dampingBondSmooth</em> option can be enabled. This will modify the above equation to read</p>
-<div class="highlight-python"><pre>Fd = - alpha * abs(Fn) * multiplier
+<div class="highlight-python"><div class="highlight"><pre>Fd = - alpha * abs(Fn) * multiplier
 multiplier = min(1, max(-1, v_n/max(minvel, dv)))
 dv = |force_n * dt|
-minvel = radius/dt * 0.001</pre>
+minvel = radius/dt * 0.001
+</pre></div>
 </div>
 <p>which corresponds to a linear switching for velocities below a velocity threshold that
 depends on the force intensity.</p>
@@ -286,36 +316,49 @@ As an example the shear force is relaxed by</p>
 behaviour, thus bonds are created at a user-defined timestep (<em>tsCreateBond</em>, scalar property) for particles
 within a user-defined range (<em>createDistanceBond</em>, perAtomTypePair property).</p>
 <p>To define those material properties, it is mandatory to use multiple <a class="reference internal" href="fix_property.html"><em>fix property/global</em></a> commands:</p>
-<div class="highlight-python"><pre>fix id all property/global radiusMultiplierBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global radiusMultiplierBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global normalBondStiffnessPerUnitArea peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global tangentialBondStiffnessPerUnitArea peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
-    (value_ij=value for the coefficient of restitution between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation)</pre>
+    (value_ij=value for the coefficient of restitution between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation)
+</pre></div>
 </div>
 <p>According to the choosen damping/dissipation model you need to add:</p>
-<div class="highlight-python"><pre>fix id all property/global dampingNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global dampingNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global dampingTangentialForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global dampingNormalTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
-fix id all property/global dampingTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+fix id all property/global dampingTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>or</p>
-<div class="highlight-python"><pre>fix id all property/global dissipationNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global dissipationNormalForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global dissipationTangentialForceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
 fix id all property/global dissipationNormalTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
-fix id all property/global dissipationTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+fix id all property/global dissipationTangentialTorqueBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>Dependent on selected flags (<em>stressBreak</em>, <em>temperatureBreak</em>) you need to add:</p>
-<div class="highlight-python"><pre>fix id all property/global maxDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global maxDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>or</p>
-<div class="highlight-python"><pre>fix id all property/global maxSigmaBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
-fix id all property/global maxTauBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global maxSigmaBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+fix id all property/global maxTauBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>For <em>createBondAlways</em> = &#8216;on&#8217; you need to add:</p>
-<div class="highlight-python"><pre>fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
+<p>In this case bonds between two particles can be created each time step as long
+as two particles are closer together than the defined <em>createDistanceBond</em>. If
+bonds should be created only at one specific time step then <em>createBondAlways</em>
+should be set to &#8220;off&#8221; and the specific time step needs to be defined as shown
+below. Bonds will then be created if the two particles are within
+<em>createDistanceBond</em> and if the time step is equal to <em>tsCreateBond</em>.</p>
 <p>For <em>createBondAlways</em> = &#8216;off&#8217; you need to add:</p>
-<div class="highlight-python"><pre>fix id all property/global tsCreateBond scalar value .
-fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global tsCreateBond scalar value .
+fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -328,10 +371,12 @@ tau_max = <em>maxTauBond</em> + sigma tan(<em>frictionAngle</em>)
 </pre>
 <p>where sigma is the normal stress, <em>maxTauBond</em> takes the role of the cohesion strength and
 <em>frictionAngle</em> is a peratomtypepair property which needs to be set as</p>
-<div class="highlight-python"><pre>fix id all property/global frictionAngle peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global frictionAngle peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>If <em>ratioTensionCompression</em> = &#8216;on&#8217; the following property needs to be set:</p>
-<div class="highlight-python"><pre>fix id all property/global ratioTensionCompression peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix id all property/global ratioTensionCompression peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
+</pre></div>
 </div>
 <p>This value, abbreviated with <em>rTC</em>, is then used to determine the maximum stress in normal
 direction under tension as <em>rTC</em> * <em>maxSigmaBond</em>. This can be used to simulate materials
@@ -341,13 +386,13 @@ which exhibit different compressive and tensile strengths.</p>
 <h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
 <p>None.</p>
 <p><strong>Coarse-graining information:</strong></p>
-<p>Using <tt class="xref doc docutils literal"><span class="pre">coarsegraining</span></tt> in
+<p>Using <a class="reference internal" href="coarsegraining.html"><em>coarsegraining</em></a> in
 combination with this command might lead to
 different dynamics or system state and thus to
 inconsistancies.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last"><tt class="xref doc docutils literal"><span class="pre">Coarsegraining</span></tt> may or
+<p class="last"><a class="reference internal" href="coarsegraining.html"><em>Coarsegraining</em></a> may or
 may not be available in LIGGGHTS(R)-INL.</p>
 </div>
 </div>
@@ -362,6 +407,9 @@ International Journal of Rock Mechanics and Mining Sciences, 41(8), 1329ff.</p>
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -392,11 +440,13 @@ International Journal of Rock Mechanics and Mining Sciences, 41(8), 1329ff.</p>
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

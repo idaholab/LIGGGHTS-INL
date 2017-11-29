@@ -1,0 +1,98 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+compute crosssection command :h3
+
+[Syntax:]
+
+compute ID group-ID crosssection general_keyword general_values dim d min mi max ma n_cuts nc cut_thickness ct keywords value   ... :pre
+
+ID, group-ID are documented in "compute"_compute.html command :ulb,l
+crosssection = style name of this compute command :l
+general_keywords general_values are documented in "compute"_compute.html" :l
+skin = obligatory keyword :l
+s = skin used for coordination number calculation :l
+dim = obligatory keyword :l
+d = axis of cross-sections (any x,y,z) :l
+min = obligatory keyword :l
+mi = lo value for cross-sections (length units) :l
+max = obligatory keyword :l
+ma = hi value for cross-sections :l
+n_cuts = obligatory keyword :l
+nc = number of cross-sections to be evaluated :l
+cut_thickness = obligatory keyword :l
+ct = obligatory keyword :l
+zero or more keyword/value pairs may be appended :l
+keyword = {file} or {region} :l
+  {region} value = region-ID
+    region-ID = ID of region atoms must be in to be included in cross-section
+  {file} value = filename
+    v_name = filename to write data to :pre
+:ule
+
+[Examples:]
+
+compute	chull all crosssection skin 0.003 dim z  min 0.0 max 0.05  n_cuts 3 cut_thickness 0.005  :pre
+
+[Description:]
+
+Define a computation that calculates cross-sectional areas of medium to
+densely packed particle beds. This is done for multiple cuts in a defined
+dimension, as defined by keyword {dim}. The number of cross-sectional cuts
+is defined by keyword {n_cuts}, the location of the cross-sections
+are defined by {min} and  {max}. Example: If {dim} = x, {n_cuts} = 3,
+{min} = 0.5 and {max} = 0.7, then cross-sectional areas are calculated
+for x = 0.5, x = 0.6, and x = 0.7.
+
+Mathematically, the 2D convex hull of all particles is included,
+if the normal distance to a cross-section plane is less than {cut_thickness}.
+Example: If {cut_thickness} = 0.05, in the above example, all particles
+with 0.45 < x < 0.55 would be included in the first cross-section, all
+particles with 0.55 < x < 0.65 would be included in the second cross-section,
+etc. Note that particles are ONLY INCLUDED IF their coordination number
+(number of contacts) is 2 or higher. This is to avoid that only particles which
+are part of a packed bed are taken into account. The coordination number
+is calculated based on the {skin} keyword, i.e. if two particles are separated
+by a distance less than the sum of their radii + skin, then the particle
+pair is counted for the coordination number.
+
+The optional keyword {file} can be used to write out the results to a
+text file, following this format:
+
+coo_1 area_1 r_1
+coo_2 area_2 r_2
+... :pre
+
+where the coo_X values are the {dim} = const coordinate values,
+area_X are the corresponding cross-section areas, and the r_X values
+are the radii of the area-equivalent circle.
+
+The optional keyword {region} can be used to restrict the calculation
+to a certain region.
+
+[Output info:]
+
+This compute calculates a local vector. The length of the vector
+is equal to {n_cuts}, and each value is equal to the cross-sectional
+area for this cut. The vector or array can be accessed by any command
+that uses local values from a compute as input.  See "this
+section"_Section_howto.html#4_15 for an overview of LIGGGHTS(R)-INL output
+options.
+
+For information on the "units"_units.html of the output, see above.
+
+[Restrictions:]
+
+Can only be used together with a granular pair style.
+
+[Related commands:]
+
+"dump local"_dump.html, "compute property/local"_compute_property_local.html
+
+[Default:]
+

@@ -42,7 +42,8 @@
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 #include <stdlib.h>
 #include <string.h>
 #include "mesh_module_stress_6dof.h"
@@ -73,8 +74,8 @@ enum{NONE,CONSTANT,EQUAL,ATOM};
 
 /* ---------------------------------------------------------------------- */
 
-MeshModuleStress6DOF::MeshModuleStress6DOF(LAMMPS *lmp, int &iarg_, int narg, char **arg, FixMeshSurface *fix_mesh)
-: MeshModule(lmp, iarg_, narg, arg, fix_mesh),
+MeshModuleStress6DOF::MeshModuleStress6DOF(LAMMPS *lmp, int &iarg_, int narg, char **arg, FixMeshSurface *fix_mesh) :
+    MeshModule(lmp, iarg_, narg, arg, fix_mesh),
 
   xcm_(      *mesh->prop().addGlobalProperty< VectorContainer<double,3> > ("xcm","comm_none","frame_invariant","restart_yes",3)),
   quat_(     *mesh->prop().addGlobalProperty< VectorContainer<double,4> > ("quat","comm_none","frame_invariant","restart_yes",1)),
@@ -108,7 +109,11 @@ MeshModuleStress6DOF::MeshModuleStress6DOF(LAMMPS *lmp, int &iarg_, int narg, ch
   c_r_(0.),
   externalForce_flag_(false),
   rot_flip_flag_(false),
-  rot_flip_angle_(0.)
+  rot_flip_angle_(0.),
+  fix_gravity_(NULL),
+  gravity_set_(false),
+  limit_vel_(-1.),
+  limit_movement_axis_(false)
 {
     mm_stress = static_cast<MeshModuleStress*>(fix_mesh->get_module("stress"));
     if (!mm_stress)
@@ -143,7 +148,27 @@ MeshModuleStress6DOF::MeshModuleStress6DOF(LAMMPS *lmp, int &iarg_, int narg, ch
           xcm_.add(_com);
           mm_stress->set_p_ref(xcm_(0));
           hasargs = true;
-      } else if(strcmp(arg[iarg_],"vel") == 0) {
+      }
+      else if(strcmp(arg[iarg_],"limit_vel") == 0)
+      {
+          if (narg < iarg_+2)
+              error->one(FLERR,"not enough arguments for 'limit_vel'");
+          limit_vel_ = force->numeric(FLERR, arg[iarg_+1]);
+          iarg_ += 2;
+          hasargs = true;
+      }
+      else if(strcmp(arg[iarg_],"movement_axis") == 0)
+      {
+          if (narg < iarg_+4) error->one(FLERR,"not enough arguments for 'movement_axis'");
+          iarg_++;
+          axis_[0] = force->numeric(FLERR,arg[iarg_++]);
+          axis_[1] = force->numeric(FLERR,arg[iarg_++]);
+          axis_[2] = force->numeric(FLERR,arg[iarg_++]);
+          vectorNormalize3D(axis_);
+          limit_movement_axis_ = true;
+          hasargs = true;
+      }
+      else if(strcmp(arg[iarg_],"vel") == 0) {
           if (narg < iarg_+4) error->one(FLERR,"not enough arguments for 'vel'");
           iarg_++;
           double _vel[3];
@@ -371,8 +396,8 @@ void MeshModuleStress6DOF::init_rotation_props()
   // if any principal moment < scaled EPSILON, set to 0.0
   
   double max;
-  max = MathExtraLiggghts::max(inertia_(0)[0],inertia_(0)[1]);
-  max = MathExtraLiggghts::max(max,inertia_(0)[2]);
+  max = std::max(inertia_(0)[0],inertia_(0)[1]);
+  max = std::max(max,inertia_(0)[2]);
 
   if (inertia_(0)[0] < EPSILON*max) inertia_(0)[0] = 0.0;
   if (inertia_(0)[1] < EPSILON*max) inertia_(0)[1] = 0.0;
@@ -458,6 +483,12 @@ void MeshModuleStress6DOF::init()
       if (input->variable->equalstyle(zvar)) zstyle = EQUAL;
       else error->all(FLERR,"Variable for fix addforce is invalid style");
     }
+
+    const int nfix_gravity = modify->n_fixes_style_strict("gravity");
+    if(nfix_gravity == 1)
+        fix_gravity_ = static_cast<FixGravity*>(modify->find_fix_style_strict("gravity",0));
+    else if (nfix_gravity > 1)
+        error->all(FLERR, "mesh module 6dof can only handle one gravity fix");
 }
 
 /* ---------------------------------------------------------------------- */
@@ -491,11 +522,24 @@ void MeshModuleStress6DOF::initial_integrate(int vflag)
 {
     double dX[3],dx[3], qOld[4],dQ[4], dq[4];
 
+    if (!gravity_set_)
+        add_gravity();
+
     // update vcm by 1/2 step
 
     if(fflag_(0)[0]) vcm_(0)[0] += dtfm_ * mm_stress->f_total(0);
     if(fflag_(0)[1]) vcm_(0)[1] += dtfm_ * mm_stress->f_total(1);
     if(fflag_(0)[2]) vcm_(0)[2] += dtfm_ * mm_stress->f_total(2);
+
+    if (limit_movement_axis_)
+    {
+        const double dot = vectorDot3D(vcm_(0), axis_);
+        vectorScalarMult3D(axis_, dot, vcm_(0));
+    }
+
+    const double vel = vectorMag3D(vcm_(0));
+    if (limit_vel_ > 0 && vel > limit_vel_)
+        vectorScalarMult3D(vcm_(0), limit_vel_/vel);
 
     // update xcm by full step
 
@@ -536,6 +580,7 @@ void MeshModuleStress6DOF::initial_integrate(int vflag)
     
     mm_stress->set_p_ref(xcm_(0));
     
+    gravity_set_ = false;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -561,6 +606,16 @@ void MeshModuleStress6DOF::final_integrate()
     if(fflag_(0)[1]) vcm_(0)[1] += dtfm_ * mm_stress->f_total(1);
     if(fflag_(0)[2]) vcm_(0)[2] += dtfm_ * mm_stress->f_total(2);
 
+    if (limit_movement_axis_)
+    {
+        const double dot = vectorDot3D(vcm_(0), axis_);
+        vectorScalarMult3D(axis_, dot, vcm_(0));
+    }
+
+    const double vel = vectorMag3D(vcm_(0));
+    if (limit_vel_ > 0. && vel > limit_vel_)
+        vectorScalarMult3D(vcm_(0), limit_vel_/vel);
+
     // update angular momentum by 1/2 step
 
     if(tflag_(0)[0]) angmom_(0)[0] += dtf_ * mm_stress->torque_total(0);
@@ -579,12 +634,13 @@ void MeshModuleStress6DOF::add_gravity()
     double gravity[3],f_grav[3];
 
     vectorZeroize3D(gravity);
-    if(modify->n_fixes_style_strict("gravity") > 0)
-        static_cast<FixGravity*>(modify->find_fix_style_strict("gravity",0))->get_gravity(gravity);
+    if (fix_gravity_)
+        fix_gravity_->get_gravity(gravity);
 
     vectorScalarMult3D(gravity,mass_(0),f_grav);
     
     mm_stress->add_global_external_contribution(f_grav);
+    gravity_set_ = true;
 }
 
 /* ---------------------------------------------------------------------- */

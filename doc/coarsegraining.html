@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>coarsegraining command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
+        
+      <li>coarsegraining command</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/coarsegraining.txt" rel="nofollow"> View page source</a>
+          
+          <a href="http://www.cfdem.com"> Website</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="coarsegraining-command">
+<span id="index-0"></span><h1>coarsegraining command<a class="headerlink" href="#coarsegraining-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>coarsegraining cg_factor args
+</pre></div>
+</div>
+<ul class="simple">
+<li>cg_factor = coarse-graining factor to be applied (dimensionless)</li>
+<li>args = <em>model_check</em></li>
+</ul>
+<pre class="literal-block">
+<em>model_check</em> = error, warn or off
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>coarsegraining 2.0
+</pre></div>
+</div>
+<p>coarsegraining 3 model_check warn</p>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Coarsegraining is a methodology to reduce the computational effort of a DEM
+calculation by scaling up the particle size by a coarse-graining factor
+(cg_factor). Thereby, the model size decreases by factor cg-factor^3.</p>
+<p>However, changing particle size will change the physics of the model.
+On the particle scale, this change is obviously inevitable. However,
+in many cases model constants can be adapted so that on the bulk scale
+the change of the physics caused by the coarse-graining model is acceptable.
+See e.g. <a class="reference internal" href="#radl"><span>(Radl)</span></a> and <a class="reference internal" href="#bierwisch"><span>(Bierwisch)</span></a> for details.</p>
+<p>Some of the models in LIGGGHTS(R)-INL support scaling of the model constants
+to counteract this change in physics on the bulk scale. Moreover,
+some commands (such as insertion commands or the neighbor command) re-scale
+some of their length scales. Using <em>model_check</em> = error will throw an error
+if a model/command does not yield constistent results with coarse-graining.
+Using <em>model_check</em> = warn will issue a warning if a model/command does not
+yield constistent results with coarse-graining. <em>model_check</em> = off will
+suppress all warnings and is only intended for long CFDEMcoupling simulations.</p>
+<p><strong>Model overview:</strong></p>
+<p>This table provides an overview of how different models behave when
+coarsegraining is used. Some models scale lengthscales, other models
+scale model parameters to make results more coarse-graining consistent.
+Models that are not mentioned here are not affected by using the
+coarsegraining command</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="46%" />
+<col width="24%" />
+<col width="30%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="create_atoms.html"><em>create_atoms</em></a></td>
+<td>&nbsp;</td>
+<td>not supported</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_addforce.html"><em>fix addforce</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_drag.html"><em>fix drag</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td>fix dragforce</td>
+<td>&nbsp;</td>
+<td>downscaling of A, Re; upscaling of dragforce</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_efield.html"><em>fix efield</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_heat_gran_conduction.html"><em>fix heat/gran/conduction</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-odd"><td><code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">mesh/surface/stress</span></code></td>
+<td>Finnie wear model</td>
+<td>inherently compatible</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_particletemplate_sphere.html"><em>fix particletemplate/sphere</em></a></td>
+<td>&nbsp;</td>
+<td>radius -&gt; cg_factor*radius</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_particletemplate_multisphere.html"><em>fix particletemplate/multisphere</em></a></td>
+<td>&nbsp;</td>
+<td>radius -&gt; cg_factor*radius</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_spring.html"><em>fix spring</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_spring_rg.html"><em>fix spring/rg</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_spring_self.html"><em>fix spring/self</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_viscous.html"><em>fix viscous</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="read_data.html"><em>neighbor</em></a></td>
+<td>&nbsp;</td>
+<td>skin -&gt; cg_factor*skin</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/*</em></a></td>
+<td>any cohesion or rolling friction model</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hertz/history</em></a></td>
+<td>base model</td>
+<td>inherently compatible</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke/history base model</em></a></td>
+<td>base model</td>
+<td>inherently compatible</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke  base model</em></a></td>
+<td>base model</td>
+<td>inherently compatible</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hertz/history/stiffness</em></a></td>
+<td>&nbsp;</td>
+<td>not supported / inconsistent</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke/history/stiffness</em></a></td>
+<td>base model with damp_massflag=0</td>
+<td>kn -&gt; cg_factor*kn, gamman -&gt; cg_factor^2*gamman</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke/history/stiffness</em></a></td>
+<td>base model with damp_massflag=1</td>
+<td>kn -&gt; cg_factor*kn, gamman -&gt; gamman/cg_factor</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke/stiffness</em></a></td>
+<td>base model with damp_massflag=0</td>
+<td>kn -&gt; cg_factor*kn, gamman -&gt; cg_factor^2*gamman</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>pair gran/hooke/stiffness</em></a></td>
+<td>base model with damp_massflag=1</td>
+<td>kn -&gt; cg_factor*kn, gamman -&gt; gamman/cg_factor</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="set.html"><em>set</em></a></td>
+<td>&nbsp;</td>
+<td>diameter -&gt; cg_factor*diameter</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Even if a model does not support proper coarse graining, in many cases
+it will still be possible to calibrate the model constant manually to capture the
+bulk scale physics with a coarse-grained model.</p>
+</div>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>General warning: Coarse graining is an approximative method and
+will _never_ deliver exactly the same results than a fine-grained
+simulation.</p>
+<p>One natural restriction is that the ratio of geometry length scale to
+particle length scale should be &gt;&gt; 1 when coarse graining is applied.</p>
+<p>See description above the fact that not all LIGGGHTS(R)-INL models will
+deliver consistent results with coarse-graining ratios &gt; 1.</p>
+<p>The coarsegraining command needs to be at the beginning of an input-script.
+It needs to be defined before any fixes or the definition of a simulation box.</p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p>see table above</p>
+</div>
+<div class="section" id="default">
+<h2>Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h2>
+<p>cg_factor = 1 (no coarse-graining applied)</p>
+<hr class="docutils" />
+<p id="radl"><strong>(Radl)</strong> S. Radl et. al., PARCEL-BASED APPROACH FOR THE SIMULATION OF GAS-PARTICLE FLOWS, Proc. 8th International Conference on CFD in Oil &amp; Gas, Metallurgical and Process Industries, 2011</p>
+<p id="bierwisch"><strong>(Bierwisch)</strong> Journal of the Mechanics and Physics of Solids, Volume 57, Issue 1, January 2009, Pages 10ff</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v3.X',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

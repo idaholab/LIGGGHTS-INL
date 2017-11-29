@@ -1,0 +1,74 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix nve/sphere/limit command :h3
+
+[Syntax:]
+
+fix ID group-ID nve/sphere/limit :pre
+
+ID, group-ID are documented in "fix"_fix.html command :ulb,l
+nve/sphere/limit = style name of this fix command :l
+zero or more keyword/value pairs may be appended :l
+keyword = {update} or {vlimit} or {omegalimit} :l
+  {update} value = {dipole}
+    dipole = update orientation of dipole moment during integration
+  {vlimit} value = vmax
+    vmax = maximum velocity with which an atom can move
+  {omegalimit} value = omegamax
+    omegamax = maximum angular velocity with which an atom can rotate :pre
+:ule
+
+[Examples:]
+
+fix 1 all nve/sphere/limit
+fix 1 all nve/sphere/limit update dipole :pre
+
+[Description:]
+
+Perform constant NVE integration similar to "fix nve/sphere"_fix_nve_sphere.html to update position, velocity, and angular velocity for finite-size spherical particles in the group each
+timestep. 
+
+If the {update} keyword is used with the {dipole} value, then the
+orientation of the dipole moment of each particle is also updated
+during the time integration.  This option should be used for models
+where a dipole moment is assigned to particles via use of the
+"atom_style dipole"_atom_style.html command.
+
+Similar to "fix nve/limit"_fix_nve_limit.html for point atoms, this fix uses the keywords {vlimit} and {omegalimit} to define a maximum velocity and maximum angular velocity for finite-size spherical atoms. This is useful when starting a simulation with a configuration containing highly overlapped atoms. Normally this would generate huge forces which would blow atoms out of the simulation box.
+
+:line
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+No information about this fix is written to "binary restart
+files"_restart.html.  None of the "fix_modify"_fix_modify.html options
+are relevant to this fix.
+
+This fix computes a scalar which can be accessed by various "output commands"_Section_howto.html#howto_8. This scalar is the total number of
+limited atoms of the fix group.
+
+No parameter of this fix can be used with the {start/stop} keywords of 
+the "run"_run.html command. This fix is not invoked during "energy minimization"_minimize.html.
+
+[Restrictions:]
+
+This fix requires that atoms store torque and angular velocity (omega)
+and a radius as defined by the "atom_style sphere"_atom_style.html
+command.  If the {dipole} keyword is used, then they must also store a
+dipole moment as defined by the "atom_style dipole"_atom_style.html
+command.
+
+All particles in the group must be finite-size spheres. They cannot
+be point particles.
+
+[Related commands:]
+
+"fix nve/sphere"_fix_nve_sphere.html, "fix nve/limit"_fix_nve_limit.html
+
+[Default:] none

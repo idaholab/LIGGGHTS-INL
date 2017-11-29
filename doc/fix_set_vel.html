@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fix set/vel command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
+        
+      <li>fix set/vel command</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/fix_set_vel.txt" rel="nofollow"> View page source</a>
+          
+          <a href="http://www.cfdem.com"> Website</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fix-set-vel-command">
+<span id="index-0"></span><h1>fix set/vel command<a class="headerlink" href="#fix-set-vel-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>fix ID group-ID set/vel keywords values ...
+</pre></div>
+</div>
+<ul class="simple">
+<li>ID, group-ID are documented in <a class="reference internal" href="fix.html"><em>fix</em></a> command</li>
+<li>set/vel = style name of this fix command</li>
+<li>following keyword/value pairs must be appended</li>
+<li>keyword = <em>dim</em> and (<em>vel</em> or <em>omega</em>)</li>
+</ul>
+<pre class="literal-block">
+<em>dim</em> value = x or y or z
+  x, y, z = component of the velocity vector to be set
+<em>vel</em> value = vel_component
+  vel_component = value of the velocity component to be set, can be a <a class="reference internal" href="variable.html"><em>variable</em></a> (velocity units)
+<em>omega</em> value = omega_component
+  omega_component = value of the omega component to be set, can be a <a class="reference internal" href="variable.html"><em>variable</em></a> (angular velocity units)
+</pre>
+<ul class="simple">
+<li>one or more optional keyword/value pairs can be appended</li>
+<li>optional keyword = <em>region</em></li>
+</ul>
+<pre class="literal-block">
+<em>region</em> value = region-ID
+  region-ID = ID of <a class="reference internal" href="region.html"><em>region</em></a> atoms must be in to have their (angular) velocity in one direction set
+<em>type</em> value = atom type
+  atom type = atom type atoms must be of to have their (angular) velocity in one direction set
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>fix fixvel all set/vel dim y vel -2.3 region velset
+fix fixvel all set/vel dim y omega 10.0 region velset
+</pre></div>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This fix sets one component of the (angular) velocity of particles in the fix
+group.  The component to be set is defined by the <em>dim</em> keyword. If the keyword
+<em>vel</em> is used, then the velocity of the particles in the fix group is specified
+by the argument that follows this keyword. If the keyword <em>omega</em> is used the
+same happens for the angular velocity of the particles in the fix group.</p>
+<p>The <em>dim</em> keyword must be used as well as either <em>vel</em> or <em>omega</em>.</p>
+<p>If the optional <em>region</em> keyword is used, the atom must also be in the specified
+geometric <a class="reference internal" href="region.html"><em>region</em></a> in order to have the (angular) velocity component
+set.</p>
+<p>The fix also sets the force/torque component on the particle in the specified
+direction to zero, so that an additional integrator (such as
+<a class="reference internal" href="fix_nve_sphere.html"><em>nve/sphere</em></a>) could be applied to the particles.</p>
+</div>
+<div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
+<h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
+<p>This fix does not need to write data to binary <a class="reference internal" href="restart.html"><em>restart files</em></a>. None of the
+<a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a> options are relevant to this fix.
+This fix computes a global scalar of the force, used to push the particles in the desired direction.
+No parameter of this fix can be used with the <em>start/stop</em> keywords of the <a class="reference internal" href="run.html"><em>run</em></a> command.
+This fix is not invoked during <code class="xref doc docutils literal"><span class="pre">energy</span> <span class="pre">minimization</span></code>.</p>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>This fix has to be placed in the input script before the first fix which implements
+the <em>initial_integrate()</em> function. This is typically implemented
+by integrators, such as <a class="reference internal" href="fix_nve_sphere.html"><em>nve/sphere</em></a>
+The code will exit with an error if this is not the case. When applied to multispheres,
+only the optional keyword type is permitted, group and region are not admissible.</p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="fix_addforce.html"><em>fix addforce</em></a></p>
+</div>
+<div class="section" id="default">
+<h2>Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h2>
+<p>region = whole simulation box</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v3.X',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

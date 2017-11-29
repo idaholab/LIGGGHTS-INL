@@ -41,6 +41,7 @@
 #ifdef FIX_CLASS
 
 FixStyle(multisphere/advanced,FixMultisphereAdvanced)
+FixStyle(concave/advanced,FixMultisphereAdvanced)
 
 #else
 

@@ -38,7 +38,7 @@
     Copyright 2014-     DCS Computing GmbH, Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +60,15 @@ FixMultisphereAdvanced::FixMultisphereAdvanced(LAMMPS *lmp, int narg, char **arg
   FixMultisphere(lmp, narg, arg)
 {
     
+    if(0 == strcmp(style,"concave/advanced"))
+    {
+        concave_ = true;
+        int strln = strlen("multisphere/advanced") + 1;
+        delete []style;
+        style = new char[strln];
+        strcpy(style,"multisphere/advanced");
+    }
+
     do_modify_body_forces_torques_ = true;
 
     if(!force->pair_match("gran", 0))
@@ -164,6 +173,9 @@ void FixMultisphereAdvanced::init()
 
     if(modify->my_index(this) <  modify->index_last_fix_of_style("wall/gran"))
         error->fix_error(FLERR,this,"needs to be after all fixes of type wall/gran");
+
+    if(modify->n_fixes_style("setforce")>0 || modify->n_fixes_style("freeze")>0)
+        error->fix_error(FLERR,this,"not compatible to setforce or freeze fixes");
 }
 
 /* ---------------------------------------------------------------------- */

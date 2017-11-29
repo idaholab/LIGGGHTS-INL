@@ -51,7 +51,7 @@
 #include "domain.h"
 #include "comm.h"
 #include "memory.h"
-#include <math.h>
+#include <cmath>
 #include "vector_liggghts.h"
 #include "input_mesh_tet.h"
 #include "region_mesh_tet.h"

@@ -55,9 +55,10 @@ MeshModuleRestrict(6dof,servo)
 
 #include "fix.h"
 #include "input.h"
-#include <math.h>
+#include <cmath>
 #include "mesh_module_stress.h"
 #include "mesh_module.h"
+#include "fix_gravity.h"
 
 namespace LAMMPS_NS
 {
@@ -148,6 +149,12 @@ class MeshModuleStress6DOF : public MeshModule
 
       bool rot_flip_flag_;
       double rot_flip_angle_;
+
+      FixGravity *fix_gravity_;
+      bool gravity_set_;
+      double limit_vel_;
+      double axis_[3];
+      bool limit_movement_axis_;
 
       MeshModuleStress *mm_stress;
 

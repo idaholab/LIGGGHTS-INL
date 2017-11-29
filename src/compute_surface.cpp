@@ -38,7 +38,7 @@
     Copyright 2014-     DCS Computing GmbH, Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <string.h>
 #include <stdlib.h>
 #include "compute_surface.h"

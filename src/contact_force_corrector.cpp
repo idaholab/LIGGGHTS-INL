@@ -38,7 +38,7 @@
     Copyright 2014-     DCS Computing GmbH, Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

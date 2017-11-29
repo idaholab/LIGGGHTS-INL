@@ -38,7 +38,9 @@ zero or more 6dof_keyword/value pairs may be appended
 {torqueflags} values = t1 t2 t3
     t1,t2,t3 = flags for x,y,z which can be 0 or 1 
 {externalForce} values = f1, f2, f3
-    f1, f2, f3 = values for externally acting forces :pre
+    f1, f2, f3 = values for externally acting forces
+{limit_vel} values = v
+    v = maximum velocity (magnitude) of the body :pre
 :ule
 
 [Examples:]
@@ -69,6 +71,9 @@ dalpha is the the angle and axis is the the corresponding rotation (unit) axis.
 
 With the optional {forceflags} and {torqueflags} keywords, motion integration can be
 turned off separately for the x-, y-, and z-axis by setting the correspondig entry 0.
+
+If the {limit_vel} keyword is set, then the maximum velocity magnitude of the body is set
+to the corresponding value.
 
 [Restart, fix_modify, output, run start/stop, minimize info:]
 

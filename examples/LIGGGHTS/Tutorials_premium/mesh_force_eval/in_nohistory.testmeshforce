@@ -42,10 +42,10 @@ region		bc cylinder z 0. 0. 0.045 0.05 0.145 units box
 group		nve_group region reg
 
 #particle distributions
-fix			pts1 all particletemplate/sphere 1 atom_type 1 density constant 8000 radius constant 0.004
-fix			pdd1 all particledistribution/discrete 1.  1 pts1 1.0
+fix			pts1 all particletemplate/sphere 999667 atom_type 1 density constant 8000 radius constant 0.004
+fix			pdd1 all particledistribution/discrete 999671  1 pts1 1.0
 
-fix			ins nve_group insert/pack seed 100001 distributiontemplate pdd1 vel constant 0. 0. -0.3 &
+fix			ins nve_group insert/pack seed 999683 distributiontemplate pdd1 vel constant 0. 0. -0.3 &
 				insert_every once overlapcheck yes all_in yes particles_in_region 500 region bc
 
 #apply nve integration to all particles that are inserted as single particles

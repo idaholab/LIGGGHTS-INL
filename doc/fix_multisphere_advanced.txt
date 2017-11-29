@@ -1,0 +1,67 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix multisphere/advanced command :h3
+
+[Syntax:]
+
+fix ID group-ID multisphere/advanced :pre
+
+ID, group-ID are documented in "fix"_fix.html command :ulb,l
+
+:ule
+
+[Examples:]
+
+fix ms all multisphere/advanced
+
+[Description:]
+
+Treat one or more sets of atoms as independent rigid bodies.
+The functionality is identical to the functionality in the
+"fix multisphere"_fix_multisphere.html command. However,
+there is one significant improvement: The interaction forces
+for particle-particle and particle-wall collisions are re-scaled
+so that the coefficient of restitution is correctly reproduced.
+This is done by storing the interaction forces for each
+particle-particle contact, tallying the number of body-body contacts
+and then re-scaling the contact forces by the number of body-body
+contacts.
+
+Example: Assume that two bodies A and B are composed of spherical
+particles A1, A2 (body A) and B1, B2 (body B).
+
+A1 touches B1 - 1 contact A-B in total: The interaction forces between
+particles A1 and B1 are calculated as usual.
+
+A1 touches B1 and A2 touches B2 - 2 contacts A-B in total: The interaction
+forces between particles A1 and B1 and between particles A2 and B2 are
+divided by 2.
+
+Important note: This command requires you to use the option
+'store_force_contact yes' for all "fix wall/gran"_fix_wall_gran.html
+commands.
+
+:line
+
+[Restart, fix_modify, output, run start/stop, minimize info:]
+
+See "fix multisphere"_fix_multisphere.html command.
+
+[Restrictions:]
+
+Does not work with fixes freeze and setforce.
+See "fix multisphere"_fix_multisphere.html command.
+
+[Related commands:]
+
+See "fix multisphere"_fix_multisphere.html command.
+
+
+[Default:] none
+

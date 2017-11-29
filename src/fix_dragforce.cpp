@@ -39,7 +39,8 @@
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
 
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 #include <stdlib.h>
 #include <string.h>
 #include "fix_dragforce.h"
@@ -50,7 +51,6 @@
 #include "domain.h"
 #include "region.h"
 #include "vector_liggghts.h"
-#include "math_extra_liggghts.h"
 #include "error.h"
 
 using namespace LAMMPS_NS;
@@ -199,7 +199,7 @@ void FixDragforce::post_force(int vflag)
           if(DRAGLAW_SCHILLER_NAUMANN == draglaw_)
           {
               double Re = uMag*(2.*radius[i]*invcg)*invvisc;
-              Cd = MathExtraLiggghts::max(24./Re*(1.+0.15*pow(Re,0.687)),0.44);
+              Cd = std::max(24./Re*(1.+0.15*pow(Re,0.687)),0.44);
           }
           else if(DRAGLAW_CD_CONST == draglaw_)
           {

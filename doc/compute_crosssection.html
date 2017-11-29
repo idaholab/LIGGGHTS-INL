@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>compute crosssection command &mdash; LIGGGHTS v3.X documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="Manual.html" class="icon icon-home"> LIGGGHTS
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.X
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
+        
+      <li>compute crosssection command</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/compute_crosssection.txt" rel="nofollow"> View page source</a>
+          
+          <a href="http://www.cfdem.com"> Website</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+  
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="compute-crosssection-command">
+<span id="index-0"></span><h1>compute crosssection command<a class="headerlink" href="#compute-crosssection-command" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>compute ID group-ID crosssection general_keyword general_values dim d min mi max ma n_cuts nc cut_thickness ct keywords value   ...
+</pre></div>
+</div>
+<ul class="simple">
+<li>ID, group-ID are documented in <a class="reference internal" href="compute.html"><em>compute</em></a> command</li>
+<li>crosssection = style name of this compute command</li>
+<li>general_keywords general_values are documented in <a class="reference external" href="compute.html&quot;">compute</a></li>
+<li>skin = obligatory keyword</li>
+<li>s = skin used for coordination number calculation</li>
+<li>dim = obligatory keyword</li>
+<li>d = axis of cross-sections (any x,y,z)</li>
+<li>min = obligatory keyword</li>
+<li>mi = lo value for cross-sections (length units)</li>
+<li>max = obligatory keyword</li>
+<li>ma = hi value for cross-sections</li>
+<li>n_cuts = obligatory keyword</li>
+<li>nc = number of cross-sections to be evaluated</li>
+<li>cut_thickness = obligatory keyword</li>
+<li>ct = obligatory keyword</li>
+<li>zero or more keyword/value pairs may be appended</li>
+<li>keyword = <em>file</em> or <em>region</em></li>
+</ul>
+<pre class="literal-block">
+<em>region</em> value = region-ID
+  region-ID = ID of region atoms must be in to be included in cross-section
+<em>file</em> value = filename
+  v_name = filename to write data to
+</pre>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>compute      chull all crosssection skin 0.003 dim z  min 0.0 max 0.05  n_cuts 3 cut_thickness 0.005
+</pre></div>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Define a computation that calculates cross-sectional areas of medium to
+densely packed particle beds. This is done for multiple cuts in a defined
+dimension, as defined by keyword <em>dim</em>. The number of cross-sectional cuts
+is defined by keyword <em>n_cuts</em>, the location of the cross-sections
+are defined by <em>min</em> and  <em>max</em>. Example: If <em>dim</em> = x, <em>n_cuts</em> = 3,
+<em>min</em> = 0.5 and <em>max</em> = 0.7, then cross-sectional areas are calculated
+for x = 0.5, x = 0.6, and x = 0.7.</p>
+<p>Mathematically, the 2D convex hull of all particles is included,
+if the normal distance to a cross-section plane is less than <em>cut_thickness</em>.
+Example: If <em>cut_thickness</em> = 0.05, in the above example, all particles
+with 0.45 &lt; x &lt; 0.55 would be included in the first cross-section, all
+particles with 0.55 &lt; x &lt; 0.65 would be included in the second cross-section,
+etc. Note that particles are ONLY INCLUDED IF their coordination number
+(number of contacts) is 2 or higher. This is to avoid that only particles which
+are part of a packed bed are taken into account. The coordination number
+is calculated based on the <em>skin</em> keyword, i.e. if two particles are separated
+by a distance less than the sum of their radii + skin, then the particle
+pair is counted for the coordination number.</p>
+<p>The optional keyword <em>file</em> can be used to write out the results to a
+text file, following this format:</p>
+<div class="highlight-python"><div class="highlight"><pre>coo_1 area_1 r_1
+coo_2 area_2 r_2
+...
+</pre></div>
+</div>
+<p>where the coo_X values are the <em>dim</em> = const coordinate values,
+area_X are the corresponding cross-section areas, and the r_X values
+are the radii of the area-equivalent circle.</p>
+<p>The optional keyword <em>region</em> can be used to restrict the calculation
+to a certain region.</p>
+</div>
+<div class="section" id="output-info">
+<h2>Output info<a class="headerlink" href="#output-info" title="Permalink to this headline">¶</a></h2>
+<p>This compute calculates a local vector. The length of the vector
+is equal to <em>n_cuts</em>, and each value is equal to the cross-sectional
+area for this cut. The vector or array can be accessed by any command
+that uses local values from a compute as input.  See <span class="xref std std-ref">this section</span> for an overview of LIGGGHTS(R)-INL output
+options.</p>
+<p>For information on the <a class="reference internal" href="units.html"><em>units</em></a> of the output, see above.</p>
+</div>
+<div class="section" id="restrictions">
+<h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
+<p>Can only be used together with a granular pair style.</p>
+</div>
+<div class="section" id="related-commands">
+<h2>Related commands<a class="headerlink" href="#related-commands" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="dump.html"><em>dump local</em></a>, <a class="reference internal" href="compute_property_local.html"><em>compute property/local</em></a></p>
+</div>
+<div class="section" id="default">
+<h2>Default<a class="headerlink" href="#default" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, DCS Computing GmbH, JKU Linz and Sandia Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v3.X',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

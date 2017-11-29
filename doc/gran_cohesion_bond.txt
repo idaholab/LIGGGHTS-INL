@@ -85,8 +85,14 @@ A = rb^2 * pi,
 J = 0.5 * pi * rb^4,
 I = 0.25 * pi * rb^4 :pre
 
-The beam radius (rb) is defined by the product of the minimum radius of the bonded particles and the 
-user-defined {radiusMultiplierBond}. The {normalBondStiffnessPerUnitArea} {kn} and 
+The beam radius (rb) is defined by the product of the minimum radius of the
+bonded particles and the user-defined {radiusMultiplierBond}. With the default
+{radiusMultiplierBond} = 1 the beam that is located between two particles is a
+cylinder with radius equal to the minimum radius of the two particles. The
+{radiusMultiplierBond} allows to shrink (or grow) the beam that represents the
+bond between these two particles. Clearly, a thicker beam will make the system
+more stiff, while a thinner beam will decrease the stiffness (for constant kn
+and kt). The {normalBondStiffnessPerUnitArea} {kn} and
 {tangentialBondStiffnessPerUnitArea} {kt} are also user-defined properties.
 
 The stress flags ({tensionStress}, {compressionStress}, {shearStress}, {normalTorqueStress}, and 
@@ -185,6 +191,13 @@ fix id all property/global maxTauBond peratomtypepair n_atomtypes value_11 value
 For {createBondAlways} = 'on' you need to add:
 
 fix id all property/global createDistanceBond peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. . :pre
+
+In this case bonds between two particles can be created each time step as long
+as two particles are closer together than the defined {createDistanceBond}. If
+bonds should be created only at one specific time step then {createBondAlways}
+should be set to "off" and the specific time step needs to be defined as shown
+below. Bonds will then be created if the two particles are within
+{createDistanceBond} and if the time step is equal to {tsCreateBond}.
 
 For {createBondAlways} = 'off' you need to add:
 

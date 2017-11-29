@@ -19,10 +19,6 @@ input script commands used to define a LIGGGHTS(R)-INL simulation.
    
 END_RST -->
 
-<!-- HTML_ONLY -->
-4.1 "List of all commands"_#cmd_1 :all(b)
-<!--END_HTML_ONLY -->
-
 :line
 :line
 

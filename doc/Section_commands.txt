@@ -19,10 +19,6 @@ input script commands used to define a LIGGGHTS(R)-INL simulation.
    
 END_RST -->
 
-<!-- HTML_ONLY -->
-4.1 "List of all commands"_#cmd_1 :all(b)
-<!--END_HTML_ONLY -->
-
 :line
 :line
 
@@ -48,6 +44,7 @@ in the command's documentation.
 "box"_box.html,
 "change_box"_change_box.html,
 "clear"_clear.html,
+"coarsegraining"_coarsegraining.html,
 "communicate"_communicate.html,
 "compute"_compute.html,
 "compute_modify"_compute_modify.html,
@@ -140,12 +137,14 @@ each style or click on the style itself for a full description:
 "contact/atom/gran"_compute_contact_atom.html,
 "coord/atom"_compute_coord_atom.html,
 "coord/gran"_compute_coord_gran.html,
+"crosssection"_compute_crosssection.html,
 "displace/atom"_compute_displace_atom.html,
 "erotate"_compute_erotate.html,
 "erotate/asphere"_compute_erotate_asphere.html,
 "erotate/multisphere"_compute_erotate_multisphere.html,
 "erotate/sphere"_compute_erotate_sphere.html,
 "erotate/sphere/atom"_compute_erotate_sphere_atom.html,
+"erotate/superquadric"_compute_erotate_superquadric.html,
 "group/group"_compute_group_group.html,
 "gyration"_compute_gyration.html,
 "gyration/molecule"_compute_gyration_molecule.html,
@@ -169,8 +168,10 @@ each style or click on the style itself for a full description:
 "rdf"_compute_rdf.html,
 "reduce"_compute_reduce.html,
 "reduce/region"_compute_reduce.html,
+"rigid"_compute_rigid.html,
 "slice"_compute_slice.html,
 "stress/atom"_compute_stress_atom.html,
+"surface"_compute_surface.html,
 "voronoi/atom"_compute_voronoi_atom.html,
 "wall/gran/local"_compute_pair_gran_local.html :tb(c=4,ea=c)
 
@@ -182,6 +183,7 @@ of each style or click on the style itself for a full description:
 
 "custom/vtk"_dump_custom_vtk.html,
 "image"_dump_image.html,
+"local/gran/vtk"_dump_local_gran_vtk.html,
 "movie"_dump_image.html :tb(c=4,ea=c)
 
 fix styles :h4
@@ -231,6 +233,7 @@ of each style or click on the style itself for a full description:
 "move/mesh"_fix_move_mesh.html,
 "multicontact/halfspace"_fix_multicontact_halfspace.html,
 "multisphere"_fix_multisphere.html,
+"multisphere/advanced"_fix_multisphere_advanced.html,
 "multisphere/break"_fix_multisphere_break.html,
 "nve"_fix_nve.html,
 "nve/asphere"_fix_nve_asphere.html,
@@ -239,11 +242,15 @@ of each style or click on the style itself for a full description:
 "nve/line"_fix_nve_line.html,
 "nve/noforce"_fix_nve_noforce.html,
 "nve/sphere"_fix_nve_sphere.html,
+"nve/sphere/limit"_fix_nve_sphere_limit.html,
+"nve/superquadric"_fix_nve_superquadric.html,
 "particledistribution/discrete"_fix_particledistribution_discrete.html,
 "particledistribution/discrete/massbased"_fix_particledistribution_discrete.html,
 "particledistribution/discrete/numberbased"_fix_particledistribution_discrete.html,
+"particletemplate/multiplespheres"_fix_particletemplate_multiplespheres.html,
 "particletemplate/multisphere"_fix_particletemplate_multisphere.html,
 "particletemplate/sphere"_fix_particletemplate_sphere.html,
+"particletemplate/superquadric"_fix_particletemplate_superquadric.html,
 "planeforce"_fix_planeforce.html,
 "poems"_fix_poems.html,
 "print"_fix_print.html,
@@ -258,6 +265,7 @@ of each style or click on the style itself for a full description:
 "rigid/nve"_fix_rigid.html,
 "rigid/nvt"_fix_rigid.html,
 "rigid/small"_fix_rigid.html,
+"set/vel"_fix_set_vel.html,
 "setforce"_fix_setforce.html,
 "sph/density/continuity"_fix_sph_density_continuity.html,
 "sph/density/corr"_fix_sph_density_corr.html,
@@ -285,6 +293,5 @@ potentials.  Click on the style itself for a full description:
 "hybrid/overlay"_pair_hybrid.html,
 "none"_pair_none.html,
 "soft"_pair_soft.html,
-"sph"_pair_sph.html,
 "sph/artVisc/tensCorr"_pair_sph_artvisc_tenscorr.html :tb(c=4,ea=c)
 

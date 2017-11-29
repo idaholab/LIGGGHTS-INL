@@ -48,7 +48,8 @@ COHESION_MODEL(COHESION_BOND,bond,14)
 #include "contact_models.h"
 #include "cohesion_model_base.h"
 #include "compute_bond_counter.h"
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 #include "error.h"
 #include "math_extra_liggghts.h"
 #include "fix_property_atom.h"
@@ -388,8 +389,9 @@ namespace ContactModels {
 
       const int max_type = registry.max_type();
       const double minrad = registry.min_radius();
+
       if (minrad <= 0.)
-        error->one(FLERR,"The minimum radius can't be <= 0!");
+        error->one(FLERR,"Bond settings: The minimum radius can't be <= 0!");
 
       if (!stressbreakflag_)
       {
@@ -443,6 +445,8 @@ namespace ContactModels {
             double stress = maxSigma_[i][j];
             if (useRatioTC_)
                 stress = fmax(stress, stress*ratioTensionCompression_[i][j]);
+            if(normalBondStiffness_[i][j] <= 1e-15)
+                error->one(FLERR,"Bond settings: In case of stress breakage, the normal bond stiffness can't be <= 0!");
             double cdf_one = 0.5*(1.1*createDistanceBond_[i][j]/minrad + 1.1 * stress / (normalBondStiffness_[i][j] * minrad));
             cdf_all = cdf_one > cdf_all ? cdf_one : cdf_all;
             
@@ -457,14 +461,7 @@ namespace ContactModels {
       }
 
       //set neighbor contact_distance_factor here
-      
-      const char* neigharg[2];
-      neigharg[0] = "contact_distance_factor";
-      char arg2[30];
-      sprintf(arg2,"%e",cdf_all);
-      neigharg[1] = arg2;
-      neighbor->modify_params(2,const_cast<char**>(neigharg));
-
+      neighbor->register_contact_dist_factor(cdf_all);
       compute_bond_counter_ = static_cast<ComputeBondCounter*>(modify->find_compute_style_strict("bond/counter", 0));
     }
 
@@ -502,7 +499,8 @@ namespace ContactModels {
       // the distance r is the distance between the two particle centers
       // in case of a wall sqrt(scdata.rsq) is the distance to the intersection point on the wall, thus, assuming
       // that the wall is a particle of the same size, the distance of the centers is twice that distance
-      double r = (scdata.is_wall ? 2.0 : 1.0) * sqrt(scdata.rsq);
+      double r_create = (scdata.is_wall ? 2.0 : 1.0) * sqrt(scdata.rsq);
+      double r = (scdata.is_wall ? r_create/2. : r_create);
 
       // temporay vectors for intermediate results;
       double tmp1[3], tmp2[3];
@@ -512,18 +510,18 @@ namespace ContactModels {
           if (contflag[0] < SMALL_COHESION_MODEL_BOND)
           {
             
-            const bool create_bond_A =  (createbond_always_flag_ || (update->ntimestep == static_cast<int>(tsCreateBond_))) && (r < createDistanceBond_[itype][jtype]);
+            const bool create_bond_A =  (createbond_always_flag_ || (update->ntimestep == static_cast<int>(tsCreateBond_))) && (r_create < createDistanceBond_[itype][jtype]);
 
             if (create_bond_A)
-                createBond(scdata, r);
+                createBond(scdata, r); 
             else if (fix_bond_random_id_)
             {
                 
                 const double * const bond_rand_id = fix_bond_random_id_->vector_atom;
-                const bool create_bond_B = bond_rand_id && !scdata.is_wall && (update->ntimestep < bond_rand_id[i]) && MathExtraLiggghts::compDouble(bond_rand_id[i],bond_rand_id[j]) && (r < createDistanceBond_[itype][jtype]);
+                const bool create_bond_B = bond_rand_id && !scdata.is_wall && (update->ntimestep < bond_rand_id[i]) && MathExtraLiggghts::compDouble(bond_rand_id[i],bond_rand_id[j]) && (r_create < createDistanceBond_[itype][jtype]);
 
                 if (create_bond_B)
-                    createBond(scdata, r);
+                    createBond(scdata, r); 
 		else
                     return;
             }
@@ -568,9 +566,7 @@ namespace ContactModels {
       {
           // at walls we assume that the contact point remains the initial one
           vectorSubtract3D(atom->x[scdata.i],contact_pos,delta);
-          // rinv is now used to compute rotations, these are with respect to the
-          // initial contact point
-          r = vectorMag3D(delta)*2.0;
+          r = vectorMag3D(delta);
       }
       else
       {
@@ -586,7 +582,7 @@ namespace ContactModels {
 
       if(scdata.contact_flags) *scdata.contact_flags |= CONTACT_COHESION_MODEL;
 
-      const double rinv = 1./r * (scdata.is_wall ? 2.0 : 1.0);
+      const double rinv = 1./r;
       double en[3];
       vectorScalarMult3D(delta,rinv,en);
       const double * const vi = scdata.v_i;
@@ -602,7 +598,11 @@ namespace ContactModels {
       const double I = 0.5*J;
       const double dt = update->dt;
 
-      // calculate relative velocities (for contact this is done in the surface_model)
+      const double radsuminv = 1./(radi+radj);
+      const double cri = scdata.is_wall ? (r) : (r * radi * radsuminv);
+      const double crj = r * radj * radsuminv;
+
+      // calculate relative velocities at the contact point (for contact this is done in the surface_model)
 
       // relative translational velocity
 
@@ -624,27 +624,13 @@ namespace ContactModels {
       double wr[3];
       if (scdata.is_wall)
       {
-          double orientation[3];
-          vectorCross3D(vt, scdata.delta, orientation);
-          const double len = vectorMag3D(orientation);
-          if (len < 1e-16) // TODO-threshold
-          {
-              vectorZeroize3D(omegaj);
-          }
-          else
-          {
-              const double freq = vectorMag3D(vt)*rinv;
-              vectorScalarMult3D(orientation, freq/len, omegaj);
-              
-          }
-          vectorAdd3D(omegai,omegaj,tmp1);
-          vectorScalarMult3D(tmp1,radi*rinv,wr);
+          vectorScalarMult3D(omegai,0.5,wr);
       }
       else
       {
         // wr = (radi*omegai + radj*omegaj) * rinv;
-        vectorScalarMult3D(omegai,radi*rinv,tmp1);
-        vectorScalarMult3D(omegaj,radj*rinv,tmp2);
+        vectorScalarMult3D(omegai,radi*radsuminv,tmp1);
+        vectorScalarMult3D(omegaj,radj*radsuminv,tmp2);
         vectorAdd3D(tmp1,tmp2,wr);
       }
 
@@ -676,6 +662,7 @@ namespace ContactModels {
       double nforce_damped[3] = {0.,0.,0.}, tforce_damped[3] = {0.,0.,0.}, ntorque_damped[3] = {0.,0.,0.}, ttorque_damped[3] = {0.,0.,0.};
 
       const double displacement = (initialdist[0] - r);
+      
       const double dissipate = dissipationflag_ ? std::min(dt*fn_dissipation_[itype][jtype],1.0) : 0.0; // dissipation_ already inverted during settings
 
       if (tensionflag_ || compressionflag_)
@@ -745,9 +732,9 @@ namespace ContactModels {
             const double multiplierX = dampingsmooth_ ? fmin(1.0, fmax(-1.0, vtr[0]/fmax(minvel, dvX))) : MathExtraLiggghts::sgn(vtr[0]);
             const double multiplierY = dampingsmooth_ ? fmin(1.0, fmax(-1.0, vtr[1]/fmax(minvel, dvY))) : MathExtraLiggghts::sgn(vtr[1]);
             const double multiplierZ = dampingsmooth_ ? fmin(1.0, fmax(-1.0, vtr[2]/fmax(minvel, dvZ))) : MathExtraLiggghts::sgn(vtr[2]);
-          tforce_damped[0] = force_tang[0] - ft_damping_[itype][jtype]*fabs(force_tang[0])*multiplierX;
-          tforce_damped[1] = force_tang[1] - ft_damping_[itype][jtype]*fabs(force_tang[1])*multiplierY;
-          tforce_damped[2] = force_tang[2] - ft_damping_[itype][jtype]*fabs(force_tang[2])*multiplierZ;
+            tforce_damped[0] = force_tang[0] - ft_damping_[itype][jtype]*fabs(force_tang[0])*multiplierX;
+            tforce_damped[1] = force_tang[1] - ft_damping_[itype][jtype]*fabs(force_tang[1])*multiplierY;
+            tforce_damped[2] = force_tang[2] - ft_damping_[itype][jtype]*fabs(force_tang[2])*multiplierZ;
         } else {
           vectorCopy3D(force_tang,tforce_damped);
         }
@@ -860,12 +847,12 @@ namespace ContactModels {
       const double F[3] = {nforce_damped[0] + tforce_damped[0],
                            nforce_damped[1] + tforce_damped[1],
                            nforce_damped[2] + tforce_damped[2]};
-      const double dTorque_i[3] = {radi*tor[0]+ntorque_damped[0]+ttorque_damped[0],
-                                   radi*tor[1]+ntorque_damped[1]+ttorque_damped[1],
-                                   radi*tor[2]+ntorque_damped[2]+ttorque_damped[2]};
-      const double dTorque_j[3] = {radj*tor[0]-ntorque_damped[0]-ttorque_damped[0],
-                                   radj*tor[1]-ntorque_damped[1]-ttorque_damped[1],
-                                   radj*tor[2]-ntorque_damped[2]-ttorque_damped[2]};
+      const double dTorque_i[3] = {cri*tor[0]+ntorque_damped[0]+ttorque_damped[0],
+                                   cri*tor[1]+ntorque_damped[1]+ttorque_damped[1],
+                                   cri*tor[2]+ntorque_damped[2]+ttorque_damped[2]};
+      const double dTorque_j[3] = {crj*tor[0]-ntorque_damped[0]-ttorque_damped[0],
+                                   crj*tor[1]-ntorque_damped[1]-ttorque_damped[1],
+                                   crj*tor[2]-ntorque_damped[2]-ttorque_damped[2]};
 
       if (update_history)
       {
@@ -878,12 +865,12 @@ namespace ContactModels {
             // elastic torque component
             double torEl[3];
             vectorCross3D(force_tang,en,torEl);
-            const double dTorqueEl_i[3] = {radi*torEl[0]+torque_normal[0]+torque_tang[0],
-                                           radi*torEl[1]+torque_normal[1]+torque_tang[1],
-                                           radi*torEl[2]+torque_normal[2]+torque_tang[2]};
-            const double dTorqueEl_j[3] = {radj*torEl[0]+torque_normal[0]+torque_tang[0],
-                                           radj*torEl[1]+torque_normal[1]+torque_tang[1],
-                                           radj*torEl[2]+torque_normal[2]+torque_tang[2]};
+            const double dTorqueEl_i[3] = {cri*torEl[0]+torque_normal[0]+torque_tang[0],
+                                           cri*torEl[1]+torque_normal[1]+torque_tang[1],
+                                           cri*torEl[2]+torque_normal[2]+torque_tang[2]};
+            const double dTorqueEl_j[3] = {crj*torEl[0]+torque_normal[0]+torque_tang[0],
+                                           crj*torEl[1]+torque_normal[1]+torque_tang[1],
+                                           crj*torEl[2]+torque_normal[2]+torque_tang[2]};
             // compute increment in elastic potential
             double * const elastic_pot = &scdata.contact_history[elastic_potential_offset_];
             const double dissipated_energy = dissipationflag_ ? (elastic_pot[0])*dissipate*dissipate : 0.0; // square as E_elastic = k x^2
@@ -957,6 +944,7 @@ namespace ContactModels {
 
       // return resulting forces
       if(scdata.is_wall) {
+        
         i_forces.delta_F[0] += F[0];
         i_forces.delta_F[1] += F[1];
         i_forces.delta_F[2] += F[2];

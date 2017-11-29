@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -12,6 +11,8 @@
   <title>mesh module 6dof &mdash; LIGGGHTS v3.X documentation</title>
   
 
+  
+  
   
   
 
@@ -81,7 +82,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
@@ -105,8 +109,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="Manual.html">LIGGGHTS</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="Manual.html">LIGGGHTS</a>
+        
       </nav>
 
 
@@ -119,24 +125,41 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="Manual.html">Docs</a> &raquo;</li>
-      
-    <li>mesh module 6dof</li>
-    <li class="wy-breadcrumbs-aside">
-      
+    
+      <li><a href="Manual.html">Docs</a> &raquo;</li>
         
-          <a href="_sources/mesh_module_6dof.txt" rel="nofollow"> View page source</a> 
+      <li>mesh module 6dof</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
         
+            
+            <a href="_sources/mesh_module_6dof.txt" rel="nofollow"> View page source</a>
+          
           <a href="http://www.cfdem.com"> Website</a>
-        
-          <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+          
+            <a href="Section_commands.html#comm" rel="nofollow"> Commands</a>
+            
           
         
-      
-    </li>
+      </li>
+    
   </ul>
+
+  
   <hr/>
   
 </div>
@@ -147,7 +170,8 @@
 <h1>mesh module 6dof<a class="headerlink" href="#mesh-module-6dof" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>6dof 6dof_keywords 6dof_values</pre>
+<div class="highlight-python"><div class="highlight"><pre>6dof 6dof_keywords 6dof_values
+</pre></div>
 </div>
 <ul class="simple">
 <li>zero or more 6dof_keyword/value pairs may be appended
@@ -179,11 +203,14 @@
     t1,t2,t3 = flags for x,y,z which can be 0 or 1
 <em>externalForce</em> values = f1, f2, f3
     f1, f2, f3 = values for externally acting forces
+<em>limit_vel</em> values = v
+    v = maximum velocity (magnitude) of the body
 </pre>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>fix  cube all mesh/surface/stress/6dof file cube.stl type 1 com 0. 0. 0. vel 0. 0. -0.5 mass 40 moi 0.266666 0.266666 0.266666 0. 0. 0.</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix  cube all mesh/surface/stress/6dof file cube.stl type 1 com 0. 0. 0. vel 0. 0. -0.5 mass 40 moi 0.266666 0.266666 0.266666 0. 0. 0.
+</pre></div>
 </div>
 </div>
 <div class="section" id="description">
@@ -205,10 +232,12 @@ represent the rotational displacement of the body from its original orientation,
 dalpha is the the angle and axis is the the corresponding rotation (unit) axis.</p>
 <p>With the optional <em>forceflags</em> and <em>torqueflags</em> keywords, motion integration can be
 turned off separately for the x-, y-, and z-axis by setting the correspondig entry 0.</p>
+<p>If the <em>limit_vel</em> keyword is set, then the maximum velocity magnitude of the body is set
+to the corresponding value.</p>
 </div>
 <div class="section" id="restart-fix-modify-output-run-start-stop-minimize-info">
 <h2>Restart, fix_modify, output, run start/stop, minimize info<a class="headerlink" href="#restart-fix-modify-output-run-start-stop-minimize-info" title="Permalink to this headline">¶</a></h2>
-<p>This mesh module stores a global vector with 7 components for access by various <em class="xref std std-ref">output commands</em>.  The first 3 components (7-9) store the position of the
+<p>This mesh module stores a global vector with 7 components for access by various <span class="xref std std-ref">output commands</span>.  The first 3 components (7-9) store the position of the
 center of mass of the body. The next 4 components (10-13) are the quaternion of the
 rotation of the body.  Please note that if this module is availalble the total force and
 torque (in the output of <a class="reference external" href="mesh_module_stress.html)contain">mesh module stress</a> the
@@ -220,7 +249,8 @@ to binary restart files so that a simulation can continue correctly.  This modul
 work as their counterpart in the definition of the module (see Syntax). The option
 <em>6dof/move_mesh</em> takes three values as input and shifts the position of the mesh according
 to these three values. The following</p>
-<div class="highlight-python"><pre>fix_modify my_fix_id 6dof/move_mesh 0. 0. 1.</pre>
+<div class="highlight-python"><div class="highlight"><pre>fix_modify my_fix_id 6dof/move_mesh 0. 0. 1.
+</pre></div>
 </div>
 <p>would shift the mesh in <em>my_fix_id</em> 1 unit in <em>z</em>-direction.</p>
 </div>
@@ -246,6 +276,9 @@ be used in conjunction with another fix that manipulates mesh geometry, such as 
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -276,11 +309,13 @@ be used in conjunction with another fix that manipulates mesh geometry, such as 
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'',
+            URL_ROOT:'./',
             VERSION:'v3.X',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

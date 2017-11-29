@@ -1,0 +1,74 @@
+# Contact test
+atom_style	granular
+atom_modify	map array
+boundary	s s s
+newton		off
+
+hard_particles yes
+communicate	single vel yes
+
+units		si
+
+#Prescribe the skin and exclude neighbor interactions between particles on the walls: type 1 1 and type 2 2
+neighbor	0.001 bin
+
+#Material properties required for new pair styles
+
+variable	E equal 50.e9
+
+#Hertz parameters:
+fix		m1 all property/global youngsModulus peratomtype ${E} ${E} ${E}
+fix		m2 all property/global poissonsRatio peratomtype 0.3 0.3 0.3
+fix		m3 all property/global coefficientRestitution peratomtypepair 3 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+fix		m5 all property/global coefficientFriction peratomtypepair 3 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4
+
+#Use hertz:
+pair_style gran model hertz tangential history #Hertzian without cohesion
+pair_coeff	* *
+
+timestep	0.0000025
+
+# Use hertz contact for wall:
+fix		bx all mesh/surface file meshes/box.stl type 3
+fix wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes bx
+
+#distributions for insertion
+fix pts1 all particletemplate/multisphere 999667 atom_type 1 density constant 2500 nspheres 3 ntry 1000000 spheres file data/particle3.txt scale 10. type 1
+fix pdd1 all particledistribution/discrete 999671 1 pts1 1.0
+
+#Compute forces:
+compute		local all pair/gran/local vel id ms_id
+
+#output settings, include total thermal energy
+fix		ts all check/timestep/gran 100 0.4 0.1
+compute		rke nve_group erotate/sphere
+thermo_style	custom step atoms ke c_rke f_ts[1] f_ts[2]
+thermo		1000
+thermo_modify	lost ignore norm no
+compute_modify	thermo_temp dynamic yes
+
+dump		D_stl all stl 5000 post/Wall-*.stl
+
+#insert the first particles so that dump is not empty
+run		1
+
+#Compute the coordination number within the packing:
+compute		TotalContacts all contact/atom
+dump		dmp all custom 1000 post/dump-*.contact id type type x y z ix iy iz vx vy vz fx fy fz radius c_TotalContacts
+dump	    	dmp2 all local 1000 post/dump*.local c_local[1] c_local[2] c_local[3] c_local[4] c_local[5] c_local[5] c_local[6] c_local[7] c_local[8] c_local[9]
+ 
+variable contacts1 equal c_TotalContacts[1]
+variable contacts2 equal c_TotalContacts[2]
+variable contacts3 equal c_TotalContacts[3]
+variable contacts4 equal c_TotalContacts[4]
+variable contacts5 equal c_TotalContacts[5]
+variable contacts6 equal c_TotalContacts[6]
+variable contacts7 equal c_TotalContacts[7]
+variable contacts8 equal c_TotalContacts[8]
+
+variable time equal step*dt
+fix		dmpTH all print 1000 "${time} ${contacts1} ${contacts2} ${contacts3} ${contacts4} ${contacts5} ${contacts6} ${contacts7} ${contacts8}" screen no &
+			title "t contacts1 contacts2 contacts3 contacts4 contacts5 contacts6 contacts7 contacts8" file post/contacts.txt
+
+
+run 5000
