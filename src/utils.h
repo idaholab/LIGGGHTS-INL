@@ -79,22 +79,22 @@ namespace Utils {
   }
 
   template <typename T>
-  inline T* ptr_reduce(T** &t)
+  inline T * ptr_reduce(T ** &t)
   { return &(t[0][0]); }
 
   template <typename T>
-  inline T* ptr_reduce(T* &t)
+  inline T * ptr_reduce(T * &t)
   { return t; }
 
   template <typename T>
-  inline T* ptr_reduce(T &t)
+  inline T * ptr_reduce(T &t)
   { return &t; }
 
   template<typename Interface>
   class AbstractFactory {
     typedef typename Interface::ParentType ParentType;
     typedef Interface * (*Creator)(class LAMMPS * lmp, ParentType* parent, int64_t hash);
-    typedef int64_t (*VariantSelector)(int & argc, char ** & argv, Custom_contact_models ccm);
+    typedef int64_t (*VariantSelector)(int & argc, char ** & argv, const LAMMPS *lmp);
     typedef std::map<std::pair<std::string, int>, Creator> StyleTable;
     typedef std::map<std::string, VariantSelector> VariantSelectorTable;
     StyleTable styleTable;
@@ -119,9 +119,9 @@ namespace Utils {
       return NULL;
     }
 
-    int64_t selectVariant(const std::string & name, int & argc, char ** & argv,Custom_contact_models ccm) {
+    int64_t selectVariant(const std::string & name, int & argc, char ** & argv, const LAMMPS *lmp) {
       if(variantSelectorTable.find(name) != variantSelectorTable.end()) {
-        return variantSelectorTable[name](argc, argv,ccm);
+        return variantSelectorTable[name](argc, argv, lmp);
       }
       return 0;
     }

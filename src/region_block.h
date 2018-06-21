@@ -62,12 +62,34 @@ class RegBlock : public Region {
  public:
   RegBlock(class LAMMPS *, int, char **);
   ~RegBlock();
+  void init();
   int inside(double, double, double);
   int surface_interior(double *, double);
   int surface_exterior(double *, double);
+  void shape_update();
 
  private:
+  bool xloisvar;
+  int xlovar;
+  char *xlostr;
+  bool xhiisvar;
+  int xhivar;
+  char *xhistr;
+  bool yloisvar;
+  int ylovar;
+  char *ylostr;
+  bool yhiisvar;
+  int yhivar;
+  char *yhistr;
+  bool zloisvar;
+  int zlovar;
+  char *zlostr;
+  bool zhiisvar;
+  int zhivar;
+  char *zhistr;
   double xlo,xhi,ylo,yhi,zlo,zhi;
+
+  void variable_check();
 };
 
 }

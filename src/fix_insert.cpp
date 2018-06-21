@@ -78,7 +78,8 @@ using namespace FixConst;
 
 FixInsert::FixInsert(LAMMPS *lmp, int narg, char **arg) :
   Fix(lmp, narg, arg),
-  neighList(*new RegionNeighborList<interpolate_no>(lmp))
+  neighList(*new RegionNeighborList<interpolate_no>(lmp)),
+  property_vector_list()
 {
   if (narg < 7) error->fix_error(FLERR,this,"not enough arguments");
 
@@ -194,6 +195,55 @@ FixInsert::FixInsert(LAMMPS *lmp, int narg, char **arg) :
       strcpy(property_name,arg[iarg+1]);
       fix_property_value = force->numeric(FLERR,arg[iarg+2]);
       iarg += 3;
+      hasargs = true;
+    } else if (strcmp(arg[iarg],"set_property_vector") == 0) {
+      if (iarg+5 > narg)
+          error->fix_error(FLERR,this,"Not enough arguments for set_property_vector");
+
+      ++iarg;
+      PropertyVector newProperty;
+      newProperty.name = arg[iarg++];
+
+      if (strcmp(arg[iarg++],"magnitude") != 0)
+          error->fix_error(FLERR,this,"Keyword 'magnitude' expected as mandatory element of 'set_property_vector'");
+      // Do not support random magnitude for now!
+//      if (strcmp(arg[iarg],"random") == 0)
+//      {
+//          newProperty.magnitude = PropertyVector::RANDOM;
+//          ++iarg;
+//      }
+//      else
+      if (strcmp(arg[iarg],"constant") == 0)
+      {
+          if (iarg+1 > narg)
+              error->fix_error(FLERR,this,"Not enough arguments for a constant magnitude");
+          newProperty.magnitude = PropertyVector::CONST;
+          ++iarg;
+          newProperty.mag_value = force->numeric(FLERR,arg[iarg++]);
+      }
+      else
+          error->fix_error(FLERR,this,"magnitude supports only 'constant'");
+
+      if (strcmp(arg[iarg++],"orientation") != 0)
+          error->fix_error(FLERR,this,"Keyword 'orientation' expected as mandatory element of 'set_property_vector'");
+      if (strcmp(arg[iarg],"random") == 0)
+      {
+          newProperty.orientation = PropertyVector::RANDOM;
+          ++iarg;
+      }
+      else if (strcmp(arg[iarg],"constant") == 0)
+      {
+          newProperty.orientation = PropertyVector::CONST;
+          ++iarg;
+          newProperty.o_vector[0] = force->numeric(FLERR,arg[iarg++]);
+          newProperty.o_vector[1] = force->numeric(FLERR,arg[iarg++]);
+          newProperty.o_vector[2] = force->numeric(FLERR,arg[iarg++]);
+      }
+      else
+          error->fix_error(FLERR,this,"orientation supports only 'constant' and 'random'");
+
+      property_vector_list.push_back(newProperty);
+
       hasargs = true;
     } else if (strcmp(arg[iarg],"random_distribute") == 0) {
       if (iarg+2 > narg) error->fix_error(FLERR,this,"");
@@ -326,16 +376,17 @@ FixInsert::FixInsert(LAMMPS *lmp, int narg, char **arg) :
 
   print_stats_start_flag = 1;
 
-  irregular = new Irregular(lmp);
+  irregular = NULL;
 
   // calc max insertion radius
   int ntypes = atom->ntypes;
   maxrad = 0.;
   minrad = 1000.;
+  maxrad_simulation = 0.;
   for(int i = 1; i <= ntypes; i++)
   {
-     maxrad = std::max(maxrad,max_rad(i));
-     minrad = std::min(minrad,min_rad(i));
+     maxrad = std::max(maxrad, fix_distribution->max_rad(i));
+     minrad = std::min(minrad, fix_distribution->min_rad(i));
   }
 }
 
@@ -436,8 +487,10 @@ void FixInsert::sanity_check()
     if(fix_distribution == NULL)
         error->fix_error(FLERR,this,"have to define a 'distributiontemplate'");
 
-    if(MathExtraLiggghts::abs(vectorMag4DSquared(quat_insert)-1.) > 1e-10)
-        error->fix_error(FLERR,this,"quaternion not valid");
+    if(MathExtraLiggghts::abs(vectorMag4DSquared(quat_insert)-1.) > 1e-4)
+        error->fix_error(FLERR,this,"quaternion not valid. Ensure that its norm is equal to one with a sufficient precision.");
+    else if(MathExtraLiggghts::abs(vectorMag4DSquared(quat_insert)-1.) > 1e-10)
+        MathExtraLiggghts::quat_normalize(quat_insert);
 
     if(ninsert > 0 && massinsert > 0.)
         error->fix_error(FLERR,this,"must not define both 'nparticles' and 'mass'");
@@ -447,36 +500,16 @@ void FixInsert::sanity_check()
     if(insert_every == 0 && (massflowrate > 0. || nflowrate > 0.))
         error->fix_error(FLERR,this,"must not define 'particlerate' or 'massrate' for 'insert_every' = 0");
 
-    if(0 == comm->me)
+    for (std::vector<PropertyVector>::iterator it = property_vector_list.begin(); it != property_vector_list.end(); ++it)
     {
-        
-        std::vector<int> seeds;
-        seeds.push_back(random->state());
-        seeds.push_back(fix_distribution->random_state());
-        for(int itemplate = 0; itemplate < fix_distribution->n_particletemplates(); itemplate++)
-        {
-            
-            seeds.push_back(fix_distribution->particletemplates()[itemplate]->random_insertion_state());
-        }
+        if ((*it).magnitude == PropertyVector::CONST && MathExtraLiggghts::compDouble((*it).mag_value,0.0,1e-16))
+            error->fix_error(FLERR,this,"In set_property_vector: Magnitude is zero");
 
-        std::sort(seeds.begin(),seeds.end());
+        if ((*it).orientation == PropertyVector::CONST && MathExtraLiggghts::compDouble(vectorMag3D((*it).o_vector),0.0))
+            error->fix_error(FLERR,this,"In set_property_vector: Orientation has zero length");
 
-        if(std::unique(seeds.begin(),seeds.end()) !=seeds.end() )
-        {
-            char errstr[1024];
-            sprintf(errstr,"Fix %s, ID %s: Random number generation: It is required that all the random seeds of this fix insert/*, \n"
-                           "  the random seed of particle distribution fix (id %s) template and all random seeds of the \n"
-                           "  fix particletemplate/* commands used by particle distribution fix (id %s) are different\n"
-                           "  Hint: possible valid (different) seeds would be the following numbers:\n"
-                           "        15485863, 15485867, 32452843, 32452867, 49979687, 49979693, 67867967, 67867979, 86028121, 86028157",
-                           style,id,fix_distribution->id,fix_distribution->id);
-
-            if(input->seed_check_throw_error())
-                error->one(FLERR,errstr);
-            else
-                error->warning(FLERR,errstr);
-        }
     }
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -553,6 +586,8 @@ void FixInsert::init()
 {
     int ntimestep = update->ntimestep;
 
+    maxrad_simulation = atom->get_properties()->max_radius();
+
     if (!atom->radius_flag || !atom->rmass_flag)
         error->fix_error(FLERR,this,"Fix insert requires atom attributes radius, rmass");
     if (domain->triclinic)
@@ -598,20 +633,6 @@ int FixInsert::min_type()
 int FixInsert::max_type()
 {
     return type_max;
-}
-
-/* ---------------------------------------------------------------------- */
-
-double FixInsert::max_rad(int type)
-{
-    return fix_distribution->max_rad(type);
-}
-
-/* ---------------------------------------------------------------------- */
-
-double FixInsert::min_rad(int type)
-{
-    return fix_distribution->min_rad(type);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -757,9 +778,50 @@ void FixInsert::pre_exchange()
 
   // actual particle insertion
 
+  // since we know the number of inserted particles - grow arrays accordingly
+  // This is important because:
+  //   * fix_distribution->pre_insert will update several pointers via pre_set_arrays
+  //   * this pointers may be invalidated due to memory reallocation during particle insertion
+  //     if the arrays are not big enough a priori
+  int c_nmax = atom->nlocal+ninserted_spheres_this_local;
+  if (c_nmax > atom->nmax)
+      atom->avec->grow(c_nmax);
+  
   fix_distribution->pre_insert(ninserted_this_local,fix_property,fix_property_value);
   
   ninserted_spheres_this_local = fix_distribution->insert(ninserted_this_local);
+
+  // Rather simple implementation: modify atoms after insertion
+  
+  for (std::vector<PropertyVector>::iterator it = property_vector_list.begin(); it != property_vector_list.end(); ++it)
+  {
+      
+      int len1 = 0,len2 = 0;
+      double** property = static_cast<double**>(atom->get_properties()->find_property((*it).name.c_str(),"vector-atom",len1,len2));
+      if (!property)
+          error->one(FLERR,"could not find atom property");
+
+      double mag = 0, vec[3] = {0.,0.,0.};
+      const bool const_magnitude = (*it).magnitude == PropertyVector::CONST;
+      if (const_magnitude)
+          mag = (*it).mag_value;
+
+      const bool const_orientation = (*it).orientation == PropertyVector::CONST;
+      if (const_orientation)
+          vectorCopy3D((*it).o_vector,vec);
+
+      const int nlocal = atom->nlocal;
+      for (int i = nlocal-1; i > nlocal-1-ninserted_spheres_this_local; --i)
+      {
+          //if (!const_magnitude) // Not implemented for now
+          //    mag = random->uniform();
+
+          if (!const_orientation)
+              randomUnitVec3D(random,vec);
+
+          vectorScalarMult3D(vec,mag,property[i]);
+      }
+  }
 
   // warn if max # insertions exceeded by random processes
   if (ninsert_exists && ninserted + ninsert_this > ninsert)
@@ -813,8 +875,10 @@ void FixInsert::pre_exchange()
   if(ninserted_this < ninsert_this && comm->me == 0)
       error->warning(FLERR,"Particle insertion: Less insertions than requested");
 
+  if (!irregular)
+      irregular = new Irregular(lmp);
   if (irregular->migrate_check())
-      irregular->migrate_atoms();
+      irregular->migrate_all();
 
   // next timestep to insert
   if (insert_every && (!ninsert_exists || ninserted < ninsert)) next_reneighbor += insert_every;
@@ -927,13 +991,17 @@ int FixInsert::load_xnear(int ninsert_this_local)
   neighList.set_obb_flag(check_obb_flag);
 #endif
 
-  if(neighList.setBoundingBox(bb, maxrad,true,true))
+  //fprintf(screen,"LOAD XNEAR, nall %d  \n",nall)  ;
+  if(neighList.setBoundingBox(bb, maxrad_simulation,true,true))
   {
     for (int i = 0; i < nall; ++i)
     {
       
+      //fprintf(screen,"checking is_nearby(i) %d, neighList.isInBoundingBox(x[i]) %s\n",is_nearby(i),neighList.isInBoundingBox(x[i])?"true":"false")  ;
+      //printVec3D(screen,"x[i]",x[i]);
       if (is_nearby(i) && neighList.isInBoundingBox(x[i]) )
       {
+        //fprintf(screen,"adding to XNEAR\n")  ;
 #ifdef SUPERQUADRIC_ACTIVE_FLAG
         if(atom->superquadric_flag and check_obb_flag)
           neighList.insert_superquadric(x[i], radius[i], atom->quaternion[i], atom->shape[i], atom->blockiness[i]);
@@ -993,7 +1061,7 @@ void FixInsert::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixInsert::restart(char *buf)
+void FixInsert::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;

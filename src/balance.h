@@ -32,6 +32,11 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
+
+    Christoph Kloss (JKU Linz)
+    Christoph Kloss (DCS Computing GmbH, Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
+
     This file is from LAMMPS, but has been modified. Copyright for
     modification:
 
@@ -60,57 +65,75 @@ CommandStyle(balance,Balance)
 
 #include <stdio.h>
 #include "pointers.h"
+#include "fix_property_atom.h"
 
 namespace LAMMPS_NS {
 
 class Balance : protected Pointers {
  public:
+  class RCB *rcb;
+  class FixPropertyAtom *fix_weight_;   // per-atom weights stored in FixStore
+  int wtflag;                           // 1 if particle weighting is used
+  int varflag;                          // 1 if weight style var(iable) is used
+  int outflag;                          // 1 for output of balance results to file
+
   Balance(class LAMMPS *);
   ~Balance();
   void command(int, char **);
-  void dynamic_setup(char *, int, double);
-  int dynamic();
-  double imbalance_nlocal(int &);
-  void dumpout(bigint, FILE *);
+  void options(int, int, char **);
+  void weight_storage(char *);
+  void init_imbalance(int);
+  void set_weights();
+  double imbalance_factor(double &);
+  void shift_setup(char *, int, double);
+  int shift();
+  int **bisection(int sortflag = 0);
+  void dumpout(bigint);
 
-  bool disallow_irregular();   
+  bool disallow_irregular();
 
  private:
   int me,nprocs;
 
+  double thresh;                                    // threshold to perform LB
+  int algorithm;                                    // style of LB
   int xflag,yflag,zflag;                            // xyz LB flags
   double *user_xsplit,*user_ysplit,*user_zsplit;    // params for xyz LB
 
-  int dflag;                 // dynamic LB flag
-  int nitermax;              // params for dynamic LB
-  double thresh;
+  int nitermax;              // params for shift LB
+  double stopthresh;
   char bstr[4];
 
+  int shift_allocate;        // 1 if SHIFT vectors have been allocated
   int ndim;                  // length of balance string bstr
   int *bdim;                 // XYZ for each character in bstr
-  bigint *count;             // counts for slices in one dim
-  bigint *onecount;          // work vector of counts in one dim
-  bigint *sum;               // cummulative count for slices in one dim
-  bigint *target;            // target sum for slices in one dim
+  double *onecost;           // work vector of counts in one dim
+  double *allcost;           // counts for slices in one dim
+  double *sum;               // cumulative count for slices in one dim
+  double *target;            // target sum for slices in one dim
   double *lo,*hi;            // lo/hi split coords that bound each target
-  bigint *losum,*hisum;      // cummulative counts at lo/hi coords
+  double *losum,*hisum;      // cumulative counts at lo/hi coords
   int rho;                   // 0 for geometric recursion
                              // 1 for density weighted recursion
 
-  int *proccount;            // particle count per processor
-  int *allproccount;
+  double *proccost;          // particle cost per processor
+  double *allproccost;       // proccost summed across procs
 
-  int outflag;               // for output of balance results to file
-  FILE *fp;
+  int nimbalance;                 // number of user-specified weight styles
+  class Imbalance **imbalances;   // list of Imb classes, one per weight style
+  double *weight;                 // ptr to FixStore weight vector
+
+  FILE *fp;                  // balance output file
   int firststep;
 
-  void static_setup(char *);
-  double imbalance_splits(int &);
+  double imbalance_splits();
+  void shift_setup_static(char *);
   void tally(int, int, double *);
   int adjust(int, double *);
-  void old_adjust(int, int, bigint *, double *);
   int binary(double, int, double *);
-  void debug_output(int, int, int, double *);
+#ifdef BALANCE_DEBUG
+  void debug_shift_output(int, int, int, double *);
+#endif
 };
 
 }
@@ -139,7 +162,7 @@ E: Cannot balance in z dimension for 2d simulation
 
 Self-explanatory.
 
-E: Balance dynamic string is invalid
+E: Balance shift string is invalid
 
 The string can only contain the characters "x", "y", or "z".
 

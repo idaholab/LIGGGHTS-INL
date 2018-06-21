@@ -278,7 +278,7 @@ FixTemplateSuperquadric::FixTemplateSuperquadric(LAMMPS *lmp, int narg, char **a
             pdf_shapey->set_params<RANDOM_GAUSSIAN>(mu,sigma);
           if(strcmp(arg[iarg],"shapez") == 0)
             pdf_shapez->set_params<RANDOM_GAUSSIAN>(mu,sigma);
-            iarg += 4;
+          iarg += 4;
         }
         else if (strcmp(arg[iarg+1],"uniform") == 0)
         {
@@ -313,8 +313,8 @@ FixTemplateSuperquadric::FixTemplateSuperquadric(LAMMPS *lmp, int narg, char **a
         double value = atof(arg[iarg+2])*force->cg(atom_type);
         if( value <= 0. )
           error->all(FLERR,"Illegal fix particletemplate/superquadric command, shape parameters must be >= 0");
-          pdf_size->set_params<RANDOM_CONSTANT>(value);
-          iarg += 3;
+        pdf_size->set_params<RANDOM_CONSTANT>(value);
+        iarg += 3;
       }
       else if (strcmp(arg[iarg+1],"gaussian") == 0)
       {
@@ -338,11 +338,11 @@ FixTemplateSuperquadric::FixTemplateSuperquadric(LAMMPS *lmp, int narg, char **a
           error->fix_error(FLERR,this,"max shape less than min shape");
         if(shmin <= 0.0)
           error->fix_error(FLERR,this,"Illegal value min shapex");
-          pdf_size->set_params<RANDOM_UNIFORM>(shmin,shmax);
-          iarg += 4;
-        }
-        else
-          error->fix_error(FLERR,this,"fix particletemplate/superquadric currently supports only constant, gaussian and uniform shape params");
+        pdf_size->set_params<RANDOM_UNIFORM>(shmin,shmax);
+        iarg += 4;
+      }
+      else
+        error->fix_error(FLERR,this,"fix particletemplate/superquadric currently supports only constant, gaussian and uniform shape params");
     }
     else if (strcmp(arg[iarg],"blockiness") == 0  or strcmp(arg[iarg],"roundness") == 0) {
           hasargs = true;
@@ -469,7 +469,7 @@ void FixTemplateSuperquadric::randomize_single()
     ptisq_ptr->blockiness_ins[1] = blockiness[1];
     double radius_;
     MathExtraLiggghtsNonspherical::bounding_sphere_radius_superquadric(shape, blockiness, &radius_);
-    pti->radius_ins[0] = pti->r_bound_ins = radius_;
+    pti->radius_ins[0] = pti->r_bound_ins = pti->radius_ins_max = radius_;
 
     // randomize density
     pti->density_ins = rand(pdf_density,random_insertion);
@@ -531,7 +531,7 @@ void FixTemplateSuperquadric::randomize_ptilist(int n_random,int distribution_gr
         ptisq_ptr->blockiness_ins[1] = blockiness[1];
         double radius_;
         MathExtraLiggghtsNonspherical::bounding_sphere_radius_superquadric(shape, blockiness, &radius_);
-        pti_list[i]->radius_ins[0] = pti_list[i]->r_bound_ins = radius_;
+        pti_list[i]->radius_ins[0] = pti_list[i]->r_bound_ins = pti_list[i]->radius_ins_max = radius_;
 
         // randomize density
         pti_list[i]->density_ins = rand(pdf_density,random_insertion);
@@ -547,11 +547,11 @@ void FixTemplateSuperquadric::randomize_ptilist(int n_random,int distribution_gr
         vectorZeroize3D(pti_list[i]->v_ins);
         vectorZeroize3D(pti_list[i]->omega_ins);
 
-        pti_list[i]->groupbit = groupbit | distribution_groupbit; 
+        pti_list[i]->groupbit = groupbit | distribution_groupbit;
 
         pti_list[i]->distorder = distorder;
     }
-    
+
 }
 
 /* ----------------------------------------------------------------------*/
@@ -563,6 +563,7 @@ void FixTemplateSuperquadric::direct_set_ptlist(const int i, const void * const 
     ptisq_ptr->atom_type = atom_type;
     const double radius = superquadric->get_radius();
     ptisq_ptr->radius_ins[0] = radius;
+    ptisq_ptr->radius_ins_max = radius;
     ptisq_ptr->blockiness_ins[0] = superquadric->get_blockiness(0);
     ptisq_ptr->blockiness_ins[1] = superquadric->get_blockiness(1);
     ptisq_ptr->shape_ins[0] = superquadric->get_shape(0);

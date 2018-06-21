@@ -53,6 +53,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
 #include "ctype.h"
 #include "unistd.h"
 #include "sys/stat.h"
@@ -62,6 +63,8 @@
 #include "atom.h"
 #include "atom_vec.h"
 #include "comm.h"
+#include "comm_brick.h"
+#include "comm_tiled.h"
 #include "group.h"
 #include "domain.h"
 #include "output.h"
@@ -154,7 +157,8 @@ Input::Input(LAMMPS *lmp, int argc, char **argv) : Pointers(lmp)
     } else iarg++;
   }
 
-  seed_check_error = true;
+  last_command_was_run = false;
+  last_command_was_run_2 = false;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -561,6 +565,8 @@ int Input::execute_command()
 {
   int flag = 1;
 
+  last_command_was_run = false;
+
   if (!strcmp(command,"clear")) clear();
   else if (!strcmp(command,"echo")) echo();
   else if (!strcmp(command,"if")) ifthenelse();
@@ -568,6 +574,7 @@ int Input::execute_command()
   else if (!strcmp(command,"jump")) jump();
   else if (!strcmp(command,"label")) label();
   else if (!strcmp(command,"log")) log();
+  else if (!strcmp(command,"warn")) warn();
   else if (!strcmp(command,"next")) next_command();
   else if (!strcmp(command,"partition")) partition();
   else if (!strcmp(command,"print")) print();
@@ -584,6 +591,7 @@ int Input::execute_command()
   else if (!strcmp(command,"boundary")) boundary();
   else if (!strcmp(command,"box")) box();
   else if (!strcmp(command,"communicate")) communicate();
+  else if (!strcmp(command,"comm_style")) comm_style();
   else if (!strcmp(command,"compute")) compute();
   else if (!strcmp(command,"compute_modify")) compute_modify();
   else if (!strcmp(command,"dielectric")) dielectric();
@@ -616,7 +624,7 @@ int Input::execute_command()
   else if (!strcmp(command,"reset_timestep")) reset_timestep();
   else if (!strcmp(command,"restart")) restart();
   else if (!strcmp(command,"run_style")) run_style();
-  else if (!strcmp(command,"soft_particles")) soft_particles(); 
+  else if (!strcmp(command,"soft_particles")) soft_particles();
   else if (!strcmp(command,"hard_particles")) hard_particles();
   else if (!strcmp(command,"write_restart_on_signal")) write_restart_on_signal();
   else if (!strcmp(command,"special_bonds")) special_bonds();
@@ -624,25 +632,39 @@ int Input::execute_command()
   else if (!strcmp(command,"thermo")) thermo();
   else if (!strcmp(command,"thermo_modify")) thermo_modify();
   else if (!strcmp(command,"thermo_style")) thermo_style();
-  else if (!strcmp(command,"thermo_log")) thermo_log(); 
+  else if (!strcmp(command,"thermo_log")) thermo_log();
   else if (!strcmp(command,"timestep")) timestep();
   else if (!strcmp(command,"uncompute")) uncompute();
   else if (!strcmp(command,"undump")) undump();
   else if (!strcmp(command,"unfix")) unfix();
   else if (!strcmp(command,"units")) units();
-  else if (!strcmp(command,"modify_timing")) modify_timing(); 
+  else if (!strcmp(command,"modify_timing")) modify_timing();
+  else if (!strcmp(command,"wall_clock_time")) set_wall_clock_time();
 
   else flag = 0;
 
   // return if command was listed above
 
-  if (flag) return 0;
+  if (flag)
+  {
+      if(last_command_was_run)
+        last_command_was_run_2 = true;
+      else
+        last_command_was_run_2 = false;
+    return 0;
+  }
 
   // invoke commands added via style_command.h
 
   if (command_map->find(command) != command_map->end()) {
     CommandCreator command_creator = (*command_map)[command];
     command_creator(lmp,narg,arg);
+
+    if(last_command_was_run)
+        last_command_was_run_2 = true;
+    else
+        last_command_was_run_2 = false;
+
     return 0;
   }
 
@@ -937,6 +959,32 @@ void Input::log()
   }
 }
 
+void Input::warn()
+{
+  if (narg > 2) error->all(FLERR,"Illegal warn command");
+
+  int appendflag = 0;
+  if (narg == 2) {
+    if (strcmp(arg[1],"append") == 0) appendflag = 1;
+    else error->all(FLERR,"Illegal warn command");
+  }
+
+  if (me == 0) {
+    if (warnfile) fclose(warnfile);
+    if (strcmp(arg[0],"none") == 0) warnfile = NULL;
+    else {
+      if (appendflag) warnfile = fopen(arg[0],"a");
+      else warnfile = fopen(arg[0],"w");
+      if (warnfile == NULL) {
+        char str[512];
+        sprintf(str,"Cannot open warnfile %s",arg[0]);
+        error->one(FLERR,str);
+      }
+    }
+    if (universe->nworlds == 1) universe->uwarnfile = warnfile;
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 
 void Input::thermo_log()
@@ -1035,20 +1083,20 @@ void Input::print()
         {
             if (iarg+2 > narg)
                 error->all(FLERR,"Illegal print command");
-                if (me == 0)
+            if (me == 0)
+            {
+                if (strcmp(arg[iarg],"file") == 0)
+                    fp = fopen(arg[iarg+1],"w");
+                else
+                    fp = fopen(arg[iarg+1],"a");
+                if (fp == NULL)
                 {
-                    if (strcmp(arg[iarg],"file") == 0)
-                        fp = fopen(arg[iarg+1],"w");
-                    else
-                        fp = fopen(arg[iarg+1],"a");
-                    if (fp == NULL)
-                    {
-                        char str[512];
-                        sprintf(str,"Cannot open print file %s",arg[iarg+1]);
-                        error->one(FLERR,str);
-                    }
+                    char str[512];
+                    sprintf(str,"Cannot open print file %s",arg[iarg+1]);
+                    error->one(FLERR,str);
                 }
-                iarg += 2;
+            }
+            iarg += 2;
         }
         else if (strcmp(arg[iarg],"screen") == 0)
         {
@@ -1273,6 +1321,26 @@ void Input::box()
 void Input::communicate()
 {
   comm->set(narg,arg);
+}
+
+/* ---------------------------------------------------------------------- */
+
+void Input::comm_style()
+{
+  if (narg < 1) error->all(FLERR,"Illegal comm_style command");
+  if (strcmp(arg[0],"brick") == 0) {
+    if (comm->style == 0) return;
+    Comm *oldcomm = comm;
+    comm = new CommBrick(lmp,oldcomm);
+    delete oldcomm;
+  } else if (strcmp(arg[0],"tiled") == 0) {
+    if (comm->style == 1) return;
+    Comm *oldcomm = comm;
+
+    comm = new CommTiled(lmp,oldcomm);
+
+    delete oldcomm;
+  } else error->all(FLERR,"Illegal comm_style command");
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1517,6 +1585,13 @@ void Input::modify_timing()
   } else error->all(FLERR,"Illegal modify_timing command");
 
   modify->timing = timing;
+}
+
+/* ---------------------------------------------------------------------- */
+
+void Input::set_wall_clock_time()
+{
+  update->set_wall_clock_time(narg, arg);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1842,3 +1917,37 @@ void Input::parse_nonlammps()
   }
 }
 
+void Input::add_and_validate_seed(int &seed)
+{
+    if(seed < 10000 ||
+       !MathExtraLiggghts::isPrime(seed) ||
+       std::find(random_seeds.begin(), random_seeds.end(), seed) != random_seeds.end())
+    {
+        int default_seeds[128] = {23447,13757,25747,93479,75277,29683,17959,60913,51239,45293,77711,16883,87443,57131,51199,64709,75721,29033,97231,84199,49117,14879,79657,30817,47057,80449,73751,53791,11863,95213,34877,11261,12619,22751,89413,87421,42571,39671,64489,30427,13451,20347,34483,95369,14969,40763,67213,53267,20543,22961,64579,84317,34061,18127,27457,91577,32569,26111,50069,22051,43787,15107,65357,90187,44617,52363,89443,99563,23011,76579,95737,68963,27407,74353,74857,32561,51263,28933,53897,42643,31469,10639,99577,10163,17789,28697,96001,26111,42787,59207,66161,63607,70573,37447,50341,54001,65071,19249,69991,60383,29531,28211,64567,76243,53453,82349,65981,78569,90703,53401,59263,47057,69127,29569,98731,24317,34261,93001,27847,20021,92669,57847,15767,71719,67699,96469,84481,63629};
+        bool found = true;
+        int old_seed = seed;
+        for (int i = 0; i < 128; i++)
+        {
+            seed = default_seeds[(old_seed+i) % 128];
+            if (std::find(random_seeds.begin(), random_seeds.end(), seed) == random_seeds.end())
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            seed = old_seed;
+            if (comm->me == 0)
+                error->warning(FLERR, "Could not find unique prime number seed > 10000 so using the provided one.");
+        }
+        if (comm->me == 0 && logfile && found)
+        {
+            std::stringstream msg;
+            msg << "LIGGGHTS requires seeds to be unique prime numbers > 10000. Because of this seed " << old_seed << " was changed to " << seed << "\n";
+            fprintf(logfile, msg.str().c_str());
+        }
+        random_seeds.push_back(seed);
+    }
+
+}

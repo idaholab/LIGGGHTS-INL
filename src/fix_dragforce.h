@@ -73,8 +73,7 @@ class FixDragforce : public FixBaseLiggghts {
  protected:
   int iarg_;
 
-  inline double small()
-  { return 0.00000001; }
+  static double small_;
 
   double U_fluid_[3];
 

@@ -117,9 +117,13 @@ PairSph::~PairSph()
 
   if(kernel_style) delete []kernel_style;
   if(fppaSl) modify->delete_fix("sl");
-//  if(fppaSlType) modify->delete_fix("sl");
 
   if(fix_fgradP_) modify->delete_fix(fix_fgradP_->id);
+    if (fppaSlType)
+    {
+        if (sl)
+            delete [] sl;
+    }
 }
 
 /* ----------------------------------------------------------------------
@@ -160,8 +164,15 @@ void PairSph::setKernelAndLength(int narg, char **arg)
 
 void PairSph::updatePtrs()
 {
-  if(fppaSl) sl = fppaSl->vector_atom;
-  if(fppaSlType) sl = fppaSlType->values;
+    if(fppaSl)
+        sl = fppaSl->vector_atom;
+    if (fppaSlType)
+    {
+        const int n = fppaSlType->get_nvalues();
+        sl = new double[n];
+        for (int i = 0; i < n; i++)
+            sl[i] = fppaSlType->compute_vector(i);
+    }
 }
 
 /* ----------------------------------------------------------------------
@@ -295,34 +306,7 @@ void PairSph::init_style()
     // update radius
     updateRadius();
 
-    // set maxrad_dynamic and maxrad_frozen for each type
-    for (i = 1; i <= atom->ntypes; i++)  onerad[i] = 0.0;
-
-    // include future Fix pour particles as dynamic
-
-    for (i = 0; i < modify->nfix; i++){
-      for(int j=1;j<=atom->ntypes;j++)
-      {
-          int pour_type = 0;
-          double pour_maxrad = 0.0;
-          pour_type = j;
-          pour_maxrad = modify->fix[i]->max_rad(pour_type);
-          onerad[pour_type] = MAX(onerad[pour_type],pour_maxrad);
-      }
-    }
-
-    //further dynamic and frozen
-
-    double *radius = atom->radius;
-    int *mask = atom->mask;
-    int *type = atom->type;
-    int nlocal = atom->nlocal;
-
-    for (i = 0; i < nlocal; i++)
-      if (mask[i])
-        onerad[type[i]] = MAX(onerad[type[i]],radius[i]);
-
-    MPI_Allreduce(&onerad[1],&maxrad[1],atom->ntypes,MPI_DOUBLE,MPI_MAX,world);
+    modify->get_max_radius(true, onerad);
   }
 
   // proceed with initialisation of the substyle

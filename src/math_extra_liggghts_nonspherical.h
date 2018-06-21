@@ -114,7 +114,7 @@ namespace MathExtraLiggghtsNonspherical {
 
   inline bool isInteger(double x);
   inline void surfacesIntersectNonSpherical(SurfacesIntersectData & sidata, double **x);
-};
+}
 
 //rotate tensor by quaternion
 inline void MathExtraLiggghtsNonspherical::tensor_quat_rotate(const double *tensor, const double *quat, double *result)

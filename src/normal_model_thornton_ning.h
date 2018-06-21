@@ -80,7 +80,8 @@ namespace ContactModels
       fo_offset = hsetup->add_history_value("fo", "1");
       c->add_history_offset("kc_offset", kc_offset);
       c->add_history_offset("fo_offset", fo_offset);
-
+      if (!(c->contact_match("surface", "default") || c->contact_match("surface", "sphere/surfaceheating") || c->contact_match("surface", "multicontact")))
+          error->all(FLERR, "Cohesion model bubble/coalescence is incompatible with non-spherical surface models");
     }
 
     void registerSettings(Settings & settings)
@@ -89,7 +90,7 @@ namespace ContactModels
       settings.registerOnOff("limitForce", limitForce);
     }
 
-	inline void postSettings(IContactHistorySetup *, ContactModelBase *) {}
+	void postSettings(IContactHistorySetup *, ContactModelBase *) {}
 
     void connectToProperties(PropertyRegistry & registry) {
       registry.registerProperty("Yeff", &MODEL_PARAMS::createYeff,"model thornton_ning");
@@ -109,14 +110,14 @@ namespace ContactModels
 
     // effective exponent for stress-strain relationship
 
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
       return 1.5;
     }
 
     /* ------------------------ CALL FUNCTIONS --------------------------------*/
 
-    inline double calculate_fl(double force_old, double fc, int adhesion_flag)
+    double calculate_fl(double force_old, double fc, int adhesion_flag)
     {
 
       double fl;
@@ -131,7 +132,7 @@ namespace ContactModels
       return fl;
     }
 
-    inline double calculate_elastic_force_differential(double a, double E, double fl, double fc)
+    double calculate_elastic_force_differential(double a, double E, double fl, double fc)
     {
 
       double df;
@@ -147,7 +148,7 @@ namespace ContactModels
       return df;
     }
 
-    inline double calculate_plastic_force_differential(double a_yield, double E, double fl, double fc, double yield_stress, double R)
+    double calculate_plastic_force_differential(double a_yield, double E, double fl, double fc, double yield_stress, double R)
     {
 
       double df;
@@ -163,7 +164,7 @@ namespace ContactModels
       return df;
     }
 
-    inline double calculate_a(double fl, double E, double R, double delta, double gamma_s)
+    double calculate_a(double fl, double E, double R, double delta, double gamma_s)
     {
       double a;
 
@@ -177,7 +178,7 @@ namespace ContactModels
       return a;
     }
 
-    inline double calculate_delta_f_ratio(double a, double ac)
+    double calculate_delta_f_ratio(double a, double ac)
     {
       double a_over_ac = a/ac;
       double daf = pow(3, (1./3.))*pow(a_over_ac, 2)*(1-(4./3.)*pow(a_over_ac, -(3./2.)));
@@ -185,7 +186,7 @@ namespace ContactModels
       return daf;
     }
 
-    inline void branch_2_force_calc(double force_old, double fc, int adhesion_flag, double E, double rp, double delta, double dn, double gamma_s, double *f_df)
+    void branch_2_force_calc(double force_old, double fc, int adhesion_flag, double E, double rp, double delta, double dn, double gamma_s, double *f_df)
     {
       double fl_r = calculate_fl(force_old, fc, adhesion_flag);
       double a = calculate_a(fl_r, E, rp, delta, gamma_s);
@@ -204,7 +205,7 @@ namespace ContactModels
 
     /* ------------------------- END OF CALL FUNCTIONS ------------------------*/
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       const int itype = sidata.itype;
       const int jtype = sidata.jtype;

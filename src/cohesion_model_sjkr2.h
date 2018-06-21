@@ -65,6 +65,8 @@ namespace ContactModels {
         cohEnergyDens(NULL)
     {
         
+        if (!(c->contact_match("surface", "default") || c->contact_match("surface", "sphere/surfaceheating") || c->contact_match("surface", "multicontact")))
+            error->all(FLERR, "Cohesion model bubble/coalescence is incompatible with non-spherical surface models");
     }
 
     void registerSettings(Settings& settings) 
@@ -72,7 +74,7 @@ namespace ContactModels {
         settings.registerOnOff("tangential_reduce",tangentialReduce_,false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry)
     {
@@ -123,7 +125,7 @@ namespace ContactModels {
       }
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
 

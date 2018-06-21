@@ -54,7 +54,7 @@
 #include "atom.h"
 #include "group.h"
 #include "update.h"
-#include "fix_contact_history.h" 
+#include "fix_contact_history.h"
 #include "error.h"
 
 using namespace LAMMPS_NS;
@@ -69,7 +69,7 @@ using namespace LAMMPS_NS;
 
 void Neighbor::granular_nsq_no_newton(NeighList *list)
 {
-  int i,j,m,n,nn=0,bitmask=0,d; 
+  int i,j,m,n,nn=0,bitmask=0,d;
   double xtmp,ytmp,ztmp,delx,dely,delz,rsq;
   double radi,radsum,cutsq;
   int *neighptr,*contact_flag_ptr = NULL;
@@ -77,12 +77,12 @@ void Neighbor::granular_nsq_no_newton(NeighList *list)
 
   NeighList *listgranhistory;
   int *npartner = NULL,**partner = NULL;
-  double **contacthistory = NULL; 
+  double **contacthistory = NULL;
   int **first_contact_flag;
   double **first_contact_hist;
   MyPage<int> *ipage_contact_flag = NULL;
   MyPage<double> *dpage_contact_hist = NULL;
-  int dnum = 0; 
+  int dnum = 0;
 
   double **x = atom->x;
   double *radius = atom->radius;
@@ -102,17 +102,17 @@ void Neighbor::granular_nsq_no_newton(NeighList *list)
   int **firstneigh = list->firstneigh;
   MyPage<int> *ipage = list->ipage;
 
-  FixContactHistory *fix_history = list->fix_history; 
+  FixContactHistory *fix_history = list->fix_history;
   if (fix_history) {
-    npartner = fix_history->npartner_; 
-    partner = fix_history->partner_; 
-    contacthistory = fix_history->contacthistory_; 
+    npartner = fix_history->npartner_;
+    partner = fix_history->partner_;
+    contacthistory = fix_history->contacthistory_;
     listgranhistory = list->listgranhistory;
     first_contact_flag = listgranhistory->firstneigh;
     first_contact_hist = listgranhistory->firstdouble;
     ipage_contact_flag = listgranhistory->ipage;
     dpage_contact_hist = listgranhistory->dpage;
-    dnum = listgranhistory->dnum; 
+    dnum = listgranhistory->dnum;
   }
 
   int inum = 0;
@@ -140,13 +140,13 @@ void Neighbor::granular_nsq_no_newton(NeighList *list)
 
     for (j = i+1; j < nall; j++) {
       if (includegroup && !(mask[j] & bitmask)) continue;
-      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
       delz = ztmp - x[j][2];
       rsq = delx*delx + dely*dely + delz*delz;
-      radsum = (radi + radius[j]) * contactDistanceFactor; 
+      radsum = (radi + radius[j]) * contactDistanceFactor;
       cutsq = (radsum+skin) * (radsum+skin);
 
       if (rsq <= cutsq) {
@@ -159,18 +159,18 @@ void Neighbor::granular_nsq_no_newton(NeighList *list)
               if (partner[i][m] == tag[j]) break;
             if (m < npartner[i]) {
               contact_flag_ptr[n] = 1;
-              for (d = 0; d < dnum; d++) {  
+              for (d = 0; d < dnum; d++) {
                 contact_hist_ptr[nn++] = contacthistory[i][m*dnum+d];
               }
             } else {
               contact_flag_ptr[n] = 0;
-              for (d = 0; d < dnum; d++) {  
+              for (d = 0; d < dnum; d++) {
                 contact_hist_ptr[nn++] = 0.0;
               }
             }
           } else {
             contact_flag_ptr[n] = 0;
-            for (d = 0; d < dnum; d++) {  
+            for (d = 0; d < dnum; d++) {
               contact_hist_ptr[nn++] = 0.0;
             }
           }
@@ -265,7 +265,7 @@ void Neighbor::granular_nsq_newton(NeighList *list)
         }
       }
 
-      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -316,7 +316,7 @@ void Neighbor::granular_bin_no_newton_ghost(NeighList *list)
   double **first_contact_hist = NULL;
   MyPage<int> *ipage_contact_flag = NULL;
   MyPage<double> *dpage_contact_hist = NULL;
-  int dnum = 0; 
+  int dnum = 0;
 
   // bin local & ghost atoms
 
@@ -341,17 +341,17 @@ void Neighbor::granular_bin_no_newton_ghost(NeighList *list)
   int **stencilxyz = list->stencilxyz;
   MyPage<int> *ipage = list->ipage;
 
-  FixContactHistory *fix_history = list->fix_history; 
+  FixContactHistory *fix_history = list->fix_history;
   if (fix_history) {
-    npartner = fix_history->npartner_; 
-    partner = fix_history->partner_; 
-    contacthistory = fix_history->contacthistory_; 
+    npartner = fix_history->npartner_;
+    partner = fix_history->partner_;
+    contacthistory = fix_history->contacthistory_;
     listgranhistory = list->listgranhistory;
     first_contact_flag = listgranhistory->firstneigh;
     first_contact_hist = listgranhistory->firstdouble;
     ipage_contact_flag = listgranhistory->ipage;
     dpage_contact_hist = listgranhistory->dpage;
-    dnum = listgranhistory->dnum; 
+    dnum = listgranhistory->dnum;
   }
 
   int inum = 0;
@@ -387,13 +387,13 @@ void Neighbor::granular_bin_no_newton_ghost(NeighList *list)
       for (k = 0; k < nstencil; k++) {
         for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
           if (j <= i) continue;
-          if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+          if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
           delz = ztmp - x[j][2];
           rsq = delx*delx + dely*dely + delz*delz;
-          radsum = (radi + radius[j]) * contactDistanceFactor; 
+          radsum = (radi + radius[j]) * contactDistanceFactor;
           cutsq = (radsum+skin) * (radsum+skin);
           
           if (rsq <= cutsq) {
@@ -406,18 +406,18 @@ void Neighbor::granular_bin_no_newton_ghost(NeighList *list)
                   if (partner[i][m] == tag[j]) break;
                 if (m < npartner[i]) {
                   contact_flag_ptr[n] = 1;
-                  for (d = 0; d < dnum; d++) { 
+                  for (d = 0; d < dnum; d++) {
                     contact_hist_ptr[nn++] = contacthistory[i][m*dnum+d];
                   }
                 } else {
                    contact_flag_ptr[n] = 0;
-                   for (d = 0; d < dnum; d++) { 
+                   for (d = 0; d < dnum; d++) {
                      contact_hist_ptr[nn++] = 0.0;
                    }
                 }
               } else {
                 contact_flag_ptr[n] = 0;
-                for (d = 0; d < dnum; d++) { 
+                for (d = 0; d < dnum; d++) {
                     contact_hist_ptr[nn++] = 0.0;
                 }
               }
@@ -439,13 +439,13 @@ void Neighbor::granular_bin_no_newton_ghost(NeighList *list)
         for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
           if (j <= i) continue;
 
-          if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+          if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
           delz = ztmp - x[j][2];
           rsq = delx*delx + dely*dely + delz*delz;
-          radsum = (radi + radius[j]) * contactDistanceFactor; 
+          radsum = (radi + radius[j]) * contactDistanceFactor;
           cutsq = (radsum+skin) * (radsum+skin);
 
           if (rsq <= cutsq) neighptr[n++] = j;
@@ -497,7 +497,7 @@ void Neighbor::granular_bin_no_newton(NeighList *list)
   double **first_contact_hist = NULL;
   MyPage<int> *ipage_contact_flag = NULL;
   MyPage<double> *dpage_contact_hist = NULL;
-  int dnum = 0; 
+  int dnum = 0;
 
   // bin local & ghost atoms
 
@@ -521,17 +521,17 @@ void Neighbor::granular_bin_no_newton(NeighList *list)
   int *stencil = list->stencil;
   MyPage<int> *ipage = list->ipage;
 
-  FixContactHistory *fix_history = list->fix_history; 
+  FixContactHistory *fix_history = list->fix_history;
   if (fix_history) {
-    npartner = fix_history->npartner_; 
-    partner = fix_history->partner_; 
-    contacthistory = fix_history->contacthistory_; 
+    npartner = fix_history->npartner_;
+    partner = fix_history->partner_;
+    contacthistory = fix_history->contacthistory_;
     listgranhistory = list->listgranhistory;
     first_contact_flag = listgranhistory->firstneigh;
     first_contact_hist = listgranhistory->firstdouble;
     ipage_contact_flag = listgranhistory->ipage;
     dpage_contact_hist = listgranhistory->dpage;
-    dnum = listgranhistory->dnum; 
+    dnum = listgranhistory->dnum;
   }
 
   int inum = 0;
@@ -564,19 +564,24 @@ void Neighbor::granular_bin_no_newton(NeighList *list)
     // stores own/own pairs only once
     // stores own/ghost pairs on both procs
 
+//    if (i == 151)
+//        error->one(FLERR,"TEST STOP");
+
     for (k = 0; k < nstencil; k++) {
       
+        if (ibin+stencil[k] < 0)
+          error->one(FLERR,"Neighbor list tries to access impossible binhead index.");
       for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
         
         if (j <= i) continue;
         
-        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
         delz = ztmp - x[j][2];
         rsq = delx*delx + dely*dely + delz*delz;
-        radsum = (radi + radius[j]) * contactDistanceFactor; 
+        radsum = (radi + radius[j]) * contactDistanceFactor;
         cutsq = (radsum+skin) * (radsum+skin);
 
         if (rsq <= cutsq) {
@@ -593,13 +598,13 @@ void Neighbor::granular_bin_no_newton(NeighList *list)
               if (m < npartner[i]) {
                 contact_flag_ptr[n] = 1;
                 
-                for (d = 0; d < dnum; d++) { 
+                for (d = 0; d < dnum; d++) {
                   contact_hist_ptr[nn++] = contacthistory[i][m*dnum+d];
                 }
               } else {
                  
                  contact_flag_ptr[n] = 0;
-                 for (d = 0; d < dnum; d++) { 
+                 for (d = 0; d < dnum; d++) {
                    contact_hist_ptr[nn++] = 0.0;
                  }
               }
@@ -609,7 +614,7 @@ void Neighbor::granular_bin_no_newton(NeighList *list)
             {
               
               contact_flag_ptr[n] = 0;
-              for (d = 0; d < dnum; d++) { 
+              for (d = 0; d < dnum; d++) {
                 contact_hist_ptr[nn++] = 0.0;
               }
             }
@@ -700,13 +705,13 @@ void Neighbor::granular_bin_newton(NeighList *list)
         }
       }
 
-      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+      if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
       delz = ztmp - x[j][2];
       rsq = delx*delx + dely*dely + delz*delz;
-      radsum = (radi + radius[j]) * contactDistanceFactor; 
+      radsum = (radi + radius[j]) * contactDistanceFactor;
       cutsq = (radsum+skin) * (radsum+skin);
 
       if (rsq <= cutsq) neighptr[n++] = j;
@@ -717,7 +722,7 @@ void Neighbor::granular_bin_newton(NeighList *list)
     ibin = coord2bin(x[i]);
     for (k = 0; k < nstencil; k++) {
       for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
-        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -808,13 +813,13 @@ void Neighbor::granular_bin_newton_tri(NeighList *list)
           }
         }
 
-        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule)) continue;
+        if (exclude && exclusion(i,j,type[i],type[j],mask,molecule,true)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
         delz = ztmp - x[j][2];
         rsq = delx*delx + dely*dely + delz*delz;
-        radsum = (radi + radius[j]) * contactDistanceFactor; 
+        radsum = (radi + radius[j]) * contactDistanceFactor;
         cutsq = (radsum+skin) * (radsum+skin);
 
         if (rsq <= cutsq) neighptr[n++] = j;

@@ -138,6 +138,10 @@ DumpCustomVTM::DumpCustomVTM(LAMMPS *lmp, int narg, char **arg) :
     }
     vtkMPIController * controller = getLocalController();
 
+    std::list<int> allowed_extensions;
+    allowed_extensions.push_back(VTK_FILE_FORMATS::PVTM);
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
+
     bool hasargs = true;
     int iarg = 5;
     // all keywords that start a new dump class
@@ -209,14 +213,6 @@ DumpCustomVTM::DumpCustomVTM(LAMMPS *lmp, int narg, char **arg) :
 
     if (iarg < narg)
         error->all(FLERR,"Invalid attribute in dump custom/vtm command");
-
-    char *ptr = strchr(filename,'%');
-    if (ptr) {
-      multiname_ex = new char[strlen(filename) + 16];
-      *ptr = '\0';
-      sprintf(multiname_ex,"%s_%d%s",filename,me,ptr+1);
-      *ptr = '%';
-    }
 
     for (int i = 0; i < output->ndump; i++)
     {
@@ -347,104 +343,7 @@ int DumpCustomVTM::count()
 /* ---------------------------------------------------------------------- */
 
 void DumpCustomVTM::setFileCurrent() {
-    delete [] filecurrent;
-    filecurrent = NULL;
-
-    char *filestar = filename;
-    if (multiproc)
-    {
-        if (multiproc > 1) // if dump_modify fileper or nfile was used
-        {
-            delete [] multiname_ex;
-            multiname_ex = NULL;
-            char *ptr = strchr(filename,'%');
-            if (ptr)
-            {
-                int id;
-                if (me + nclusterprocs == nprocs) // last filewriter
-                    id = multiproc -1;
-                else
-                    id = me/nclusterprocs;
-                multiname_ex = new char[strlen(filename) + 16];
-                *ptr = '\0';
-                sprintf(multiname_ex,"%s_%d%s",filename,id,ptr+1);
-                *ptr = '%';
-            }
-        } // else multiname_ex built in constructor is OK
-        filestar = multiname_ex;
-    }
-
-    if (multifile == 0)
-    {
-        filecurrent = new char[strlen(filestar) + 1];
-        strcpy(filecurrent, filestar);
-    }
-    else
-    {
-        filecurrent = new char[strlen(filestar) + 16];
-        char *ptr = strchr(filestar,'*');
-        *ptr = '\0';
-        if (padflag == 0)
-        {
-            sprintf(filecurrent,"%s" BIGINT_FORMAT "%s",
-                    filestar,update->ntimestep,ptr+1);
-        }
-        else
-        {
-            char bif[8],pad[16];
-            strcpy(bif,BIGINT_FORMAT);
-            sprintf(pad,"%%s%%0%d%s%%s",padflag,&bif[1]);
-            sprintf(filecurrent,pad,filestar,update->ntimestep,ptr+1);
-        }
-        *ptr = '*';
-    }
-
-    // filename of parallel file
-    if (multiproc)
-    {
-        delete [] parallelfilecurrent;
-        parallelfilecurrent = NULL;
-
-        // remove '%' character
-        // -> string length stays the same
-        // p is not added to filename as we are writing multiblock data
-        char *ptr = strchr(filename,'%');
-        filestar = new char[strlen(filename)];
-        *ptr = '\0';
-        sprintf(filestar,"%s%s",filename,ptr+1);
-        *ptr = '%';
-        ptr = strrchr(filestar,'.');
-        ptr++;
-        *ptr++='v';
-        *ptr++='t';
-        *ptr++='m';
-        *ptr++= 0;
-
-        if (multifile == 0)
-        {
-            parallelfilecurrent = new char[strlen(filestar) + 1];
-            strcpy(parallelfilecurrent, filestar);
-        }
-        else
-        {
-            parallelfilecurrent = new char[strlen(filestar) + 16];
-            char *ptr = strchr(filestar,'*');
-            *ptr = '\0';
-            if (padflag == 0)
-                sprintf(parallelfilecurrent,"%s" BIGINT_FORMAT "%s",
-                        filestar,update->ntimestep,ptr+1);
-            else
-            {
-                char bif[8],pad[16];
-                strcpy(bif,BIGINT_FORMAT);
-                sprintf(pad,"%%s%%0%d%s%%s",padflag,&bif[1]);
-                sprintf(parallelfilecurrent,pad,filestar,update->ntimestep,ptr+1);
-            }
-            *ptr = '*';
-        }
-        delete [] filestar;
-        filestar = NULL;
-    }
+    DumpVTK::setFileCurrent(filecurrent, filename, multifile, padflag);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -471,32 +370,7 @@ void DumpCustomVTM::write()
     if (!filewriter)
         return;
 
-    if (multiproc)
-    {
-        vtkSmartPointer<vtkXMLPMultiBlockDataWriter> pwriter = vtkSmartPointer<vtkXMLPMultiBlockDataWriter>::New();
-        setVtkWriterOptions(vtkXMLWriter::SafeDownCast(pwriter));
-        pwriter->SetFileName(parallelfilecurrent);
-
-#if VTK_MAJOR_VERSION < 6
-        pwriter->SetInput(mbSet);
-#else
-        pwriter->SetInputData(mbSet);
-#endif
-
-        pwriter->Write();
-    }
-    else if (comm->me == 0 || comm->nprocs == 1)
-    {
-        vtkSmartPointer<vtkXMLMultiBlockDataWriter> mbWriter = vtkXMLMultiBlockDataWriter::New();
-        setVtkWriterOptions(vtkXMLWriter::SafeDownCast(mbWriter));
-        mbWriter->SetFileName(filecurrent);
-#if VTK_MAJOR_VERSION < 6
-        mbWriter->SetInput(mbSet);
-#else
-        mbWriter->SetInputData(mbSet);
-#endif
-        mbWriter->Write();
-    }
+    DumpVTK::write_vtm(mbSet, filecurrent);
 
     // write out paraview configuration file for python script (paraview_generic_display.py)
     if (write_pv_config && comm->me == 0)
@@ -546,7 +420,7 @@ void DumpCustomVTM::write()
         if (found != std::string::npos)
             dirname = fname.substr(0,found+1);
         // add a new entry to a <int, std::string> pair list
-        std::string curfile = multiproc ? parallelfilecurrent : filecurrent;
+        std::string curfile = filecurrent;
         found = curfile.find_last_of("/\\");
         if (found != std::string::npos)
             curfile = curfile.substr(found+1);

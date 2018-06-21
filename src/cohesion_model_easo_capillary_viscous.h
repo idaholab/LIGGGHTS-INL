@@ -113,7 +113,7 @@ namespace ContactModels {
         settings.registerOnOff("tangential_reduce",tangentialReduce_,false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry)
     {
@@ -176,7 +176,7 @@ namespace ContactModels {
             error->one(FLERR,"\n\ncohesion model easo/capillary/viscous requires maxSeparationDistanceRatio >= 1.0. Please increase this value.\n");
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
 

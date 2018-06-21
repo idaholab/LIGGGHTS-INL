@@ -253,6 +253,6 @@ inline int MPI_Allgather_Vector(T *vector, int size ,T *&vector_all,MPI_Comm com
     return size_all;
 }
 
-}; // end namespace LAMMPS_NS
+} // end namespace LAMMPS_NS
 
 #endif

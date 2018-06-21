@@ -95,8 +95,8 @@ void Neighbor::respa_nsq_no_newton(NeighList *list)
   int **firstneigh_inner = listinner->firstneigh;
   MyPage<int> *ipage_inner = listinner->ipage;
 
-  NeighList *listmiddle;
-  int *ilist_middle,*numneigh_middle,**firstneigh_middle;
+  NeighList *listmiddle = NULL;
+  int *ilist_middle = NULL,*numneigh_middle = NULL,**firstneigh_middle = NULL;
   MyPage<int> *ipage_middle = NULL;
   int respamiddle = list->respamiddle;
   if (respamiddle) {
@@ -133,7 +133,7 @@ void Neighbor::respa_nsq_no_newton(NeighList *list)
     for (j = i+1; j < nall; j++) {
       if (includegroup && !(mask[j] & bitmask)) continue;
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -238,8 +238,8 @@ void Neighbor::respa_nsq_newton(NeighList *list)
   int **firstneigh_inner = listinner->firstneigh;
   MyPage<int> *ipage_inner = listinner->ipage;
 
-  NeighList *listmiddle;
-  int *ilist_middle,*numneigh_middle,**firstneigh_middle;
+  NeighList *listmiddle = NULL;
+  int *ilist_middle = NULL,*numneigh_middle = NULL,**firstneigh_middle = NULL;
   MyPage<int> *ipage_middle = NULL;
   int respamiddle = list->respamiddle;
   if (respamiddle) {
@@ -293,7 +293,7 @@ void Neighbor::respa_nsq_newton(NeighList *list)
       }
 
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -401,8 +401,8 @@ void Neighbor::respa_bin_no_newton(NeighList *list)
   int **firstneigh_inner = listinner->firstneigh;
   MyPage<int> *ipage_inner = listinner->ipage;
 
-  NeighList *listmiddle;
-  int *ilist_middle,*numneigh_middle,**firstneigh_middle;
+  NeighList *listmiddle = NULL;
+  int *ilist_middle = NULL,*numneigh_middle = NULL,**firstneigh_middle = NULL;
   MyPage<int> *ipage_middle = NULL;
   int respamiddle = list->respamiddle;
   if (respamiddle) {
@@ -445,7 +445,7 @@ void Neighbor::respa_bin_no_newton(NeighList *list)
         if (j <= i) continue;
 
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -601,7 +601,7 @@ void Neighbor::respa_bin_newton(NeighList *list)
       }
 
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -639,7 +639,7 @@ void Neighbor::respa_bin_newton(NeighList *list)
     for (k = 0; k < nstencil; k++) {
       for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -748,8 +748,8 @@ void Neighbor::respa_bin_newton_tri(NeighList *list)
   int **firstneigh_inner = listinner->firstneigh;
   MyPage<int> *ipage_inner = listinner->ipage;
 
-  NeighList *listmiddle;
-  int *ilist_middle,*numneigh_middle,**firstneigh_middle;
+  NeighList *listmiddle = NULL;
+  int *ilist_middle = NULL,*numneigh_middle = NULL,**firstneigh_middle = NULL;
   MyPage<int> *ipage_middle = NULL;
   int respamiddle = list->respamiddle;
   if (respamiddle) {
@@ -800,7 +800,7 @@ void Neighbor::respa_bin_newton_tri(NeighList *list)
         }
 
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];

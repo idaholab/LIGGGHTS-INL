@@ -668,7 +668,7 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::bufSize(int operation,bool scale,bool t
 }
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushToBuffer(double *buf,int operation,bool scale,bool translate, bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushToBuffer(double *buf,int operation,bool scale,bool translate, bool rotate) const
 {
       //TODO throw error if sizeof(T) > sizeof(double)
 
@@ -725,7 +725,7 @@ used for borders, fw and rev comm for element properties
 ------------------------------------------------------------------------- */
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const
 {
   if(!this->decidePackUnpackOperation(operation,scale,translate,rotate))
         return 0;
@@ -737,9 +737,9 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemListBufSize(int n,int operation,boo
 }
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBuffer(int n, int *list, int *wraplist, double *buf,int operation, double *dlo, double *dhi, bool scale,bool translate, bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBuffer(const int n, const int * const list, double * const buf, const int operation, const int pbc_flag, const int *const pbc, Domain *const domain, const bool scale, const bool translate, const bool rotate) const
 {
-    int i,m = 0;
+    int m = 0;
 
     if(!this->decidePackUnpackOperation(operation,scale,translate,rotate))
         return 0;
@@ -747,30 +747,42 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBuffer(int n, int *list, 
     if(!this->decideCommOperation(operation))
         return 0;
 
-    for(int ii = 0; ii < n; ii++)
+    if (wrapPeriodic() && LEN_VEC == 3 && pbc_flag)
     {
-        i = list[ii];
-        for(int j = 0; j < NUM_VEC; j++)
-            for(int k = 0; k < LEN_VEC; k++)
+        double dp[3];
+        if (domain->triclinic == 0)
+        {
+            dp[0] = pbc[0]*domain->xprd;
+            dp[1] = pbc[1]*domain->yprd;
+            dp[2] = pbc[2]*domain->zprd;
+        }
+        else
+        {
+            dp[0] = pbc[0]*domain->xprd + pbc[5]*domain->xy + pbc[4]*domain->xz;
+            dp[1] = pbc[1]*domain->yprd + pbc[3]*domain->yz;
+            dp[2] = pbc[2]*domain->zprd;
+        }
+        for(int ii = 0; ii < n; ii++)
+        {
+            const int i = list[ii];
+            for(int j = 0; j < NUM_VEC; j++)
             {
-                buf[m] = static_cast<double>(arr_[i][j][k]);
-                if (wrapPeriodic())
-                {
-                    const int wrap = wraplist[ii];
-                    if (wrap != IS_GHOST)
-                    {
-                        if      ((k == 0 && wrap == IS_GHOST_WRAP_DIM_0_NEG) ||
-                                 (k == 1 && wrap == IS_GHOST_WRAP_DIM_1_NEG) ||
-                                 (k == 2 && wrap == IS_GHOST_WRAP_DIM_2_NEG)   )
-                            buf[m] -= dhi[k] - dlo[k];
-                        else if ((k == 0 && wrap == IS_GHOST_WRAP_DIM_0_POS) ||
-                                 (k == 1 && wrap == IS_GHOST_WRAP_DIM_1_POS) ||
-                                 (k == 2 && wrap == IS_GHOST_WRAP_DIM_2_POS)   )
-                            buf[m] += dhi[k] - dlo[k];
-                    }
-                }
-                m++;
+                for(int k = 0; k < LEN_VEC; k++)
+                    buf[m++] = static_cast<double>(arr_[i][j][k]) + dp[k];
             }
+        }
+    }
+    else
+    {
+        for(int ii = 0; ii < n; ii++)
+        {
+            const int i = list[ii];
+            for(int j = 0; j < NUM_VEC; j++)
+            {
+                for(int k = 0; k < LEN_VEC; k++)
+                    buf[m++] = static_cast<double>(arr_[i][j][k]);
+            }
+        }
     }
 
     return (n*NUM_VEC*LEN_VEC);
@@ -806,7 +818,7 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::popElemListFromBuffer(int first, int n,
 }
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBufferReverse(int first, int n, double *buf,int operation,bool scale,bool translate, bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBufferReverse(int first, int n, double *buf,int operation,bool scale,bool translate, bool rotate) const
 {
     int m = 0;
 
@@ -824,7 +836,7 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemListToBufferReverse(int first, 
 }
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::popElemListFromBufferReverse(int n, int *list,double *buf,int operation,bool scale,bool translate, bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::popElemListFromBufferReverse(int n, const int *const list,double *buf,int operation,bool scale,bool translate, bool rotate)
 {
     int i,m = 0;
 
@@ -863,7 +875,7 @@ used for exchange of single elements
 ------------------------------------------------------------------------- */
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemBufSize(int operation,bool scale,bool translate,bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemBufSize(int operation,bool scale,bool translate,bool rotate) const
 {
   
   if(!this->decidePackUnpackOperation(operation,scale,translate,rotate))
@@ -876,7 +888,7 @@ int GeneralContainer<T,NUM_VEC,LEN_VEC>::elemBufSize(int operation,bool scale,bo
 }
 
 template<typename T, int NUM_VEC, int LEN_VEC>
-int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemToBuffer(int i, double *buf,int operation,bool scale,bool translate, bool rotate)
+int GeneralContainer<T,NUM_VEC,LEN_VEC>::pushElemToBuffer(int i, double *buf,int operation,bool scale,bool translate, bool rotate) const
 {
     int m = 0;
 

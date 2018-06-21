@@ -156,6 +156,8 @@ FixMultisphereBreak::FixMultisphereBreak(LAMMPS *lmp, int narg, char **arg) :
         }
         else if(strcmp(arg[iarg],"trigger_fixName") == 0)
         {
+            // DEPRECATED-TODO remove with 4.1
+            error->all(FLERR, "trigger_fixName is a deprecated argument and will be removed in future version, use trigger_name instead");
             if(narg < iarg+2)
                 error->fix_error(FLERR,this,"not enough arguments for 'trigger_fixName'");
             iarg++;
@@ -166,7 +168,6 @@ FixMultisphereBreak::FixMultisphereBreak(LAMMPS *lmp, int narg, char **arg) :
                     triggerFixName_, n);
             trigger_fixNameSet = true;
             hasargs = true;
-            error->warning(FLERR, "trigger_fixName is a deprecated argument and will be removed in future version, use trigger_name instead");
         }
         else
         {
@@ -182,8 +183,7 @@ FixMultisphereBreak::FixMultisphereBreak(LAMMPS *lmp, int narg, char **arg) :
         error->fix_error(FLERR,this,"Setting made for 'trigger_name' and 'trigger_fixName' only one is allowed (preferably the former).");
 }
 
-/* ---------------------------------------------------------------------- */
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 FixMultisphereBreak::~FixMultisphereBreak()
 {
     if (triggerName_ && triggerType_ == VARIABLE)
@@ -207,6 +207,9 @@ void FixMultisphereBreak::init()
             triggerIdx_ = modify->find_fix(triggerName_);
             if (triggerIdx_ < 0)
                 error->fix_error(FLERR,this,"fix with name set as trigger_name not found by fix multisphere/break. Ensure a fix with the proper name is available");
+            const int myIdx = modify->find_fix(id);
+            if (myIdx < triggerIdx_)
+                error->fix_error(FLERR, this, "Fix with name set as trigger_name is specified after fix multisphere/break. Exchange the order of the two fixes to ensure up to date information.");
             if (triggerIndex_ == 0)
                 triggerFix_ = static_cast<FixPropertyAtom*>(modify->find_fix_property(triggerName_,"property/atom","scalar",1,0,style));
             else
@@ -252,10 +255,6 @@ void FixMultisphereBreak::pre_neighbor()
     reverse_comm();
     multisphere_.exchange();
 
-    multisphere_.calc_nbody_all();
-
-    multisphere_.generate_map();
-
     // set deletion flag
     // if any deleted atoms, do re-neigh in 100 steps at latest to remove
     // remainder particles
@@ -272,20 +271,11 @@ void FixMultisphereBreak::pre_neighbor()
 
     fw_comm_flag_ = MS_COMM_FW_IMAGE_DISPLACE;
     forward_comm();
-
-    // DO NOT merge delflag and existflag, since we would like to keep atoms that are not in a body
-//    int nlocal = atom->nlocal;
-//    delflag =   fix_delflag_->vector_atom;
-//    existflag = fix_existflag_->vector_atom;
-//    for(int i = 0; i < nlocal; i++)
-//    {
-//            delflag[i] = (MathExtraLiggghts::compDouble(existflag[i],0.,1e-6)) ? 1. : delflag[i];
-//    }
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void FixMultisphereBreak::final_integrate()
+void FixMultisphereBreak::end_of_step()
 {
-    FixMultisphere::final_integrate();
 
     int ghostflag = LOOP_ALL;
 
@@ -345,11 +335,6 @@ void FixMultisphereBreak::final_integrate()
             if(data().nrigid(ibody) < 2)
                 continue;
 
-//            printf("FixMultisphereBreak checks nrigid now for body %d/ibody: %d (n_body()/all: %d, %d) \n",
-//                  body_[i], ibody, data().n_body(), data().n_body_all());
-
-//            printf("FixMultisphereBreak resets body index for local atom-id %d with trigger %g, threshold: %g \n",
-//                  i, trigger,triggerThreshold_);
             data().tagReset(ibody); //re-sets the tag of the body
             haveRemovedAtomsDirectSelect++;
         }
@@ -396,49 +381,9 @@ void FixMultisphereBreak::final_integrate()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void FixMultisphereBreak::calc_force(bool setupflag)
+int FixMultisphereBreak::setmask()
 {
-
-//  int ghostflag = LOOP_ALL;
-//  int nlocal = atom->nlocal;
-//  int nghost = atom->nghost;
-//  int nloop = 0;
-
-//  if(ghostflag == LOOP_ALL) nloop = nlocal+nghost;
-//  else if(ghostflag == LOOP_LOCAL) nloop = nlocal;
-//  else error->all(FLERR,"Illegal call to FixMultisphereBreak::final_integrate()");
-
-  FixMultisphere::calc_force(setupflag);
-
-  //add gravity to atoms not belonging to a body to ensure they move correctly
-  if(false) //fix_gravity_)
-  {
-//      double grav[3];
-//      fix_gravity_->get_gravity(grav);
-//      if (rmass) {
-//        for (int i = 0; i < nloop; i++)
-//        {
-//            if ( existflag[i]==0 )
-//            {
-//                massone = rmass[i];
-/////                printf("massone: %g grav[2]: %g .\n",massone, grav[2]);
-//                f[i][0] += massone*grav[0];
-//                f[i][1] += massone*grav[1];
-//                f[i][2] += massone*grav[2];
-//            }
-//        }
-//      } else {
-//        for (int i = 0; i < nloop; i++)
-//        {
-//            if ( existflag[i]==0 )
-//            {
-//                massone = mass[type[i]];
-//                f[i][0] += massone*grav[0];
-//                f[i][1] += massone*grav[1];
-//                f[i][2] += massone*grav[2];
-//            }
-//        }
-//      }
-  }
-
+    int mask = FixMultisphere::setmask();
+    mask |= END_OF_STEP;
+    return mask;
 }

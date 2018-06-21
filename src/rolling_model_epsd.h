@@ -79,7 +79,7 @@ namespace ContactModels
        settings.registerOnOff("torsionTorque", torsion_torque, false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
     {}
 
     void connectToProperties(PropertyRegistry & registry) {

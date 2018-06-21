@@ -12,21 +12,22 @@ fix property/atom command :h3
 [Syntax:]
 
 fix id group property/atom variablename style restartvalue comm_ghost_value comm_reverse_ghost_value defaultvalue(s)...
-fix id group property/global variablename style stylearg defaultvalue(s)... :pre
+fix id group property/global variablename style stylearg type type_value (warn_out_of_bounds val) defaultvalue(s)... :pre
 
 ID, group-ID are documented in "fix"_fix.html command :ulb,l
 property/global or property/atom = style name of this fix command   :l
 variablename = a valid C++ string :l
-restartvalues = 'yes' or 'no' :l
-comm_ghost_value = 'yes' or 'no' :l
-comm_reverse_ghost_value = 'yes' or 'no' :l
 :ule
 
 fix property/global:
 
-    style = scalar or vector or atomtype or matrix or atomtypepair :ulb,l
+    style = scalar or vector or peratomtype or atomtype or matrix or atomtypepair or peratomtypepair :ulb,l
     stylearg for scalar/vector: none
     stylearg for matrix/atomtypepair: nCols :pre
+    type = optional keyword, if available must be followed by: :l
+    type_value = constant or lookup :l
+    warn_out_of_bounds = optional keyword for type lookup :l
+    val = yes or no :l
 :ule
 
 fix property/atom:
@@ -41,32 +42,37 @@ fix property/atom:
 
 fix m3 all property/global coefficientRestitution peratomtypepair 1 0.3
 fix m5 all property/global characteristicVelocity scalar 2.
+fix m5 all property/global initialTemperature peratomtype type lookup type1.csv type2.csv
 fix uf all property/atom uf vector yes no no  0. 0. 0. :pre
 
 [Description:]
 
-[Fix property/atom] reserves per-atom properties to be accessed by the user or other fixes.
-Style {scalar} reserves one value per atom, style {vector} multiple values per atoms, where
-the number of {defaultvalues} (that are assigned to the atoms at creation) determines the
-length of the vector. The group of atoms the fix is applied to is always "all", irrespective
-of which group is used for the fix command . If you want to assign different values for
-different groups, you can use the "set"_set.html command with keyword 'property/atom'.
-Keyword {restartvalues} determines whether information about the values stored by this fix
-is written to binary restart files.
-Keyword {communicate_ghost_value} determines whether information about the values stored by this fix
-can be communicated to ghost particles (forward communication). The exact location during a time-step
-when this happens depends on the model that uses this fix.
-Keyword {communicate_reverse_ghost_value} determines whether information about the values stored by this fix
-can be communicated from ghost particles to owned particles (reverse communication). The exact location
-during a time-step when this happens depends on the model that uses this fix.
+[Fix property/atom] reserves per-atom properties to be accessed by the user or
+other fixes.  Style {scalar} reserves one value per atom, style {vector}
+multiple values per atoms, where the number of {defaultvalues} (that are
+assigned to the atoms at creation) determines the length of the vector. The
+group of atoms the fix is applied to is always "all", irrespective of which
+group is used for the fix command . If you want to assign different values for
+different groups, you can use the "set"_set.html command with keyword
+'property/atom'.  Keyword {restartvalues} determines whether information about
+the values stored by this fix is written to binary restart files.  Keyword
+{communicate_ghost_value} determines whether information about the values stored
+by this fix can be communicated to ghost particles (forward communication). The
+exact location during a time-step when this happens depends on the model that
+uses this fix.  Keyword {communicate_reverse_ghost_value} determines whether
+information about the values stored by this fix can be communicated from ghost
+particles to owned particles (reverse communication). The exact location during
+a time-step when this happens depends on the model that uses this fix.
 
-[Fix property/global] reserves global properties to be accessed by the user or other
-fixes or pair styles. The number of defaultvalues determines the length of the vector /
-the number of matrix components . For style {vector} or {atomtype}, the user provides
-the number of vector components . For style {matrix} or {atomtypepair}, the user provides
-the number of matrix columns ({nCols}) .
+[Fix property/global] reserves global properties to be accessed by the user or
+other fixes or pair styles. The number of defaultvalues determines the length of
+the vector / the number of matrix components. For style {vector}, {peratomtype}
+or {atomtype}, the user provides the number of vector components. For style
+{matrix}, {peratomtypepair} or {atomtypepair}, the user provides the number of
+matrix columns ({nCols}).
 
-Example: {nCols}= 2 and {defaultvalues} = 1 2 3 4 5 6 would be mapped into a matrix like
+Example: {nCols}= 2 and {defaultvalues} = 1 2 3 4 5 6 would be mapped into a
+matrix like
 
 \[ 1 2 \]
 
@@ -74,15 +80,41 @@ Example: {nCols}= 2 and {defaultvalues} = 1 2 3 4 5 6 would be mapped into a mat
 
 \[ 5 6 \]
 
-Note that the number of default values must thus be a multiple of {nCols}.
-Note that {vector} and {atomtype} do the same thing, {atomtype} is just provided to make input scripts more readable .
-Note that {matrix} and {atomtypepair} both refer to a matrix of global values. However, a matrix defined via {atomtypepair} is required to be symmetric.
+Note that the number of default values must thus be a multiple of {nCols}.  Note
+that {vector} and [per]{atomtype} do the same thing, [per]{atomtype} is just
+provided to make input scripts more readable .  Note that {matrix} and
+[per]{atomtypepair} both refer to a matrix of global values. However, a matrix
+defined via [per]{atomtypepair} is required to be symmetric.
 
-Note that the group of atoms the fix is applied to is ignored (as the fix is not applied to atoms, but defines values of global scope).
+The default values are floating point numbers by default. If the {type} keyword
+is used, then they are either floating point numbers or filenames if
+{type_value} is constant or lookup, respectively. The lookup type allows to
+specify a property that is a function of another variable. The function is
+specified pointwise in a file and a linear interpolation is performed between
+the points specified in the file. The file is structured as follows:
+
+# Lines starting with '#' are ignored, e.g. for comments
+0. 1.
+1. 3.
+2. 1.
+6. 0. :pre
+
+Note that the entries in the first column must be listed in ascending
+order.  This specific type can only be used in combination with
+specialized models. If the keyword {warn_out_of_bounds} is set to
+{on}, the fix issues a warning every time a function value is
+requested for an argument smaller than the first entry or larger than
+the last entry of the function file (in the above example: < 0 or >
+6). This is useful if you are tuning parameters and don't exactly know
+which range to expect.
+
+Note that the group of atoms the fix is applied to is ignored (as the fix is not
+applied to atoms, but defines values of global scope).
 
 [Restart, fix_modify, output, run start/stop, minimize info:]
 
-Information about this fix is written to "binary restart files"_restart.html if you set {restartvalue} to 'yes'.
+Information about this fix is written to "binary restart files"_restart.html if
+you set {restartvalue} to 'yes'.
 
 [Restrictions:] none
 
@@ -90,4 +122,6 @@ Information about this fix is written to "binary restart files"_restart.html if 
 
 "set"_set.html, "pair_gran"_pair_gran.html
 
-[Default:] none
+[Default:]
+
+type_value = constant

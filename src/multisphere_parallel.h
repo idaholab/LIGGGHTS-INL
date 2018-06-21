@@ -45,6 +45,7 @@
 #define LMP_MULTISPHERE_PARALLEL_FLAG_
 
 #include "multisphere.h"
+#include "parallel_base.h"
 #include "comm.h"
 
 namespace LAMMPS_NS {
@@ -54,26 +55,40 @@ namespace LAMMPS_NS {
     public:
 
       MultisphereParallel(LAMMPS *lmp);
-      ~MultisphereParallel();
+      ~MultisphereParallel()
+      { }
 
-      void exchange();
+      void exchange()
+      { mycomm_->exchange(); }
 
-      void writeRestart(FILE *fp);
-      void restart(double *list);
+      void restart_serial(double *list);
+      void write_restart_parallel(FILE *fp);
+      void restart_parallel(double *list);
+
+      // ParallelBase interface
+      void clear_exchange()
+      { mycomm_->copy_exchange_info_from_main_comm(); }
+      int pack_exchange(const int dim);
+      void unpack_exchange(const int nrecv, const int dim);
+      void post_exchange();
+
+      int pack_irregular(const int i, double * const buf);
+      int unpack_irregular(double * const buf);
+
+      int size_restart() const;
+      int pack_restart(double *const buf) const;
+      int unpack_restart(double *const buf);
+      void finalize_restart();
 
     private:
 
       int pack_exchange_rigid(int i, double *buf);
       int unpack_exchange_rigid(double *buf);
 
-      void grow_send(int, int);
-      void grow_recv(int);
+      int nbody_all_restart;
 
-      // current size of send/recv buffer
-      // send buffer and recv buffer for all comm
-      int maxsend_,maxrecv_;
-      double *buf_send_;
-      double *buf_recv_;
+      Comm *mycomm_;
+
   };
 
   // *************************************

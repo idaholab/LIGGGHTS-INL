@@ -10,7 +10,7 @@ coarsegraining command :h3
 
 [Syntax:]
 
-coarsegraining cg_factor args :pre
+coarsegraining cg_factors args :pre
 
 cg_factor = coarse-graining factor to be applied (dimensionless) :ulb,l
 args = {model_check} :l
@@ -19,8 +19,9 @@ args = {model_check} :l
 
 [Examples:]
 
-coarsegraining 2.0  :pre
-coarsegraining 3 model_check warn
+coarsegraining 2.0
+coarsegraining 4. 2.
+coarsegraining 3 model_check warn :pre
 
 [Description:]
 
@@ -33,6 +34,10 @@ On the particle scale, this change is obviously inevitable. However,
 in many cases model constants can be adapted so that on the bulk scale
 the change of the physics caused by the coarse-graining model is acceptable.
 See e.g. "(Radl)"_#Radl and "(Bierwisch)"_#Bierwisch for details.
+
+If more than one coarse-graining factor is entered, type-specific coarse-
+graining is activated. So every atom-type in the simulation may have a
+different coarse-graining factor.
 
 Some of the models in LIGGGHTS(R)-INL support scaling of the model constants
 to counteract this change in physics on the bulk scale. Moreover,

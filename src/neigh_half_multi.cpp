@@ -122,7 +122,7 @@ void Neighbor::half_multi_no_newton(NeighList *list)
         jtype = type[j];
         if (cutsq[jtype] < distsq[k]) continue;
 
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -218,7 +218,7 @@ void Neighbor::half_multi_newton(NeighList *list)
       }
 
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -249,7 +249,7 @@ void Neighbor::half_multi_newton(NeighList *list)
         jtype = type[j];
         if (cutsq[jtype] < distsq[k]) continue;
 
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -357,7 +357,7 @@ void Neighbor::half_multi_newton_tri(NeighList *list)
           }
         }
 
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];

@@ -11,18 +11,26 @@ fix heat/gran/conduction command :h3
 
 [Syntax:]
 
-fix ID group-ID heat/gran initial_temperature T0 keyword values :pre
-fix ID group-ID heat/gran/conduction initial_temperature T0 keyword values :pre
+fix ID group-ID heat/gran initial_temperature T0 general_keyword general_values
+area_keyword area_values :pre
+fix ID group-ID heat/gran/conduction initial_temperature T0 general_keyword general_values
+area_keyword area_values :pre
 
 ID, group-ID are documented in "fix"_fix.html command :l
 heat/gran/conduction or fix heat/gran = style name of this fix command :l
 initial_temperature = obligatory keyword :l
 T0 = initial (default) temperature for the particles :l
-zero or more keyword/value pairs may be appended :l
-keyword = {contact_area} or {area_correction} or {store_contact_data} :l
-  {contact_area} values = {overlap} or {constant areavalue} or {projection}
+zero or more general keyword/value pairs may be appended :l
+general_keyword = {store_contact_data} or {temp_max} :l
+  {store_contact_data} values = {yes} or {no} 
+  {temp_max} value = max. particle temperature in K :pre
+
+zero or more area correction keyword/value pairs may be appended :l
+area_keyword = {contact_area} or {area_correction} or {area_shape} :l
+  {contact_area} values = {overlap} or {constant \[value\]} or {projection} or {superquadric} or {convex}
   {area_correction} values = {yes} or {no}
-  {store_contact_data} values = {yes} or {no} :pre
+  {area_shape} values = {square} or {circle} :pre
+
 
 [Examples:]
 
@@ -35,9 +43,9 @@ This command is not available in LAMMPS.
 [Description:]
 
 Calculates heat conduction between particles in contact and temperature 
-update (see "(Chaudhuri)"_#Chaudhuri) according to
+update (see "(Rickelt)"_#Rickelt) according to
 
-:c,image(Eqs/heat_gran.png)
+:c,image(Eqs/heat_gran.jpg)
 
 It is assumed that the temperature within the particles is uniform.
 To make particles adiabatic (so they do not change the temperature),
@@ -65,22 +73,30 @@ units). A negative value means it is a heat sink. Examples would be:
 set region halfbed property/peratom Temp 800.
 set region srcreg property/peratom heatSource 0.5 :pre
 
+The keyword {temp_max} allows to specify an upper limit for the per-particle
+temperature. Obviously, this value must be greater than 0K.
+
 :line
 
 Contact area calculation:
 
-Using keyword {contact_area}, you can choose from 3 modes of calulating
+Using keyword {contact_area}, you can choose from 5 modes of calulating
 the contact area for particle-particle heat transfer: If {overlap} is used,
 the contact area is calculated from the area of the sphere-sphere intersection
 If {constant} is used, a constant user-defined overlap area is assumed.
 If {projection} is used, the overlap area is assumed to be equal to rmin*rmin*Pi,
 where rmin is the radius of the smaller of the two particles in contact.
+For pure superquadric simulation you may also use the {superquadric} scheme that
+uses the local curvature radii to calculate the contact area.
+Finally the {convex} scheme can be used for simulations with convex particles
+only. This approach uses informations provided by the corresponding surface
+model.
 
 Area correction:
 
-For {contact_area}  = overlap, an area correction can additionally
-be performed using keyword {area_correction} to account for the fact that
-the Young's modulus might have been decreased in order to speed-up the
+For {contact_area}  = overlap, superquadric or convex, an area correction can
+additionally be performed using keyword {area_correction} to account for the 
+fact that the Young's modulus might have been decreased in order to speed-up the
 simulation, thus artificially increasing the overlap. In this case, you have
 to specify the original Young's modulus of each material by means of a
 "fix property/global"_fix_property.html command:
@@ -93,6 +109,17 @@ This area correction is performed by scaling the contact area with
 "pair_style gran"_pair_gran.html .
 The scaling factor is given as e.g. a=1 for a Hooke and a=2/3 for a Hertz
 interaction.
+
+Area shape:
+
+If {area_shape} is set to 'circle' then the equations for the heattransfer
+coefficient (h_c) are taken as above. If this keyword is set to 'square' (the
+default) then the pi in this equation is neglected. Note that using 'circle'
+would be appropriate but due to backward compatibility issues 'square' is chosen
+as default. As the thermal conductivity is a calibration parameter this is not a
+big issue, as switching from the default (and old) square representation to the
+correct (and new) circle representation can be achieved by multiplying the
+previous thermal conductivities by *sqrt(pi)*.
 
 [Coarse-graining information:]
 
@@ -150,10 +177,10 @@ temp/region"_compute_temp_region.html
 
 [Default:] 
 
-{contact_area} = overlap, {area_correction} = no
+{contact_area} = overlap, {area_correction} = no, {area_shape} = square
 
 [Literature:] 
 
-:link(Chaudhuri)
-[(Chaudhuri)] Chaudhuri et al, Chemical Engineering Science, 61, p 6348 (2006).
-
+:link(Rickelt)
+[(Rickelt)] Rickelt, Discrete Element Simulation and Experimental Validation of
+Conductive and Convective Heat Transfer in Moving Granular Material, PhD thesis (2011).

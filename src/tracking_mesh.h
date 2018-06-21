@@ -50,6 +50,7 @@
 
 #include "multi_node_mesh_parallel.h"
 #include "custom_value_tracker.h"
+#include "parallel_base.h"
 #include "container.h"
 #include "memory.h"
 #include <map>
@@ -105,7 +106,6 @@ namespace LAMMPS_NS{
                 return mapArray_[global].size();
         }
 
-        //AM-TODO check if still in use
         inline int tag_max()
         { return mapTagMax_; }
 
@@ -123,6 +123,12 @@ namespace LAMMPS_NS{
 
         inline void check_element_property_consistency()
         { customValues_.check_element_property_consistency(this->sizeLocal()+this->sizeGhost()); }
+
+        int pack_comm(const int operation, const int n, const int *const list, double *const buf, const int pbc_flag, const int *const pbc);
+        int unpack_comm(const int operation, const int first, const int n, double *const buf);
+
+        int pack_reverse(const int operation, const int n, const int first, double *const buf);
+        int unpack_reverse(const int operation, const int n, const int *const list, double *const buf);
 
       protected:
 
@@ -152,18 +158,16 @@ namespace LAMMPS_NS{
 
         // buffer operations
 
-        inline int elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate);
-        inline int pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, std::list<std::string> * properties, double *dlo, double *dhi, bool scale,bool translate, bool rotate);
-        inline int popElemListFromBuffer(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate);
-        inline int pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate);
+        inline int elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const;
+        inline int pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate) const;
         inline int popElemListFromBufferReverse(int n, int *list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate);
 
-        inline int elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate);
-        inline int pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate,bool rotate);
+        inline int elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate) const;
+        inline int pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate,bool rotate) const;
         inline int popElemFromBuffer(double *buf, int operation,bool scale,bool translate,bool rotate);
 
-        int meshPropsBufSize(int operation,bool scale,bool translate,bool rotate);
-        int pushMeshPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate);
+        int meshPropsBufSize(int operation,bool scale,bool translate,bool rotate) const;
+        int pushMeshPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const;
         int popMeshPropsFromBuffer(double *buf, int operation,bool scale,bool translate, bool rotate);
 
       private:

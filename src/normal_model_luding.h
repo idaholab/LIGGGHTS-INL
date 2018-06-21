@@ -73,13 +73,13 @@ namespace ContactModels
       c->add_history_offset("fo_offset", fo_offset);
     }
 
-    inline void registerSettings(Settings & settings){
+    void registerSettings(Settings & settings){
       settings.registerOnOff("tangential_damping", tangential_damping, true);
       settings.registerOnOff("limitForce", limitForce, true);
     }
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
-    inline void connectToProperties(PropertyRegistry & registry) {
+    void connectToProperties(PropertyRegistry & registry) {
       registry.registerProperty("K_elastic", &MODEL_PARAMS::createLoadingStiffness,"model luding");
       registry.registerProperty("CoeffRestLog", &MODEL_PARAMS::createCoeffRestLog,"model luding");
       registry.registerProperty("kn2k1", &MODEL_PARAMS::createUnloadingStiffness,"model luding");
@@ -101,12 +101,12 @@ namespace ContactModels
 
     // effective exponent for stress-strain relationship
 
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
       return 1.;
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       const int itype = sidata.itype;
       const int jtype = sidata.jtype;
@@ -218,9 +218,9 @@ namespace ContactModels
         #ifdef NONSPHERICAL_ACTIVE_FLAG
         if(sidata.is_non_spherical) {
           //for non-spherical particles normal force can produce torque!
-          i_forces.delta_torque[0] += torque_i[0];
-          i_forces.delta_torque[1] += torque_i[1];
-          i_forces.delta_torque[2] += torque_i[2];
+          i_forces.delta_torque[0] += sidata.area_ratio*torque_i[0];
+          i_forces.delta_torque[1] += sidata.area_ratio*torque_i[1];
+          i_forces.delta_torque[2] += sidata.area_ratio*torque_i[2];
         }
         #endif
       } else {
@@ -251,7 +251,7 @@ namespace ContactModels
       }
     }
 
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData&, ForceData&)
+    void surfacesClose(SurfacesCloseData & scdata, ForceData&, ForceData&)
     {
       if(scdata.contact_flags) *scdata.contact_flags &= ~CONTACT_NORMAL_MODEL;
       double * const history = &scdata.contact_history[history_offset];

@@ -73,12 +73,13 @@ enum
     PVTU,
     PVTI,
     PVTR,
+    PVTM,
     VTK_INVALID
 };
 
 // number of serial vtk file types
 const int vtk_serial_file_types = 6;
-}; // namespace VTK_FILE_FORMATS
+} // namespace VTK_FILE_FORMATS
 
 class DumpVTK
 {
@@ -90,19 +91,23 @@ public:
     void setVtkWriterOptions(vtkSmartPointer<vtkXMLWriter> writer);
     void setVtkWriterOptions(vtkSmartPointer<vtkDataWriter> writer);
 
-    void write_vtp(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename);
-    void write_vtu(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename);
-    void write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const int vtk_file_format, const char * const filename);
-    void write_vtr(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename);
+    void write_vtp(vtkSmartPointer<vtkDataObject> data, const char * const filename);
+    void write_vtu(vtkSmartPointer<vtkDataObject> data, const char * const filename);
+    void write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const char * const filename);
+    void write_vtr(vtkSmartPointer<vtkDataObject> data, const char * const filename);
+    void write_vtm(vtkSmartPointer<vtkDataObject> data, const char * const filename);
 
-    void write_vtk_poly(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label = NULL);
-    void write_vtk_unstructured_grid(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label = NULL);
-    void write_vtk_rectilinear_grid(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label = NULL);
+    void write_vtk_poly(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label = NULL);
+    void write_vtk_unstructured_grid(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label = NULL);
+    void write_vtk_rectilinear_grid(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label = NULL);
 
     vtkMPIController *getLocalController();
 
     void setFileCurrent(char * &filecurrent, char * const filename, const int multifile, const int padflag);
-    int identify_file_type(char * const filename, std::list<int> &allowed_extensions, char * const style, int &multiproc, int &nclusterprocs, int &filewriter, int &fileproc, MPI_Comm &world, MPI_Comm &clustercomm);
+    void identify_file_type(char * const filename, std::list<int> &allowed_extensions, char * const style, int &multiproc, int &nclusterprocs, int &filewriter, int &fileproc, MPI_Comm &world, MPI_Comm &clustercomm);
+
+protected:
+    int vtk_file_format_;
 
 private:
 
@@ -125,7 +130,7 @@ private:
     char * filesuffixes[VTK_FILE_FORMATS::VTK_INVALID];
 };
 
-}; // namespace
+} // namespace
 
 #endif // LMP_DUMP_VTK_H
 

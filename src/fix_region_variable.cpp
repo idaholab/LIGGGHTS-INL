@@ -181,7 +181,7 @@ void FixRegionVariable::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixRegionVariable::restart(char *buf)
+void FixRegionVariable::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;

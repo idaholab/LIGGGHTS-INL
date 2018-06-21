@@ -82,7 +82,7 @@ set atom 2 type 2 shape 0.002 0.002 0.004 blockiness ${blockiness1} ${blockiness
 group		nve_group region reg
 
 #apply nve integration to all particles that are inserted as single particles
-fix		integr all nve/superquadric integration_scheme 1
+fix		integr all nve/nonspherical integration_scheme 1
 
 variable time equal step*${dt}
 
@@ -100,7 +100,6 @@ variable vmax equal c_vmax
 thermo_style	custom step atoms c_rke c_kin_e c_vmax cpu time
 thermo		${thermofreq}
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 #insert the first particles so that dump is not empty
 

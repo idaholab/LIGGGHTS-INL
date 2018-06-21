@@ -72,7 +72,7 @@ class FixMassflowMesh : public Fix {
   void pre_exchange();
 
   void write_restart(FILE *fp);
-  void restart(char *buf);
+  void restart(char *buf, const Version &);
 
   double compute_vector(int index);
 

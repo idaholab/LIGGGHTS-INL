@@ -45,7 +45,6 @@ compute		rke nve_group erotate/sphere
 thermo_style	custom step atoms ke c_rke f_ts[1] f_ts[2]
 thermo		1000
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 dump		D_stl all stl 5000 post/Wall-*.stl
 

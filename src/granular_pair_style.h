@@ -63,7 +63,7 @@ namespace PairStyles {
     virtual void init_granular() = 0;
     virtual void write_restart_settings(FILE * fp) = 0;
     virtual void read_restart_settings(FILE * fp, int64_t hashcode = -1) = 0;
-    virtual void compute_force(LAMMPS_NS::PairGran * pg, int eflag, int vflag, int addflag) = 0;
+    virtual void compute_force(LAMMPS_NS::PairGran * pg, int eflag, int vflag) = 0;
 
     virtual int get_history_offset(const std::string hname) = 0;
     virtual double stressStrainExponent() = 0;

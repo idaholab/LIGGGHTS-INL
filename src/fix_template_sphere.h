@@ -179,7 +179,7 @@ class FixTemplateSphere : public Fix {
   virtual void post_create(){}
   virtual int setmask();
   void write_restart(FILE *);
-  void restart(char *);
+  void restart(char *, const Version &);
 
   // access to protected properties
   virtual double volexpect();           

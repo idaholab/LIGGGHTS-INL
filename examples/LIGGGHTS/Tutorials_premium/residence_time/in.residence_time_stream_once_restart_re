@@ -62,7 +62,6 @@ compute			rke all erotate/sphere
 thermo_style	custom step atoms ke c_rke vol
 thermo			1000
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 #insert the first particles so that dump is not empty
 dump		dmp all custom 800 post/dump*.residence id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius f_tracer f_release_fix_insert_stream[5]

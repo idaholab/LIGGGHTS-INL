@@ -10,7 +10,7 @@ fix wall/gran  command :h3
 
 [Syntax:]
 
-fix ID group-ID style model_type model_name wallstyle wallstyleargs general_keywords general_values model_keywords model_values  ... :pre
+fix ID group-ID style model_type model_name wallstyle wallstyleargs general_keywords general_values area_keywords area_values model_keywords model_values  ... :pre
 ID, group-ID are documented in "fix"_fix.html command :ulb,l
 style = {wall/gran} :l
 
@@ -38,19 +38,23 @@ wallstyle args for wallstyle {primitive} = {type} or {xplane} or {yplane} or {zp
     c1,c2 = coordinates of center axis in other 2 dims (distance units) :pre
 
 zero or more general_keyword/value pairs may be appended :l
-general_keyword =  {shear} or {store_force} or {store_force_contact} or {store_force_contact_stress} :l
+general_keyword =  {shear} or {temperature} or {store_force} or {store_force_contact} or {store_force_contact_stress} :l
   {shear} values = dim vshear
     dim = {x} or {y} or {z}
     vshear = magnitude of shear velocity (velocity units)
   {temperature} value = T0
     T0 = Temperature of the wall (temperature units)
-  {contact_area} values = 'overlap' or 'constant \[value\]' or 'projection'
   {store_force} value = 'yes' or 'no'
     yes, no = determines if the wall force exerted on the particles is stored in a "fix property/atom"_fix_property.html with id force_(ID), where (ID) is the id of the fix wall/gran command.
   {store_force_contact} value = 'yes' or 'no'
     yes, no = determines if the force for each particle-wall contact is stored in a "fix property/atom"_fix_property.html with id contactforces_(ID), where (ID) is the id of the fix wall/gran command.
   {store_force_contact_stress} value = 'yes' or 'no'
     yes, no = determines if the force and contact point for each particle-wall contact is stored in a "fix property/atom"_fix_property.html with id contactforces_stress_(ID), where (ID) is the id of the fix wall/gran command. :pre
+
+zero or more area correction keyword/value pairs may be appended :l
+area_keyword =  {contact_area} or {area_correction} :l
+  {contact_area} values = 'overlap' or 'constant \[value\]' or 'projection' or 'superquadric' or 'convex'
+  {area_correction} values = {yes} or {no} :pre
 
 following the general_keyword/value pairs, zero or more model_keyword/model_value pairs may be appended in arbitrary order :l
   model_keyword/model_value pairs = described for each model separately "here"_Section_gran_models.html

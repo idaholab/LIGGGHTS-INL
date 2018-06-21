@@ -85,6 +85,7 @@ class FixContactPropertyAtom : public FixContactHistory {
   void grow_arrays(int);
   void copy_arrays(int, int, int);
   int unpack_exchange(int, double *);
+  int get_comm_size() const;
   int pack_comm(int, int *, double *, int, int *);
   void unpack_comm(int, int, double *);
   void unpack_restart(int, int);

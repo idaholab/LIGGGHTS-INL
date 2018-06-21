@@ -45,6 +45,9 @@
 
 inline void ContactForceCorrector::modify_body_forces_torques_pair(int i)
 {
+    if (!fix_ms_)
+        error->all(FLERR, "Contact force corrector only implemented for multispheres");
+
     double correction_factor, f_torque_contact[6];
     int n_atom_contacts = fix_contact_->n_partner(i);
     int j,j_tag,j_body_tag, ibody, ibody_contact;
@@ -69,14 +72,15 @@ inline void ContactForceCorrector::modify_body_forces_torques_pair(int i)
         {
             ibody_contact = 0;
 
-            while(ibody_contact < n_ibody_contact_(ibody))
+            const int n_contact = (*n_ibody_contact_)(ibody);
+            while(ibody_contact < n_contact)
             {
                 if(j_body_tag == jbodytags_[ibody][ibody_contact])
                         break;
                 ibody_contact++;
             }
             
-            if(ibody_contact == n_ibody_contact_(ibody))
+            if(ibody_contact == n_contact)
             {
                 
                 error->one(FLERR,"internal error");
@@ -105,17 +109,27 @@ inline void ContactForceCorrector::modify_body_forces_torques_wall(int i)
 {
     double correction_factor, f_torque_contact[6];
     int n_wall_contacts = fix_contact_->n_partner(i);
-    int ibody, i_body_tag = fix_ms_->belongs_to(i);
 
-    if(i_body_tag < 0)
+    if (n_wall_contacts == 0)
         return;
 
-    ibody = multisphere_->map(i_body_tag);
+    if (fix_ms_)
+    {
+        int ibody, i_body_tag = fix_ms_->belongs_to(i);
 
-    if(ibody < 0 || n_wall_contacts == 0)
-        return;
+        if(i_body_tag < 0)
+            return;
 
-    correction_factor = 1.-1./static_cast<double>(n_ibody_contact_(ibody));
+        ibody = multisphere_->map(i_body_tag);
+
+        if(ibody < 0)
+            return;
+
+        const int n_contact = (*n_ibody_contact_)(ibody);
+        correction_factor = 1.-1./static_cast<double>(n_contact);
+    }
+    else
+        correction_factor = 1.-1./static_cast<double>(n_wall_contacts);
 
     for(int iwallcontact = 0; iwallcontact < n_wall_contacts; iwallcontact++)
     {
@@ -136,7 +150,7 @@ inline void ContactForceCorrector::modify_body_forces_torques_wall(int i)
             double delta[3] = {0.0, 0.0, 0.0}, vrel[3] = {0.0, 0.0, 0.0};
             double f_corr[3] = {f_torque_contact[0], f_torque_contact[1], f_torque_contact[2]};
             vectorScalarMult3D(f_corr,-correction_factor,f_corr);
-            mesh->add_particle_contribution(i,f_corr,delta,fix_contact_->partner(i,iwallcontact),vrel);
+            mesh->add_particle_contribution(i,f_corr,delta,fix_contact_->partner(i,iwallcontact),vrel,fix_contact_->contacthistory(i,iwallcontact));
         }
     }
     

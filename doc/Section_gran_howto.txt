@@ -1,0 +1,18 @@
+"Previous Section"_Section_howto.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_modify.html :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+9. How-to discussions specific for granular functinalities :h3
+
+
+
+To commands :h4
+
+Click on the style itself for a full description:
+
+"LIGGGHTS(R)-INL4.X"_howto_liggghts_4.X_tutorial.html :tb(c=4,ea=c)
+

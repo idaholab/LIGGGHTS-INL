@@ -87,7 +87,7 @@ class FixContactHistory : public Fix {
   int pack_exchange(int, double *);
   virtual int unpack_exchange(int, double *);
   virtual void write_restart(FILE *fp);
-  void restart(char *buf);
+  void restart(char *buf, const Version &);
   int pack_restart(int, double *);
   virtual void unpack_restart(int, int);
   int size_restart(int);

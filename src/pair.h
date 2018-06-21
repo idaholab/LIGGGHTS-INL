@@ -47,6 +47,7 @@
 #define LMP_PAIR_H
 
 #include "pointers.h"
+#include "version_struct.h"
 
 namespace LAMMPS_NS {
 
@@ -183,14 +184,16 @@ class Pair : protected Pointers {
   virtual void free_disp_tables();
 
   virtual void write_restart(FILE *) {}
-  virtual void read_restart(FILE *, const int major, const int minor) {}
+  virtual void read_restart(FILE *, const Version &ver) {}
   virtual void write_restart_settings(FILE *) {}
-  virtual void read_restart_settings(FILE *, const int major, const int minor) {}
+  virtual void read_restart_settings(FILE *, const Version &ver) {}
   virtual void write_data(FILE *) {}
   virtual void write_data_all(FILE *) {}
 
+  virtual int get_comm_size() const { return 0; }
   virtual int pack_comm(int, int *, double *, int, int *) {return 0;}
   virtual void unpack_comm(int, int, double *) {}
+  virtual int get_reverse_comm_size() const { return 0; }
   virtual int pack_reverse_comm(int, int, double *) {return 0;}
   virtual void unpack_reverse_comm(int, int *, double *) {}
   virtual double memory_usage();

@@ -1,6 +1,6 @@
 #Conveyor
 atom_style	granular
-atom_modify	map array
+atom_modify	map array sort 0 0
 boundary	m m m
 newton		off
 

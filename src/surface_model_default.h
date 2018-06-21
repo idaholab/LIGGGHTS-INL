@@ -68,25 +68,27 @@ namespace ContactModels
         dissipatedflag_(false),
         delta_offset_(-1),
         dissipation_offset_(-1),
-        fix_dissipated_(NULL)
+        fix_dissipated_(NULL),
+        fix_dissipated_tangential_(NULL)
     {
       
     }
 
-    inline void registerSettings(Settings& settings)
+    void registerSettings(Settings& settings)
     {
         settings.registerOnOff("computeElasticPotential", elasticpotflag_, false);
         settings.registerOnOff("computeDissipatedEnergy", dissipatedflag_, false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
     {
         if (dissipatedflag_)
         {
             if (cmb->is_wall())
             {
                 fix_dissipated_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy_wall", "property/atom", "vector", 0, 0, "dissipated energy"));
-                if (!fix_dissipated_)
+                fix_dissipated_tangential_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy_wall_tangential", "property/atom", "vector", 0, 0, "dissipated energy"));
+                if (!fix_dissipated_ || !fix_dissipated_tangential_)
                     error->one(FLERR, "Could not find dissipated_energy_wall atom property. Ensure that fix calculate/wall_dissipated_energy is before fix wall/gran");
             }
             else
@@ -108,6 +110,10 @@ namespace ContactModels
                 fixarg[13] = (char*)"0.0"; // ty
                 fixarg[14] = (char*)"0.0"; // tz
                 fix_dissipated_ = modify->add_fix_property_atom(15, static_cast<char**>(fixarg), "dissipated energy");
+                fixarg[0] = (char*)"dissipated_energy_tangential_";
+                fixarg[3]  = (char*)"dissipated_energy_tangential";
+
+                fix_dissipated_tangential_ = modify->add_fix_property_atom(15, static_cast<char**>(fixarg), "dissipated energy");
             }
         }
         if (cmb->is_wall() && (dissipatedflag_ || elasticpotflag_))
@@ -126,9 +132,9 @@ namespace ContactModels
         }
     }
 
-    inline void connectToProperties(PropertyRegistry&) {}
+    void connectToProperties(PropertyRegistry&) {}
 
-    inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
+    bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
     {
         #ifdef SUPERQUADRIC_ACTIVE_FLAG
             sidata.is_non_spherical = false;
@@ -137,7 +143,7 @@ namespace ContactModels
         return true;
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
     {
       #ifdef SUPERQUADRIC_ACTIVE_FLAG
       if(sidata.is_non_spherical)
@@ -204,12 +210,12 @@ namespace ContactModels
       sidata.P_diss = 0.;
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata,TriMesh *, double * const) {}
-    inline void surfacesClose(SurfacesCloseData &scdata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata,TriMesh *, double * const) {}
+    void surfacesClose(SurfacesCloseData &scdata, ForceData&, ForceData&) {}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
-    inline void tally_pp(double,int,int,int) {}
-    inline void tally_pw(double,int,int,int) {}
+    void tally_pp(double,int,int,int) {}
+    void tally_pw(double,int,int,int) {}
 
   private:
     bool elasticpotflag_;
@@ -217,6 +223,7 @@ namespace ContactModels
     int delta_offset_;
     int dissipation_offset_;
     FixPropertyAtom *fix_dissipated_;
+    FixPropertyAtom *fix_dissipated_tangential_;
   };
 }
 }

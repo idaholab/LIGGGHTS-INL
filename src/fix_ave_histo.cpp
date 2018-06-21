@@ -253,6 +253,20 @@ FixAveHisto::FixAveHisto(LAMMPS *lmp, int narg, char **arg) :
           nvalues += ncols-1;
         }
       }
+      // check whether compute or fix exists
+      else if (mode == SCALAR)
+      {
+        if (which[nvalues] == COMPUTE)
+        {
+            if (modify->find_compute(ids[nvalues]) < 0)
+                error->all(FLERR, "Could not find compute ID for fix ave/histo");
+        }
+        else if (which[nvalues] == FIX)
+        {
+            if (modify->find_fix(ids[nvalues]) < 0)
+                error->all(FLERR, "Could not find fix ID for fix ave/histo");
+        }
+      }
 
       nvalues++;
       iarg++;

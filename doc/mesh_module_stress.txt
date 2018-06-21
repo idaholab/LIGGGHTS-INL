@@ -26,14 +26,21 @@ fix cad all mesh/surface/stress file mesh.stl type 1 wear finnie :pre
 
 [Description:]
 
-This mesh module computes the average normal and shear stresses that the particles in the
-fix group exert on each triangle of the mesh is evaluated (which costs a bit of performance).
-Also, the total force and torque on the particle is calculated (see output info).
-The per-element average normal stress can be dumped into VTK format using "dump mesh/vtk"_dump.html.
+This mesh module computes the average normal and shear stresses that the
+particles in the fix group exert on each triangle of the mesh is evaluated
+(which costs a bit of performance).  Also, the total force and torque on the
+particle is calculated (see output info).  The per-element average normal stress
+can be dumped into VTK format using "dump mesh/vtk"_dump.html.
 
-With the optional {stress} keyword, stress tracking can be turned off if desired. The
-reference point for calculating the body torque can be controlled via the {reference_point}
-keyword. The optional {wear} keyword can activates a simple qualitative wear model
+With the optional {stress} keyword, stress tracking can be turned off if
+desired. The reference point for calculating the body torque can be controlled
+via the {reference_point} keyword. Note that the reference point is set after
+the {move}, {scale} and {rotate} keywords are applied in the initalization of
+the "fix mesh/surface"_fix_mesh_surface.html. Thus, the reference point should
+be set with respect to the repositioned mesh and not with respect to the stl
+file.
+
+The optional {wear} keyword can activates a simple qualitative wear model
 ({finnie}) - for details on the model, see the seperate /doc/finnie-wear.pdf. The wear coefficient
 is divided by the mesh element area, therefore it is independent of mesh size.
 The finnie constant k in Eqn. (4.23) has to be specified as follows:
@@ -57,7 +64,8 @@ This mesh module is a prerequisite for the following mesh modules
 This mesh module stores a global vector with 9 components for access by various
 "output commands"_Section_howto.html#4_15. The first 3 components are equal to the
 total force on the mesh, the next 3 components store the total torque on the body
-exerted by the particles. Finally, the last 3 components are the coordinates (moved, scaled, rotated) of the reference point. Other info see "fix mesh"_fix_mesh.html.
+exerted by the particles. Finally, the last 3 components are the coordinates (moved, scaled, rotated) of the reference point. Other info see "fix mesh/surface"_fix_mesh_surface.html.
+This modeule also supports "fix_modify"_fix_modify.html with option {shift} = dx dy dz, which shifts a mesh instantaneously by the provided vector.
 
 [Related commands:]
 

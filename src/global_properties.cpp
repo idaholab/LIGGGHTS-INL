@@ -75,6 +75,7 @@ namespace MODEL_PARAMS
   static const char * MAXIMUM_RESTITUTION = "MaximumRestitution";
   static const char * CRITITCAL_STOKES = "CriticalStokes";
   static const char * LIQUID_VOLUME = "liquidVolume";
+  static const char * LIQUID_VOLUME_WALL = "liquidVolumeWall";
   static const char * LIQUID_DENSITY = "liquidDensity";
   static const char * HISTORY_INDEX = "historyIndex";
   static const char * SURFACE_TENSION = "surfaceTension";
@@ -102,6 +103,14 @@ namespace MODEL_PARAMS
   static const char * COEFFICIENT_ROLLING_FRICTION_STIFFNESS = "coeffRollingStiffness";
   static const char * UNLOADING_STIFFNESS = "UnloadingStiffness";
   static const char * LOADING_STIFFNESS = "LoadingStiffness";
+  static const char * VB_YOUNGS_MODULUS = "viscoBondYoungsModulus";
+  static const char * VB_POISSONS_RATIO = "viscoBondPoissonsRatio";
+  static const char * VB_NORMAL_DAMPING_RATIO = "viscoBondNormalDampingRatio";
+  static const char * VB_TANGENTIAL_DAMPING_RATIO = "viscoBondTangentialDampingRatio";
+  static const char * VB_DRIFT = "viscoBondDrift";
+  static const char * VB_ELAST = "viscoBondElast";
+  static const char * THERMAL_CUNDUCTIVITY = "thermalConductivity";
+  static const char * HEAT_CAPACITY = "thermalCapacity";
   /* -----------------------------------------------------------------------
    * Utility functions
    * ----------------------------------------------------------------------- */
@@ -677,6 +686,13 @@ namespace MODEL_PARAMS
 
   /* ---------------------------------------------------------------------- */
 
+  ScalarProperty* createLiquidVolumeWall(PropertyRegistry & registry, const char * caller, bool)
+  {
+    return createScalarProperty(registry, LIQUID_VOLUME_WALL, caller);
+  }
+
+  /* ---------------------------------------------------------------------- */
+
   ScalarProperty* createLiquidDensity(PropertyRegistry & registry, const char * caller, bool)
   {
     return createScalarProperty(registry, LIQUID_DENSITY, caller);
@@ -1011,6 +1027,68 @@ namespace MODEL_PARAMS
       return createPerTypePairProperty(registry, COHESION_STRENGTH, caller);
     }
 
+    /* -----------------------------------------------------------------------
+     * Heat transfer
+     * ----------------------------------------------------------------------- */
+
+    VectorProperty *createThermalCunductivity(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+      return createPerTypeProperty(registry, THERMAL_CUNDUCTIVITY, caller, sanity_checks, 0.0);
+    }
+
+    VectorProperty *createHeatCapacity(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+      return createPerTypeProperty(registry, HEAT_CAPACITY, caller, sanity_checks, 0.0);
+    }
+
+    /* This is only the first term of the real thermal effusivity e = sqrt(k*cp*rho)
+     * The term of the density " *sqrt(rho) " must be multiplied by the user!
+     */
+    VectorProperty *createThermalEffusivity(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        const int max_type = registry.max_type();
+
+        registry.registerProperty(THERMAL_CUNDUCTIVITY, &createThermalCunductivity);
+        registry.registerProperty(HEAT_CAPACITY, &createHeatCapacity);
+
+        VectorProperty * vector = new VectorProperty(max_type+1);
+        VectorProperty * thermal_cunductivity = registry.getVectorProperty(THERMAL_CUNDUCTIVITY,caller);
+        VectorProperty * heat_capacity = registry.getVectorProperty(HEAT_CAPACITY,caller);
+        double * k = thermal_cunductivity->data;
+        double * cp = heat_capacity->data;
+
+        for(int i=1;i< max_type+1; i++)
+           vector->data[i] = sqrt(k[i]*cp[i]);
+
+        return vector;
+    }
+
+    /* This is only the first term of the real heat transfer coefficient h = 4*ki*kj/(ki+kj) * sqrt(Acont)
+     * The term of the contact area " *sqrt(Acont) " must be multiplied by the user!
+     */
+    MatrixProperty *createHeatTransferCoefficient(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        const int max_type = registry.max_type();
+
+        registry.registerProperty(THERMAL_CUNDUCTIVITY, &createThermalCunductivity);
+
+        MatrixProperty * matrix = new MatrixProperty(max_type+1, max_type+1);
+        VectorProperty * thermal_cunductivity = registry.getVectorProperty(THERMAL_CUNDUCTIVITY,caller);
+        double * k = thermal_cunductivity->data;
+
+        for(int i=1;i< max_type+1; i++)
+        {
+            for(int j=1;j<max_type+1;j++)
+            {
+                const double ki=k[i];
+                const double kj=k[j];
+                matrix->data[i][j] = 4*ki*kj/(ki+kj);
+            }
+        }
+
+        return matrix;
+    }
+
     /* ---------------------------------------------------------------------- */
 
     // Dissipation matrix creation (fiber & bond model) (1/timeScale)
@@ -1084,6 +1162,193 @@ namespace MODEL_PARAMS
                 lmp->error->all(FLERR, "Attrition limit needs to be between 0 and 1");
         }
         return attritionLimit;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    // General properties for all visco bond models
+
+    VectorProperty *createViscoBondYoungsModulus(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        VectorProperty *Y = createPerTypeProperty(registry, VB_YOUNGS_MODULUS, caller, sanity_checks, 0.0);
+        const double * const Y_val = Y->data;
+        const LAMMPS * const lmp = registry.getLAMMPS();
+        const int max_type = registry.max_type();
+        for (int i=1; i<max_type+1; i++)
+            if (Y_val[i] <= 0)
+                lmp->error->all(FLERR, "viscoBondYoungsModulus > 0 required");
+        return Y;
+    }
+
+    VectorProperty *createViscoBondPoissonsRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        return createPerTypeProperty(registry, VB_POISSONS_RATIO, caller, sanity_checks, -1.0, 0.5);
+    }
+
+    MatrixProperty *createViscoBondYoungsModulusEff(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        const int max_type = registry.max_type();
+
+        registry.registerProperty(VB_YOUNGS_MODULUS, &createViscoBondYoungsModulus);
+        registry.registerProperty(VB_POISSONS_RATIO, &createViscoBondPoissonsRatio);
+
+        MatrixProperty * matrix = new MatrixProperty(max_type+1, max_type+1);
+        VectorProperty * youngsModulus = registry.getVectorProperty(VB_YOUNGS_MODULUS,caller);
+        VectorProperty * poissonRatio = registry.getVectorProperty(VB_POISSONS_RATIO,caller);
+        double * Y = youngsModulus->data;
+        double * v = poissonRatio->data;
+
+        for(int i=1;i< max_type+1; i++)
+        {
+            for(int j=1;j<max_type+1;j++)
+            {
+                const double Yi=Y[i];
+                const double Yj=Y[j];
+                const double vi=v[i];
+                const double vj=v[j];
+                matrix->data[i][j] = 1./((1.-pow(vi,2.))/Yi+(1.-pow(vj,2.))/Yj);
+            }
+        }
+
+        return matrix;
+    }
+
+    MatrixProperty *createViscoBondShearModulusEff(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        const int max_type = registry.max_type();
+
+        registry.registerProperty(VB_YOUNGS_MODULUS, &createViscoBondYoungsModulus);
+        registry.registerProperty(VB_POISSONS_RATIO, &createViscoBondPoissonsRatio);
+
+        MatrixProperty * matrix = new MatrixProperty(max_type+1, max_type+1);
+        VectorProperty * youngsModulus = registry.getVectorProperty(VB_YOUNGS_MODULUS,caller);
+        VectorProperty * poissonRatio = registry.getVectorProperty(VB_POISSONS_RATIO,caller);
+        double * Y = youngsModulus->data;
+        double * v = poissonRatio->data;
+
+        for(int i=1;i< max_type+1; i++)
+        {
+            for(int j=1;j<max_type+1;j++)
+            {
+                const double Yi=Y[i];
+                const double Yj=Y[j];
+                const double vi=v[i];
+                const double vj=v[j];
+                matrix->data[i][j] = 1./(2.*(2.-vi)*(1.+vi)/Yi+2.*(2.-vj)*(1.+vj)/Yj);
+            }
+        }
+
+        return matrix;
+    }
+
+    MatrixProperty *createViscoBondNormalDampingRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        return createPerTypePairProperty(registry, VB_NORMAL_DAMPING_RATIO, caller, sanity_checks, 0.0);
+    }
+
+    MatrixProperty *createViscoBondTangentialDampingRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        return createPerTypePairProperty(registry, VB_TANGENTIAL_DAMPING_RATIO, caller, sanity_checks, 0.0);
+    }
+
+    MatrixProperty* createViscoBondMaxDistance(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+    {
+        MatrixProperty* matrix = createPerTypePairProperty(registry, "viscoBondcutOffDistanceRatio", caller, sanity_checks, 0.0);
+
+        LAMMPS * lmp = registry.getLAMMPS();
+        const int max_type = registry.max_type();
+        for(int i=1; i< max_type+1; ++i)
+            for(int j=1; j<max_type+1; ++j)
+                if(matrix->data[i][j] <= 1. || matrix->data[i][j] > 3.)
+                    lmp->error->all(FLERR,"Expecting 1 < viscoBondcutOffDistanceRatio < 3");
+
+        return matrix;
+    }
+
+    /* ----------------------------------------------------------------------
+     * time dependent spring relaxation
+     * the coefficient is equal to the inverse time (seconds) that is
+     * required to relax completely
+     * ---------------------------------------------------------------------- */
+
+    VectorProperty * createViscoBondDrift(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+    {
+        LAMMPS * lmp = registry.getLAMMPS();
+        const int max_type = registry.max_type();
+
+        VectorProperty * vec = new VectorProperty(max_type+1);
+        FixPropertyGlobal * drift = registry.getGlobalProperty(VB_DRIFT,"property/global","peratomtype",max_type,0,caller);
+
+        for(int i=1; i < max_type+1; i++)
+        {
+            const double drifti = drift->compute_vector(i-1);
+            // error checks
+            if(sanity_checks)
+            {
+                if(drifti <= 0.)
+                    lmp->error->all(FLERR,"viscoBondDrift > 0 required");
+            }
+            vec->data[i] = drifti;
+        }
+        return vec;
+    }
+
+    MatrixProperty * createViscoBondDriftEff(PropertyRegistry & registry, const char * caller, bool)
+    {
+        const int max_type = registry.max_type();
+        registry.registerProperty(VB_DRIFT, &createViscoBondDrift);
+
+        MatrixProperty * matrix = new MatrixProperty(max_type+1, max_type+1);
+        VectorProperty * drift_cohesionBeam = registry.getVectorProperty(VB_DRIFT,caller);
+        double * drift = drift_cohesionBeam->data;
+
+        for(int i=1;i< max_type+1; i++)
+            for(int j=1;j<max_type+1;j++)
+                matrix->data[i][j] = std::max(drift[i],drift[j]); //drift[i]*drift[j]/(drift[i]+drift[j]);
+
+        return matrix;
+    }
+
+    /* ----------------------------------------------------------------------
+     * stress dependent spring relaxation
+     * the coefficient is the maximum, transferable stress
+     * ---------------------------------------------------------------------- */
+
+    VectorProperty * createViscoBondElastizity(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+    {
+        LAMMPS * lmp = registry.getLAMMPS();
+        const int max_type = registry.max_type();
+
+        VectorProperty * vec = new VectorProperty(max_type+1);
+        FixPropertyGlobal * elast = registry.getGlobalProperty(VB_ELAST,"property/global","peratomtype",max_type,0,caller);
+
+        for(int i=1; i < max_type+1; i++)
+        {
+            const double elasti = elast->compute_vector(i-1);
+            // error checks
+            if(sanity_checks)
+            {
+                if(elasti <= 0.)
+                    lmp->error->all(FLERR,"elast_cohesionBeam > 0 required");
+            }
+            vec->data[i] = elasti;
+        }
+        return vec;
+    }
+
+    MatrixProperty * createViscoBondElastEff(PropertyRegistry & registry, const char * caller, bool)
+    {
+        const int max_type = registry.max_type();
+        registry.registerProperty(VB_ELAST, &createViscoBondElastizity);
+
+        MatrixProperty * matrix = new MatrixProperty(max_type+1, max_type+1);
+        VectorProperty * elast_cohesionBeam = registry.getVectorProperty(VB_ELAST,caller);
+        double * elast = elast_cohesionBeam->data;
+
+        for(int i=1;i< max_type+1; i++)
+            for(int j=1;j<max_type+1;j++)
+                matrix->data[i][j] = elast[i]*elast[j]/(elast[i]+elast[j]);
+
+        return matrix;
     }
 
     /* ---------------------------------------------------------------------- */

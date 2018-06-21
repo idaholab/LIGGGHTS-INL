@@ -99,6 +99,7 @@ namespace MathExtraLiggghts {
   inline void vec_quat_rotate(int * const vec, const double * const quat) { UNUSED(vec); UNUSED(quat); }
   inline void vec_quat_rotate(bool * const vec, const double * const quat) { UNUSED(vec); UNUSED(quat); }
   inline void quat_diff(double *q_new, double *q_old, double *q_diff);
+  inline void quat_to_EulerAngle(double *quat_, double *omega_);
   inline void angmom_from_omega(double *w,
                                   double *ex, double *ey, double *ez,
                                   double *idiag, double *m);
@@ -123,7 +124,10 @@ namespace MathExtraLiggghts {
 
   // prime number test
   inline bool isPrime(int val);
-};
+
+  // contact area
+  inline double contactAreaTwoSpheres(double radi, double radj, double dist);
+}
 
 /* ----------------------------------------------------------------------
    matrix  times col vector
@@ -528,6 +532,26 @@ inline void MathExtraLiggghts::quat_diff(double *q_new, double *q_old, double *q
     MathExtra::quatquat(q_old_c,q_new,q_diff);
 }
 
+inline void MathExtraLiggghts::quat_to_EulerAngle(double *quat_, double *omega_)
+{
+	// roll (x-axis rotation)
+	double sinr = +2.0 * (quat_[0] * quat_[1] +quat_[2] * quat_[3]);
+	double cosr = +1.0 - 2.0 * (quat_[1] * quat_[1] + quat_[2] * quat_[2]);
+  omega_[0] = std::atan2(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	double sinp = +2.0 * (quat_[0] * quat_[2] - quat_[3] * quat_[1]);
+	if (fabs(sinp) >= 1)
+    omega_[1] = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+    omega_[1] = std::asin(sinp);
+
+	// yaw (z-axis rotation)
+	double siny = +2.0 * (quat_[0] * quat_[3] + quat_[1] * quat_[2]);
+	double cosy = +1.0 - 2.0 * (quat_[2] * quat_[2] + quat_[3] * quat_[3]);  
+  omega_[2] = std::atan2(siny, cosy);
+}
+
 /* -----------------------------------------------------------------------------
  * compare two doubles by using their integer representation
  * source: http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
@@ -691,6 +715,18 @@ bool MathExtraLiggghts::isPrime(int val)
   }
 
   return true;
+}
+
+/* ----------------------------------------------------------------------
+   calculates the contact area of two spheres with radii (radi, radj) at
+   distance (dist)
+------------------------------------------------------------------------- */
+
+double MathExtraLiggghts::contactAreaTwoSpheres(double radi, double radj, double dist)
+{
+    // using Heron's formula
+    const double s = (radi+radj+dist)*0.5;
+    return 4*M_PI*s*(s-radi)*(s-radj)*(s-dist)/(dist*dist);
 }
 
 #endif

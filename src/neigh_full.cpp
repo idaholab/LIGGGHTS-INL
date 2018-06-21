@@ -106,7 +106,7 @@ void Neighbor::full_nsq(NeighList *list)
       if (includegroup && !(mask[j] & bitmask)) continue;
       if (i == j) continue;
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -186,7 +186,7 @@ void Neighbor::full_nsq_ghost(NeighList *list)
       for (j = 0; j < nall; j++) {
         if (i == j) continue;
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -206,7 +206,7 @@ void Neighbor::full_nsq_ghost(NeighList *list)
       for (j = 0; j < nall; j++) {
         if (i == j) continue;
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -287,7 +287,7 @@ void Neighbor::full_bin(NeighList *list)
         if (i == j) continue;
 
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -381,7 +381,7 @@ void Neighbor::full_bin_ghost(NeighList *list)
           if (i == j) continue;
 
           jtype = type[j];
-          if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+          if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
@@ -413,7 +413,7 @@ void Neighbor::full_bin_ghost(NeighList *list)
           if (i == j) continue;
 
           jtype = type[j];
-          if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+          if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
@@ -503,7 +503,7 @@ void Neighbor::full_multi(NeighList *list)
         if (cutsq[jtype] < distsq[k]) continue;
         if (i == j) continue;
 
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];

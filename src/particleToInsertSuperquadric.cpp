@@ -161,6 +161,7 @@ void ParticleToInsertSuperquadric::scale_pti(double r_scale)
 
     for(int i = 0; i < nparticles; i++) {
         radius_ins[i] *= r_scale;
+        radius_ins_max *= r_scale;
         shape_ins[0] *= r_scale;
         shape_ins[1] *= r_scale;
         shape_ins[2] *= r_scale;

@@ -44,6 +44,7 @@
 
 #include <cmath>
 #include "lammps.h"
+#include "random_park.h"
 
 namespace LAMMPS_NS {
 
@@ -133,7 +134,7 @@ inline void vectorCopyN(const T *from, T *to, int N)
 }
 
 template<typename T>
-inline void vectorCopy3D(const T *from, T *to)
+inline void vectorCopy3D(const T *const from, T *const to)
 {
   to[0]=from[0];
   to[1]=from[1];
@@ -362,6 +363,13 @@ inline void vectorAddMultiple3D(const double *v1, double v2factor, const double 
   result[0]=v1[0]+v2factor*v2[0];
   result[1]=v1[1]+v2factor*v2[1];
   result[2]=v1[2]+v2factor*v2[2];
+}
+
+template<typename T>
+inline void vectorAddMultipleN(const T *const v1, const T v2factor, const T *const v2, T *const result, const int n)
+{
+    for (int i = 0; i < n; i++)
+        result[i] = v1[i] + v2factor*v2[i];
 }
 
 inline void vectorSubtract4D(const double *v1,const double *v2, double *result)
@@ -634,6 +642,15 @@ inline void printMat33(FILE *out, const char *name, double const* const* mat)
     fprintf(out," matrix %s: %f %f %f\n",name,mat[0][0],mat[0][1],mat[0][2]);
     fprintf(out,"        %s: %f %f %f\n",name,mat[1][0],mat[1][1],mat[1][2]);
     fprintf(out,"        %s: %f %f %f\n",name,mat[2][0],mat[2][1],mat[2][2]);
+}
+
+inline void randomUnitVec3D(LAMMPS_NS::RanPark *random,double *vec)
+{
+    vec[0] = random->uniform()-0.5;
+    vec[1] = random->uniform()-0.5;
+    vec[2] = random->uniform()-0.5;
+
+    vectorNormalize3D(vec);
 }
 
 }

@@ -130,7 +130,7 @@ namespace ContactModels {
         settings.registerOnOff("tangential_reduce",tangentialReduce_,false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry) {
       registry.registerProperty("surfaceLiquidContentInitial", &MODEL_PARAMS::createliquidContentInitialWashino);
@@ -224,7 +224,7 @@ namespace ContactModels {
       neighbor->register_contact_dist_factor(1.1*maxSeparationDistanceRatio);
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
 
@@ -538,7 +538,7 @@ namespace ContactModels {
     }
 
   private: // private functions
-    inline void limitLiquidContent(const int idx, const int itype)
+    void limitLiquidContent(const int idx, const int itype)
     {
         double *surfaceLiquidContent = fix_surfaceliquidcontent->vector_atom;
 

@@ -105,17 +105,17 @@ class AssociativePointerArray
         void scale(double factor);
 
         inline int bufSize(int operation,bool scale,bool translate,bool rotate) const;
-        inline int pushToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate);
+        inline int pushToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const;
         inline int popFromBuffer(double *buf, int operation,bool scale,bool translate, bool rotate);
 
-        inline int elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate);
-        inline int pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, std::list<std::string> * properties, double *dlo, double *dhi,bool scale,bool translate, bool rotate);
+        inline int elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const;
+        inline int pushElemListToBuffer(const int n, const int *const list, double *const buf, const int operation, std::list<std::string> *const properties, const int pbc_flag, const int *const pbc, Domain *const domain, const bool scale, const bool translate, const bool rotate) const;
         inline int popElemListFromBuffer(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate);
-        inline int pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> *properties,bool scale,bool translate, bool rotate);
-        inline int popElemListFromBufferReverse(int n, int *list, double *buf, int operation, std::list<std::string> *properties, bool scale,bool translate, bool rotate);
+        inline int pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> *properties,bool scale,bool translate, bool rotate) const;
+        inline int popElemListFromBufferReverse(int n, const int *const list, double *buf, int operation, std::list<std::string> *properties, bool scale,bool translate, bool rotate);
 
-        inline int elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate);
-        inline int pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate);
+        inline int elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate) const;
+        inline int pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate) const;
         inline int popElemFromBuffer(double *buf, int operation,bool scale,bool translate, bool rotate);
 
         int idToIndex(const char *_id);

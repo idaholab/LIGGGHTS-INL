@@ -53,6 +53,7 @@
 #define LMP_FIX_H
 
 #include "pointers.h"
+#include "version_struct.h"
 
 namespace LAMMPS_NS {
 
@@ -166,7 +167,7 @@ class Fix : protected Pointers {
   virtual void post_run() {}
   virtual void write_restart(FILE *);
   virtual void write_restart_file(char *) {}
-  virtual void restart(char *) {}
+  virtual void restart(char *, const Version & = Version(0,0)) {}
 
   virtual void grow_arrays(int) {}
   virtual void copy_arrays(int, int, int) {}
@@ -207,8 +208,10 @@ class Fix : protected Pointers {
   virtual double max_alpha(double *) {return 0.0;}
   virtual int min_dof() {return 0;}
 
+  virtual int get_comm_size() const { return 0; }
   virtual int pack_comm(int, int *, double *, int, int *) {return 0;}
   virtual void unpack_comm(int, int, double *) {}
+  virtual int get_reverse_comm_size() const { return 0; }
   virtual int pack_reverse_comm(int, int, double *) {return 0;}
   virtual void unpack_reverse_comm(int, int *, double *) {}
 
@@ -245,14 +248,14 @@ class Fix : protected Pointers {
   virtual unsigned int data_mask() {return datamask;}
   virtual unsigned int data_mask_ext() {return datamask_ext;}
 
-  virtual bool use_rad_for_cut_neigh_and_ghost() {return true;} 
-  virtual double min_rad(int) {return 0.0;} 
-  virtual double max_rad(int) {return 0.0;} 
-  virtual int min_type() {return 0;} 
-  virtual int max_type() {return 0;} 
-  virtual double extend_cut_ghost() {return 0.0;} 
-  virtual int n_history_extra() {return 0;} 
-  virtual bool history_args(char** args) { UNUSED(args); return false; } 
+  virtual bool use_rad_for_cut_neigh_and_ghost() {return true;}
+  virtual double min_rad(int) {return 0.0;}
+  virtual double max_rad(int) {return 0.0;}
+  virtual int min_type() {return 0;}
+  virtual int max_type() {return 0;}
+  virtual double extend_cut_ghost() {return 0.0;}
+  virtual int n_history_extra() {return 0;}
+  virtual bool history_args(char** args) { UNUSED(args); return false; }
 
   // Mesh creation routines
   virtual int getCreateMeshTriCount()
@@ -267,11 +270,25 @@ class Fix : protected Pointers {
   virtual class IRegionNeighborFieldList* getFieldList() const
   { return NULL; }
 
+  // for parallelization of multispheres and meshes
+  virtual class ParallelBase* get_parallel_base_ptr() const
+  { return NULL; }
+
+  double get_min_rad_multiplier() const
+  { return min_rad_multiplier_; }
+
+  double get_max_rad_multiplier() const
+  { return max_rad_multiplier_; }
+
  protected:
   int evflag;
   int vflag_global,vflag_atom;
   int maxvatom;
   bool can_create_mesh_;
+  // for fixes that change the size of particles we have a multiplier for min and max radius
+  // estimations that are used to compute cutoffs etc.
+  double min_rad_multiplier_;
+  double max_rad_multiplier_;
 
   void v_setup(int);
   void v_tally(int, int *, double, double *);

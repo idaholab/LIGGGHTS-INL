@@ -47,6 +47,7 @@
 #define LMP_UPDATE_H
 
 #include "pointers.h"
+#include <time.h>
 
 namespace LAMMPS_NS {
 
@@ -90,6 +91,8 @@ class Update : protected Pointers {
   void reset_timestep(bigint);
   void update_time();
   bigint memory_usage();
+  void set_wall_clock_time(int, char**);
+  bool run_into_wall_clock();
 
   void set_force_dt_reset(bool value)
   { force_dt_reset_ = value; }
@@ -98,6 +101,11 @@ class Update : protected Pointers {
   { return atime + (ntimestep - atimestep)*dt; }
 
  private:
+  int wall_clock_time;
+  time_t execution_start_time;
+  bigint execution_nstep;
+  bool stop_execution_because_of_wall_clock;
+
   void new_integrate(char *, int, char **, char *, int &);
 
   bool force_dt_reset_; 

@@ -82,8 +82,10 @@ namespace LAMMPS_NS
         virtual void setup(int vflag);
 
         virtual int setmask();
+        virtual void setup_pre_exchange();
         virtual void setup_pre_force(int);
 
+        virtual void pre_exchange();
         virtual void pre_force(int);
         virtual void initial_integrate(int);
         virtual void final_integrate();
@@ -111,7 +113,7 @@ namespace LAMMPS_NS
         void deleteMeshMulticontactData();
 
         MeshModule* get_module(std::string name);
-        void add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall);
+        void add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall, double *contact_history);
 
         bool trackStress();
 
@@ -217,6 +219,10 @@ namespace LAMMPS_NS
         // mesh curvature
         double curvature_;
         bool curvature_tolerant_;
+
+        // all active
+        bool allActiveFlag_;
+        bool weightedWallFormulation_;
 
         // extrude mesh
         bool extrude_mesh_;

@@ -75,7 +75,6 @@ fix		integr all nve/sphere
 compute		1 all erotate/sphere
 thermo_style	custom step atoms ke c_1 vol
 thermo		1000
-compute_modify	thermo_temp dynamic yes
 
 #insert the first particles so that dump is not empty
 fix piston_move all move/mesh mesh piston_m linear 0. 0. ${cvel}

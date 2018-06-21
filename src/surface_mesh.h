@@ -73,6 +73,8 @@ class SurfaceMesh : public TrackingMesh<NUM_NODES>
 
         void setCurvature(double _curvature);
         void setCurvatureTolerant(bool _tol);
+
+        void setAllEdgesCornersActive(bool _active);
         
         bool addElement(double **nodeToAdd,int lineNumb);
 
@@ -81,6 +83,15 @@ class SurfaceMesh : public TrackingMesh<NUM_NODES>
         bool areCoplanarNodeNeighs(int tag_i, int tag_j);
         bool areCoplanarNeighs(int tag_i, int tag_j);
         bool isOnSurface(double *pos);
+
+        // returns true if mesh forms a closed volume
+        bool isClosedVolume();
+        bool isConvex() {return true;} // stub, test to be implemented
+        // computes wheter p1 and p2 are on the same side of the mesh
+        // (inside or outside)
+        // assuming that the mesh is convex
+        // if the mesh does not represent a quasi-convex body, this will return rubbish!
+        bool pointsOnSameSideConvex(double *p1, double *p2);
 
         // returns true if surfaces share an edge
         // called with local index
@@ -233,6 +244,11 @@ class SurfaceMesh : public TrackingMesh<NUM_NODES>
         int nTooManyNeighs_;
         int nOverlapping_;
 
+        bool nonCoplanarEdgesActive_;
+        bool coplanarEdgesActive_;
+
+        bool nonColinearCornersActive_;
+        bool colinearCornersActive_;
         // per-element properties
         // add more properties as they are needed, such as
         // edge length, edge vectors, surface normal ....

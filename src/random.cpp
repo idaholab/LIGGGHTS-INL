@@ -74,26 +74,10 @@ Random::Random(LAMMPS *lmp, const char * seed_char, bool proc_shift, int multipl
         sprintf(errstr,"Seed %ld + %d (offset) is larger than INT_MAX (%d)\n", seedl, offset, INT_MAX);
         error->all(FLERR, errstr);
     }
+
+    // validate seed (prime and > 10000 and unique)
+    input->add_and_validate_seed(seed);
+
     seed += offset;
-
-    if(0 == comm->me)
-    {
-        if(seed < 10000 || !MathExtraLiggghts::isPrime(seed))
-        {
-            char errstr[1024];
-
-            sprintf(errstr,"Random number generation: It is required that the random seed value is > 10000 and a prime number.\n"
-                           "The random seed used was %d\n"
-                           "  Hint 1: start with 'liggghts -echo both < in.script' to find out which command caused this\n"
-                           "  Hint 2: possible valid seeds would be the following numbers:\n"
-                           "          15485863, 15485867, 32452843, 32452867, 49979687, 49979693, 67867967, 67867979, 86028121, 86028157",
-                           seed);
-
-            if(input->seed_check_throw_error())
-                error->one(FLERR,errstr);
-            else
-                error->warning(FLERR,errstr);
-        }
-    }
 
 }

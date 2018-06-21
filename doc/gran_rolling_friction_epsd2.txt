@@ -27,14 +27,14 @@ torque contribution. It is similar to the "EPSD model"_gran_rolling_friction_eps
 
 :c,image(Eqs/pair_gran_hooke_eqEpsd5.gif)
 
-where k_t is the abovementioned tangential stiffness. Furthermore, the viscous damping torque M_rd is disabled at all.
+where k_t is the abovementioned tangential stiffness. Furthermore, the viscous damping torque M_rd is disabled at all [(Wensrich)].
 
 The coefficient of rolling friction (rmu) must be defined as
 
 fix id all property/global coefficientRollingFriction peratomtypepair n_atomtypes value_11 value_12 .. value_21 value_22 .. .
     (value_ij=value for the coefficient of rolling friction between atom type i and j; n_atomtypes is the number of atom types you want to use in your simulation) :pre
 
-This coefficient rmu is equal to the rmu as defined in the "CDT model"_gran_rolling_friction_cdt.html. :pre
+This coefficient rmu is equal to the rmu as defined in the "CDT model"_gran_rolling_friction_cdt.html.
 
 IMPORTANT NOTE: You have to use atom styles beginning from 1, e.g. 1,2,3,...
 
@@ -57,3 +57,5 @@ may not be available in LIGGGHTS(R)-INL.
 {torsionTorque} = 'off'
 
 [(Ai)] Jun Ai, Jian-Fei Chen, J. Michael Rotter, Jin Y. Ooi, Powder Technology, 206 (3), p 269-282 (2011).
+[(Wensrich)] C. M. Wensrich, A. Katterfeld, Rolling friction as a technique for modelling particle shape in DEM., Powder Technology, 217, 409–417 (2012).
+[(Iwashita)] K. Iwashita, M. Oda, Rolling Resistance at Contacts in Simulation of Shear Band Development by DEM. J. Eng. Mech. 124, 285–292 (1998).

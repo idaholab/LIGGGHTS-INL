@@ -75,7 +75,7 @@ namespace ContactModels
       settings.registerOnOff("torsion",torsion,false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry) {
       registry.registerProperty("coeffRollFrict", &MODEL_PARAMS::createCoeffRollFrict);
@@ -283,7 +283,7 @@ namespace ContactModels
     int fo_offset;
     bool torsion;
 
-    inline void calcRollTorque(double (&r_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
+    void calcRollTorque(double (&r_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
       double wr_n[3],wr_t[3],dr_torque[3];
       const int itype = sidata.itype;
       const int jtype = sidata.jtype;
@@ -347,7 +347,7 @@ namespace ContactModels
         r_torque[2] += r_coef*wr_t[2];
       }
     }
-    inline void calcTorTorque(double (&r_tor_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
+    void calcTorTorque(double (&r_tor_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
       double wr_n[3],dr_tor_torque[3];
 
       const int itype = sidata.itype;

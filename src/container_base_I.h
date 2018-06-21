@@ -185,13 +185,13 @@
       strcpy(_id,id_);
   }
 
-  inline bool ContainerBase::matches_id(const char *_id)
+  inline bool ContainerBase::matches_id(const char *_id) const
   {
       if(strcmp(_id,id_) == 0) return true;
       return false;
   }
 
-  inline bool ContainerBase::matches_any_id(std::list<std::string> * ids)
+  inline bool ContainerBase::matches_any_id(std::list<std::string> * ids) const
   {
       std::list<std::string>::iterator _id;
       for (_id = ids->begin(); _id != ids->end(); _id++)

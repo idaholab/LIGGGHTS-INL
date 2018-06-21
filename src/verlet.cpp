@@ -384,6 +384,8 @@ void Verlet::run(int n)
     
     if (SignalHandler::request_quit && !SignalHandler::request_write_restart)
         break;
+    if (update->run_into_wall_clock())
+        break;
   }
 }
 

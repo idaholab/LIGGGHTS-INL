@@ -110,18 +110,18 @@ class RegionNeighborList : public IRegionNeighborList, protected Pointers
 
     bool isInBoundingBox(double *pos) const;
 
-    inline void coord2bin_calc_interpolation_weights(double *x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const;
+    inline void coord2bin_calc_interpolation_weights(const double * const x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const;
 
-    int coord2bin(double *x,int &quadrant,double &wx,double &wy,double &wz) const;
+    int coord2bin(const double * const x,int &quadrant,double &wx,double &wy,double &wz) const;
 
-    inline int coord2bin(double *x) const
+    inline int coord2bin(const double * const x) const
     { int quadrant; double wx,wy,wz; return coord2bin(x,quadrant,wx,wy,wz); }
 
     bool boundingBoxSet() const
     {return bbox_set; }
 
-    std::vector<LAMMPS_NS::Bin<INTERPOLATE> > getBins() const
-    {return bins; }
+    const LAMMPS_NS::Bin<INTERPOLATE> *getBinPtr(const int i) const
+    { return &(bins.at(i)); }
 
     double invBinVolume() const
     { return bininvx*bininvy*bininvz; }

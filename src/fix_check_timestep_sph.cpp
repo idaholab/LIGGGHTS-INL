@@ -60,8 +60,6 @@
 using namespace LAMMPS_NS;
 using namespace FixConst;
 
-#define BIG 1000000.
-
 /* ---------------------------------------------------------------------- */
 
 FixCheckTimestepSph::FixCheckTimestepSph(LAMMPS *lmp, int narg, char **arg) :
@@ -205,7 +203,7 @@ void FixCheckTimestepSph::calc_courant_estims_eval()
 
   vmax = -1;
   mumax = -1;
-  courant_time = BIG;
+  courant_time = 1000000.; // just asign it some large number
 
   // calculate minimum courant time step
   //inum = list->inum;

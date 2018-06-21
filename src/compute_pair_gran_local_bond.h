@@ -59,8 +59,6 @@ class ComputePairGranLocalBond : public ComputePairGranLocal {
 
   void init();
 
-  void pair_finalize();
-
   bool decide_add(double *hist, double * &contact_pos);
 
  protected:

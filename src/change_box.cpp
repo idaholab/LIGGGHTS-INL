@@ -402,7 +402,7 @@ void ChangeBox::command(int narg, char **arg)
   if (domain->triclinic) domain->x2lamda(atom->nlocal);
   domain->reset_box();
   Irregular *irregular = new Irregular(lmp);
-  irregular->migrate_atoms();
+  irregular->migrate_all();
   delete irregular;
   if (domain->triclinic) domain->lamda2x(atom->nlocal);
 

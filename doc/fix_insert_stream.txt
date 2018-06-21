@@ -70,7 +70,16 @@ general_keywords = {verbose} or {maxattampt} or {nparticles} or {mass} or {parti
     omegaz = z-component of angular velocity (1/time units)
   {set_property} values = property-varname val
     property-varname = variable name of a "fix property/atom"_fix_property.html holding a scalar value for each particle
-    val = value to initialize the property with upon insertion  :pre
+    val = value to initialize the property with upon insertion
+  {set_property_vector} values = property-name magnitude const value orientation ...
+    property-name = name of property that should be modified
+    {magnitude} values = const
+      {const} values = value
+        value = magnitude used for vector
+    {orientation} = const or random
+      {const} values = x y z
+        x,y,z = vector used for insertion (should be a unit vector)
+      {random} = no arguments :pre
 
 following the general keyword/value section, one or more stream keyword/value pairs can be appended for the fix insert/stream command :l
 stream_keywords = {duration} or {parallel} or {insertion_face} or {extrude_length} :l
@@ -115,6 +124,10 @@ to control the insertion rate. Particles are not inserted continuously,
 but in packets (for efficiency reasons). Particles are inserted again
 after enough time has elapsed that the previously inserted particles
 have left the insertion volume.
+
+IMPORTANT NOTE: The abovementioned keywords {particlerate}, {nparticles} do apply 
+to the number of particle templates / particle conglomerates in case 
+of using multisphere of multiplespheres templates, not to single spheres.
 
 One of the two keywords {insert_every} and {extrude_length} must be
 provided by the user (but not both).
@@ -235,6 +248,9 @@ The insertion velocity must be non-zero.
 The {set_property} option can be used to initialize scalar per-particle
 properties such as temperatures, which are stored in a 
 a "fix property/atom"_fix_property.html.
+
+The {set_property_vector} option allows to initialize vector per-particle
+propeties such as dipole property 'mu'.
 
 The setting of {compress_tags} will trigger a periodic re-tagging of
 atom ids. This is usefull in case the simulation domain is used to

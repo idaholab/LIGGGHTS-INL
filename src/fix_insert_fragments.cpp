@@ -564,12 +564,12 @@ void FixInsertFragments::print_stats_replace_during()
   if (me == 0 && n_replace_this_ > 0)
   {
     if (screen)
-      fprintf(screen ,"Particle replacement: replaced %d particle templates (mass %f) at step " BIGINT_FORMAT"\n "
+      fprintf(screen ,"Particle replacement: replaced %d particle templates (mass %f) at step " BIGINT_FORMAT "\n "
                       " - a total of %d particles (mass %f) replaced so far.\n",
               n_replace_this_,mass_replace_this_,step,n_replace_,mass_replace_);
 
     if (logfile)
-      fprintf(logfile,"Particle replacement: replaced %d particle templates (mass %f) at step " BIGINT_FORMAT"\n "
+      fprintf(logfile,"Particle replacement: replaced %d particle templates (mass %f) at step " BIGINT_FORMAT "\n "
                       " - a total of %d particles (mass %f) replaced so far.\n",
               n_replace_this_,mass_replace_this_,step,n_replace_,mass_replace_);
   }

@@ -122,11 +122,15 @@ class FixTemplateMultiplespheres : public FixTemplateSphere {
   inline double get_bond_id(const int i) const
   { return fix_bond_random_id ? fix_bond_random_id->vector_atom[i] : 0.0; }
 
+  inline int get_orientation()
+  { return orientation; }
+
  protected:
 
   // template calculations
   virtual void calc_bounding_sphere();
   virtual void calc_center_of_mass();
+  virtual void calc_orientation();
   virtual void check_overlap();
   virtual void print_info();
 
@@ -141,6 +145,7 @@ class FixTemplateMultiplespheres : public FixTemplateSphere {
 
   // coords of each sphere with respect to center of mass
   double **x_sphere;
+  int orientation; 
 
   // radius of each sphere
   double *r_sphere;

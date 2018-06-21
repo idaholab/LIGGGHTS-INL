@@ -52,6 +52,8 @@
 #include "fix_particledistribution_discrete.h"
 #include "update.h"
 
+#include <vector>
+
 namespace LAMMPS_NS {
 
 class FixInsert : public Fix {
@@ -69,15 +71,13 @@ class FixInsert : public Fix {
   virtual void end_of_step() {}
 
   void write_restart(FILE *);
-  virtual void restart(char *);
+  virtual void restart(char *, const Version &);
 
   virtual void reset_timestep(bigint) {}
 
   double compute_vector(int index);
 
-  virtual double min_rad(int);  
-  virtual double max_rad(int);  
-  virtual double max_r_bound();  
+  virtual double max_r_bound();
   int min_type();
   int max_type();
 
@@ -142,6 +142,7 @@ class FixInsert : public Fix {
 
   // minmum/maximum radius to be inserted
   double minrad, maxrad;
+  double maxrad_simulation; 
 
   // flag if overlap is checked upon insertion (via all-to-all comm)
   int check_ol_flag;
@@ -221,6 +222,19 @@ class FixInsert : public Fix {
   void generate_random_velocity(double * velocity);
 
  private:
+
+  struct PropertyVector
+  {
+      enum {CONST, RANDOM} item_type;
+      PropertyVector() : magnitude(CONST), mag_value(0.0), orientation(RANDOM) { vectorZeroize3D(o_vector); }
+      std::string name;
+      int magnitude;
+      double mag_value;
+      int orientation;
+      double o_vector[3];
+  };
+
+  std::vector<PropertyVector> property_vector_list;
 
   char *property_name;
   class FixPropertyAtom *fix_property;

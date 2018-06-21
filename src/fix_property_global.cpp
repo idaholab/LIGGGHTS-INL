@@ -53,6 +53,8 @@
 #include "group.h"
 #include "neighbor.h"
 #include "fix_property_global.h"
+#include "property_type_constant.h"
+#include "property_type_lookup.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -62,12 +64,22 @@ using namespace FixConst;
 /* ---------------------------------------------------------------------- */
 
 FixPropertyGlobal::FixPropertyGlobal(LAMMPS *lmp, int narg, char **arg) :
-  Fix(lmp, narg, arg)
+    Fix(lmp, narg, arg),
+    variablename(NULL),
+    data_style(FIXPROPERTY_GLOBAL_SCALAR),
+    data_type_(FIXPROPERTY_GLOBAL_TYPE_CONSTANT),
+    is_symmetric(false),
+    is_atomtype_bound(false),
+    filename(NULL),
+    grpname(NULL),
+    me(-1),
+    property_(NULL)
 {
     //Check args
-    if (narg < 6) error->all(FLERR,"Illegal fix property/global command, not enough arguments");
+    if (narg < 6)
+        error->all(FLERR,"Illegal fix property/global command, not enough arguments");
 
-    if(0 == strcmp(style,"custom_property/global"))
+    if(strcmp(style,"custom_property/global") == 0)
     {
         int len = strlen("property/global") + 1;
         delete []style;
@@ -79,8 +91,6 @@ FixPropertyGlobal::FixPropertyGlobal(LAMMPS *lmp, int narg, char **arg) :
     int n = strlen(arg[3]) + 1;
     variablename = new char[n];
     strcpy(variablename,arg[3]);
-    is_symmetric = false;
-    is_atomtype_bound = false;
 
     if (strcmp(arg[4],"scalar") == 0)
         data_style = FIXPROPERTY_GLOBAL_SCALAR;
@@ -99,36 +109,70 @@ FixPropertyGlobal::FixPropertyGlobal(LAMMPS *lmp, int narg, char **arg) :
         is_symmetric = true;
         is_atomtype_bound = true;
     }
-    else error->fix_error(FLERR,this,"Unknown style. Valid styles are scalar, vector, atomtype/peratomtype, matrix, or atomtypepair/peratomtypepair");
+    else
+        error->fix_error(FLERR,this,"Unknown style. Valid styles are scalar, vector, atomtype/peratomtype, matrix, or atomtypepair/peratomtypepair");
 
     int darg = 0;
-    if (data_style == FIXPROPERTY_GLOBAL_MATRIX) darg = 1;
+    if (data_style == FIXPROPERTY_GLOBAL_MATRIX)
+    {
+        size_array_cols = force->inumeric(FLERR,arg[5]);
+        darg += 1;
+    }
+
+    if (strcmp(arg[5+darg], "type") == 0)
+    {
+        if (narg < 7+darg)
+            error->all(FLERR,"Illegal fix property/global command, not enough arguments");
+        if (strcmp(arg[6+darg], "constant") == 0)
+            data_type_ = FIXPROPERTY_GLOBAL_TYPE_CONSTANT;
+        else if (strcmp(arg[6+darg], "lookup") == 0)
+            data_type_ = FIXPROPERTY_GLOBAL_TYPE_LOOKUP;
+        else
+            error->all(FLERR, "Illegal property/global type");
+        darg += 2;
+    }
+
+    bool warn_out_of_bounds(false);
+    if(strcmp(arg[5+darg], "warn_out_of_bounds") == 0)
+    {
+        if(data_type_ != FIXPROPERTY_GLOBAL_TYPE_LOOKUP)
+            error->fix_error(FLERR,this,"warn_out_of_bounds only valid for property/global type lookup");
+
+        if(strcmp(arg[6+darg],"on") == 0)
+            warn_out_of_bounds = true;
+        else if(strcmp(arg[6+darg],"off") == 0)
+            warn_out_of_bounds = false;
+        else
+            error->all(FLERR,"illegal value for warn_out_of_bounds");
+        darg += 2;
+    }
 
     //assign values
     nvalues = narg - 5 - darg;
-    nvalues_new_array = 0;
-    
-    values = (double*) memory->smalloc(nvalues*sizeof(double),"values");
-    values_recomputed = (double*) memory->smalloc(nvalues*sizeof(double),"values");
 
-    if(narg < 5+darg+nvalues) error->fix_error(FLERR,this,"not enough arguments");
-
-    for (int j = 0; j < nvalues; j++)
-        values[j] = force->numeric(FLERR,arg[5+darg+j]);
-
-    if (data_style == FIXPROPERTY_GLOBAL_SCALAR)
-        scalar_flag = 1;
-    else if (data_style==FIXPROPERTY_GLOBAL_VECTOR) {
-        vector_flag = 1;
-        size_vector = nvalues;
-    }
-    else if (data_style == FIXPROPERTY_GLOBAL_MATRIX) {
-        array_flag = 1;
-        size_array_cols = force->inumeric(FLERR,arg[5]);
+    if (data_style == FIXPROPERTY_GLOBAL_MATRIX)
+    {
         if (fmod(static_cast<double>(nvalues),size_array_cols) != 0.)
-          error->fix_error(FLERR,this,"the number of default values must be a multiple of nCols.");
+            error->fix_error(FLERR,this,"the number of default values must be a multiple of nCols.");
         size_array_rows = static_cast<int>(static_cast<double>(nvalues)/size_array_cols);
     }
+    
+    if (data_type_ == FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+    {
+        property_ = static_cast<PropertyTypeBase*>(new PropertyTypeConstant(lmp, &arg[5+darg], nvalues, size_array_cols, data_style, is_symmetric));
+
+        if (data_style == FIXPROPERTY_GLOBAL_SCALAR)
+            scalar_flag = 1;
+        else if (data_style==FIXPROPERTY_GLOBAL_VECTOR)
+        {
+            vector_flag = 1;
+            size_vector = nvalues;
+        }
+        else if (data_style == FIXPROPERTY_GLOBAL_MATRIX)
+            array_flag = 1;
+    }
+    else if (data_type_ == FIXPROPERTY_GLOBAL_TYPE_LOOKUP)
+        property_ = static_cast<PropertyTypeBase*>(new PropertyTypeLookup(lmp, &arg[5+darg], nvalues, size_array_cols, data_style, is_symmetric, warn_out_of_bounds));
 
     extvector=0; 
 
@@ -140,67 +184,29 @@ FixPropertyGlobal::FixPropertyGlobal(LAMMPS *lmp, int narg, char **arg) :
     for (int ifix = 0; ifix < modify->nfix; ifix++)
         if ((modify->fix[ifix]) && (strcmp(modify->fix[ifix]->style,style) == 0) && (strcmp(((FixPropertyGlobal*)(modify->fix[ifix]))->variablename,variablename)==0) )
             error->fix_error(FLERR,this,"There is already a fix that registers a variable of the same name");
-
-    array = NULL;
-    array_recomputed = NULL;
-    if(data_style == FIXPROPERTY_GLOBAL_MATRIX)
-    {
-        array = (double**)memory->smalloc(size_array_rows*sizeof(double**),"FixPropGlob:array");
-        array_recomputed = (double**)memory->smalloc(size_array_rows*sizeof(double**),"FixPropGlob:array_recomputed");
-        for(int i = 0; i < size_array_rows; i++) array[i] = &values[i*size_array_cols];
-        for(int i = 0; i < size_array_rows; i++) array_recomputed[i] = &values_recomputed[i*size_array_cols];
-    }
-
-    // error check if matrix is symmetric (if required)
-    if(is_symmetric)
-    {
-        if(size_array_rows != size_array_cols)
-            error->fix_error(FLERR,this,"per-atomtype property matrix must be symmetric, i.e. N atom types "
-                                        "require you to define N columns and N rows with N*N total values");
-
-        int sflag = true;
-        for(int i = 0; i < size_array_rows; i++)
-            for(int j = 0; j < size_array_cols; j++)
-                if(array[i][j] != array[j][i])
-                    sflag = false;
-
-        if(!lmp->wb)
-        {
-            if(!sflag)
-                error->fix_error(FLERR,this,"per-atomtype property matrix must be symmetric");
-        }
-        else
-        {
-            char errstr[512];
-            sprintf(errstr,"Property %s is required to be symmetric",variablename);
-            if(!sflag)
-                error->all(FLERR,errstr);
-        }
-    }
 }
 
 /* ---------------------------------------------------------------------- */
 
 FixPropertyGlobal::~FixPropertyGlobal()
 {
-  // delete locally stored arrays
-  delete[] variablename;
+    // delete locally stored arrays
+    delete[] variablename;
 
-  if(filename) delete[] filename;
-  if(grpname) delete[] grpname;
+    if(filename)
+        delete[] filename;
+    if(grpname)
+        delete[] grpname;
 
-  memory->sfree(values);
-  memory->sfree(values_recomputed);
-
-  if(array)            memory->sfree(array);
-  if(array_recomputed) memory->sfree(array_recomputed);
+    delete property_;
 }
 
 /* ---------------------------------------------------------------------- */
 
 void FixPropertyGlobal::pre_delete(bool unfixflag)
 {
-    if(filename) write();
+    if(filename)
+        write();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -211,7 +217,8 @@ Fix* FixPropertyGlobal::check_fix(const char *varname,const char *svmstyle,int l
 
     if(strcmp(varname,variablename) == 0)
     {
-        if(strcmp(svmstyle,"scalar") == 0) len1 = 1;
+        if(strcmp(svmstyle,"scalar") == 0)
+            len1 = 1;
 
         // check variable style
         if(
@@ -273,81 +280,59 @@ void FixPropertyGlobal::init()
 
 void FixPropertyGlobal::grow(int len1, int len2)
 {
-    if(data_style == FIXPROPERTY_GLOBAL_SCALAR) error->fix_error(FLERR,this,"Can not grow global property of type scalar");
-    else if(data_style == FIXPROPERTY_GLOBAL_VECTOR && len1 > nvalues)
-    {
-        memory->grow(values,len1,"FixPropertyGlobal:values");
-    }
-    else if(data_style == FIXPROPERTY_GLOBAL_MATRIX && len1*len2 > nvalues)
-    {
-        values = (double*) memory->srealloc(values,len1*len2*sizeof(double),"FixPropertyGlobal:values");
-        size_array_rows = len1;
-        size_array_cols = len2;
-        nvalues = len1*len2;
-        array = (double**)memory->srealloc(array,size_array_rows*sizeof(double**),"FixPropGlob:array");
-        for(int i = 0; i < size_array_rows; i++) array[i] = &values[i*size_array_cols];
-    }
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot grow containers of non-constant properties");
+
+    property_->grow(len1, len2);
 }
 
 /* ---------------------------------------------------------------------- */
 
 double FixPropertyGlobal::compute_scalar()
 {
-  return values[0];
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot compute scalar of non-constant property");
+    return property_->compute_scalar(0.);
 }
 
 /* ---------------------------------------------------------------------- */
 
 double FixPropertyGlobal::compute_vector(int i)
 {
-    if (i>(nvalues-1))error->fix_error(FLERR,this,"Trying to access vector, but index out of bounds");
-    return values[i];
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot compute vector of non-constant property");
+    return property_->compute_vector(0., i);
 }
 
 void FixPropertyGlobal::vector_modify(int i,double val)
 {
-    if (i>(nvalues-1))error->fix_error(FLERR,this,"Trying to access vector, but index out of bounds");
-    values_recomputed[i] = val;
-}
-
-double FixPropertyGlobal::compute_vector_modified(int i)
-{
-    if (i>(nvalues-1))error->fix_error(FLERR,this,"Trying to access vector, but index out of bounds");
-    return values_recomputed[i];
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot modify vector of non-constant property");
+    static_cast<PropertyTypeConstant*>(property_)->vector_modify(i, val);
 }
 
 /* ---------------------------------------------------------------------- */
 
 double FixPropertyGlobal::compute_array(int i, int j) //i is row, j is column
 {
-    if (i>(size_array_rows-1))error->fix_error(FLERR,this,"Trying to access matrix, but row index out of bounds");
-    if (j>(size_array_cols-1))error->fix_error(FLERR,this,"Trying to access matrix, but column index out of bounds");
-
-    return array[i][j];
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot compute array of non-constant property");
+    return property_->compute_array(0., i, j);
 }
 
 void FixPropertyGlobal::array_modify(int i, int j,double val) //i is row, j is column
 {
-    if (i>(size_array_rows-1))error->fix_error(FLERR,this,"Trying to access matrix, but row index out of bounds");
-    if (j>(size_array_cols-1))error->fix_error(FLERR,this,"Trying to access matrix, but column index out of bounds");
-
-    array_recomputed[i][j] = val;
-}
-
-double FixPropertyGlobal::compute_array_modified(int i, int j) //i is row, j is column
-{
-    if (i>(size_array_rows-1))error->fix_error(FLERR,this,"Trying to access matrix, but row index out of bounds");
-    if (j>(size_array_cols-1))error->fix_error(FLERR,this,"Trying to access matrix, but column index out of bounds");
-
-    return array_recomputed[i][j];
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Cannot modify array of non-constant property");
+    static_cast<PropertyTypeConstant*>(property_)->array_modify(i, j, val);
 }
 
 /* ---------------------------------------------------------------------- */
 
 int FixPropertyGlobal::setmask()
 {
-  int mask = 0;
-  return mask;
+    int mask = 0;
+    return mask;
 }
 
 /* ----------------------------------------------------------------------
@@ -356,8 +341,8 @@ int FixPropertyGlobal::setmask()
 
 double FixPropertyGlobal::memory_usage()
 {
-  double bytes = nvalues * sizeof(double);
-  return bytes;
+    double bytes = property_->memory_usage();
+    return bytes;
 }
 
 /* ----------------------------------------------------------------------
@@ -367,14 +352,12 @@ double FixPropertyGlobal::memory_usage()
 void FixPropertyGlobal::new_array(int l1,int l2)
 {
     
-    if (data_style == FIXPROPERTY_GLOBAL_MATRIX) error->fix_error(FLERR,this,"Can not allocate extra array for matrix style");
+    if (data_style == FIXPROPERTY_GLOBAL_MATRIX)
+        error->fix_error(FLERR,this,"Can not allocate extra array for matrix style");
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->fix_error(FLERR, this, "Can not create new array for non-constant properties");
     array_flag = 1;
-    size_array_rows = l1;
-    size_array_cols = l2;
-    nvalues_new_array = l1*l2;
-
-    memory->create(array,size_array_rows,size_array_cols,"FixPropGlob:array");
-    memory->create(array_recomputed,size_array_rows,size_array_cols,"FixPropGlob:array_recomputed");
+    static_cast<PropertyTypeConstant*>(property_)->new_array(l1, l2);
 }
 
 /* ----------------------------------------------------------------------
@@ -387,6 +370,9 @@ void FixPropertyGlobal::write()
     if(0 != me)
         return;
 
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->one(FLERR, "Fix property/global write is only allowed for type constant properties");
+
     FILE *file = fopen(filename,"w");
 
     if(!file)
@@ -396,19 +382,24 @@ void FixPropertyGlobal::write()
     fprintf(file,"fix %s %s %s %s ",id,grpname,style,variablename);
 
     // datatype
-    const char *datatyp;
-    if(0 == data_style) datatyp = "scalar";
-    if(1 == data_style) datatyp = "vector";
-    if(2 == data_style && is_symmetric) datatyp = "atomtypepair";
-    else if(2 == data_style) datatyp            = "matrix";
-    fprintf(file,"%s ",datatyp);
+    const char *datatype;
+    if(data_style == 0)
+        datatype = "scalar";
+    if(data_style == 1)
+        datatype = "vector";
+    if(data_style == 2 && is_symmetric)
+        datatype = "atomtypepair";
+    else if(data_style == 2)
+        datatype = "matrix";
+    fprintf(file,"%s ",datatype);
 
     // size_array_cols if required
-    if(2 == data_style) fprintf(file,"%d ",size_array_cols);
+    if(2 == data_style)
+        fprintf(file,"%d ",size_array_cols);
 
     // values
     for(int i = 0; i < nvalues; i++)
-        fprintf(file,"%f ",values[i]);
+        fprintf(file,"%f ", property_->compute_vector(0.,i));
 
     fprintf(file,"\n");
     fclose(file);
@@ -418,15 +409,62 @@ void FixPropertyGlobal::write()
 
 int FixPropertyGlobal::modify_param(int narg, char **arg)
 {
-  if (strcmp(arg[0],"file") == 0) {
-    if (narg < 2) error->fix_error(FLERR,this,"not enough arguments for fix_modify 'file'");
+    if (strcmp(arg[0],"file") == 0)
+    {
+        if (narg < 2)
+            error->fix_error(FLERR,this,"not enough arguments for fix_modify 'file'");
 
-    filename = new char[strlen(arg[1])+1];
-    strcpy(filename,arg[1]);
-    grpname = new char[strlen(group->names[igroup])+1];
-    strcpy(grpname,group->names[igroup]);
-    return 2;
-  }
+        filename = new char[strlen(arg[1])+1];
+        strcpy(filename,arg[1]);
+        grpname = new char[strlen(group->names[igroup])+1];
+        strcpy(grpname,group->names[igroup]);
+        return 2;
+    }
 
-  return 0;
+    return 0;
+}
+
+double FixPropertyGlobal::operator() (const double x)
+{
+    return property_->compute_scalar(x);
+}
+
+double FixPropertyGlobal::operator() (const double x, const int i)
+{
+    
+    return property_->compute_vector(x, i-1);
+}
+
+double FixPropertyGlobal::operator() (const double x, const int i, const int j)
+{
+    
+    return property_->compute_array(x, i-1, j-1);
+}
+
+double* FixPropertyGlobal::get_values() const
+{
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->one(FLERR, "get_values called for non-constant type of property/global");
+    return static_cast<PropertyTypeConstant*>(property_)->get_values();
+}
+
+double* FixPropertyGlobal::get_values_modified() const
+{
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->one(FLERR, "get_values_modified called for non-constant type of property/global");
+    return static_cast<PropertyTypeConstant*>(property_)->get_values_modified();
+}
+
+double const* const* FixPropertyGlobal::get_array() const
+{
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->one(FLERR, "get_array called for non-constant type of property/global");
+    return static_cast<PropertyTypeConstant*>(property_)->get_array();
+}
+
+double const* const* FixPropertyGlobal::get_array_modified() const
+{
+    if (data_type_ != FIXPROPERTY_GLOBAL_TYPE_CONSTANT)
+        error->one(FLERR, "get_array_modified called for non-constant type of property/global");
+    return static_cast<PropertyTypeConstant*>(property_)->get_array_modified();
 }

@@ -72,12 +72,12 @@ class TangentialModelBase : protected Pointers
   {
   public:
     TangentialModel(LAMMPS * lmp, IContactHistorySetup * hsetup, class ContactModelBase *cmb = 0);
-    inline void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void registerSettings(Settings & settings);
-    inline void connectToProperties(PropertyRegistry & registry);
-    inline void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
+    void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void registerSettings(Settings & settings);
+    void connectToProperties(PropertyRegistry & registry);
+    void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
   };
 
   template<>
@@ -91,7 +91,7 @@ class TangentialModelBase : protected Pointers
     void registerSettings(Settings&){}
     void surfacesIntersect(const SurfacesIntersectData&, ForceData&, ForceData&){}
     void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&){}
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
   };
 
 }

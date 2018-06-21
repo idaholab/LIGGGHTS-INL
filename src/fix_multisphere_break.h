@@ -61,9 +61,9 @@ public:
     virtual ~FixMultisphereBreak();
 
     void init();
-    void final_integrate();
+    virtual void end_of_step();
     void pre_neighbor();
-    void calc_force(bool setupflag);
+    virtual int setmask();
 
 protected:
 

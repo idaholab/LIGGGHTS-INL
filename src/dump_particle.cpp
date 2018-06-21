@@ -641,7 +641,7 @@ int DumpParticle::parse_parameters(const int narg, const char *const *const arg,
                 if (found_keyword)
                     break;
                 else
-                    error->all(FLERR, "Could not identify particle_property in dump/catalyst");
+                    error->all(FLERR, "Could not identify particle_property in dump/particle");
             }
         }
     }

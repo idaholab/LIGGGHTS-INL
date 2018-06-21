@@ -63,78 +63,100 @@ using namespace MathExtraLiggghtsNonspherical;
 
 namespace LAMMPS_NS
 {
-  
-  typedef SurfaceMesh<3,5> SurfaceMeshBase;
 
-  class TriMesh : public SurfaceMeshBase
-  {
-      public:
+typedef SurfaceMesh<3,5> SurfaceMeshBase;
 
-        TriMesh(LAMMPS *lmp);
-        virtual ~TriMesh();
+class TriMesh : public SurfaceMeshBase
+{
+public:
 
-        double resolveTriSphereContact    (int iPart, int nTri, double rSphere, double *cSphere,
-                                           double *delta,int &barysign);
-        double resolveTriSphereContactBary(int iPart, int nTri, double rSphere, double *cSphere,
-                                           double *contactPoint,double *bary,int &barysign,bool skip_inactive=true);
+    TriMesh(LAMMPS *lmp);
+    virtual ~TriMesh();
 
-        #ifdef SUPERQUADRIC_ACTIVE_FLAG
+    double resolveTriSphereContact(const int iPart, const int nTri, const double rSphere, const double *const cSphere,
+                                   double *delta, int &barysign);
+    double resolveTriSphereContactBary(const int iPart, const int nTri, const double rSphere,
+                                       const double *const cSphere, double *delta, double *bary,
+                                       int &barySign,bool skip_inactive=true);
 
-        double resolveTriSuperquadricContact(int nTri, double *normal, double *contactPoint, Superquadric particle);
-        double resolveTriSuperquadricContact(int nTri, double *normal, double *contactPoint, Superquadric particle, double *bary);
+    #ifdef SUPERQUADRIC_ACTIVE_FLAG
 
-        bool sphereTriangleIntersection(int nTri, double rSphere, double *cSphere);
-        int superquadricTriangleIntersection(int nTri, double *point_of_lowest_potential, Superquadric particle);
-        double pointToTriangleDistance(int iTri, double *Csphere, double *delta, bool treatActiveFlag, double *bary);
+    double resolveTriSuperquadricContact(int nTri, double *normal, double *contactPoint, Superquadric particle);
+    double resolveTriSuperquadricContact(int nTri, double *normal, double *contactPoint, Superquadric particle, double *bary);
 
-        #endif
+    bool sphereTriangleIntersection(int nTri, double rSphere, double *cSphere);
+    int superquadricTriangleIntersection(int nTri, double *point_of_lowest_potential, Superquadric particle);
+    double pointToTriangleDistance(int iTri, double *Csphere, double *delta, bool treatActiveFlag, double *bary);
 
-        bool resolveTriSphereNeighbuild(int nTri, double rSphere, double *cSphere, double treshold);
+    #endif
 
-        #ifdef TRI_LINE_ACTIVE_FLAG
-        // Extra for Line Contact Calculation ********
-        double resolveTriSegmentContact    (int iPart, int nTri, double *line, double *cLine, double length, double cylRadius,
-                                            double *delta, double &segmentParameter,int &barysign);
-        double resolveTriSegmentContactBary(int iPart, int nTri, double *line, double *cLine, double length, double cylRadius,
-                                            double *delta, double  &segmentParameter, double *bary,int &barysign);
-        bool resolveTriSegmentNeighbuild(int nTri, double *cLine, double length, double cylRadius, double treshold);
-        // Extra for Line Contact Calculation ********
-        #endif
+    bool resolveTriSphereNeighbuild(int nTri, double rSphere, double *cSphere, double treshold);
 
-        int generateRandomOwnedGhost(double *pos);
-        int generateRandomSubbox(double *pos);
+    #ifdef TRI_LINE_ACTIVE_FLAG
+    // Extra for Line Contact Calculation ********
+    double resolveTriSegmentContact    (int iPart, int nTri, double *line, double *cLine, double length, double cylRadius,
+                                        double *delta, double &segmentParameter,int &barysign);
+    double resolveTriSegmentContactBary(int iPart, int nTri, double *line, double *cLine, double length, double cylRadius,
+                                        double *delta, double  &segmentParameter, double *bary,int &barysign);
+    bool resolveTriSegmentNeighbuild(int nTri, double *cLine, double length, double cylRadius, double treshold);
+    // Extra for Line Contact Calculation ********
+    #endif
 
-        virtual int generateRandomOwnedGhostWithin(double *pos,double delta);
+    int generateRandomOwnedGhost(double *pos);
+    int generateRandomSubbox(double *pos);
+    void setWeightedWallFormulation(const bool flag)
+    { weightedWallFormulation_ = flag; }
+    bool getWeightedWallFormulation() const
+    { return weightedWallFormulation_; }
 
-      protected:
+    virtual int generateRandomOwnedGhostWithin(double *pos,double delta);
 
-        double calcArea(int n);
-        bool isInElement(double *pos,int i);
+protected:
 
-      private:
+    double calcArea(const int n);
+    bool isInElement(double *pos,int i);
 
-        inline double precision_trimesh()
-        { return MultiNodeMesh<3>::precision(); }
+private:
 
-        double calcDist(double *cs, double *closestPoint, double *en0);
-        double calcDistToPlane(double *p, double *pPlane, double *nPlane);
+    inline double precision_trimesh()
+    { return MultiNodeMesh<3>::precision(); }
 
-        double resolveCornerContactBary(int iTri, int iNode, bool obtuse,
-                                    double *p, double *delta, double *bary,bool skip_inactive = true);
-        double resolveEdgeContactBary(int iTri, int iEdge, double *p, double *delta, double *bary,bool skip_inactive = true);
-        double resolveFaceContactBary(int iTri, double *p, double *node0ToSphereCenter, double *delta);
-  };
+    double calcDist(const double *const cs, const double *const closestPoint, double *const delta);
+    double calcDistToPlane(const double *const p, const double *const pPlane, const double *const nPlane);
 
-  // *************************************
-  #include "tri_mesh_I.h"
-  #ifdef SUPERQUADRIC_ACTIVE_FLAG
-  #include "tri_mesh_I_superquadric.h"
-  #endif
+    double resolveCornerContactBary(const int iTri, const int iNode, const bool obtuse,
+                                    const double *const p, double *const delta,
+                                    double *const bary, const bool skip_inactive = true);
+    double resolveEdgeContactBary(const int iTri, const int iEdge, const double *const p,
+                                  double *const delta, double *const bary, const bool skip_inactive = true);
+    double resolveFaceContactBary(const int iTri, const double *const p, const double *const node0ToSphereCenter, double *const delta);
 
-  #ifdef TRI_LINE_ACTIVE_FLAG
-  #include "tri_mesh_I_line.h"
-  #endif
-  // *************************************
+    double calculateWeightedProperties(const double *const x, const double *const *const tri_nodes,
+                                       const double *const tri_normal, const double *const bary,
+                                       const double *const x_to_node0, const double radius, double *const delta);
+    double weightedFaceContact(const double *const tri_normal, const double *const bary,
+                               const double *const x_to_node0, const double radius,
+                               double &delta, double *const normal);
+    void weightedEdgeContact(const double *const x, const double *const *const tri_nodes,
+                             const double radius, int *const contact, double *const delta,
+                             double normal[3][3]);
+    void weightedVertexContact(const double *const x, const double *const *const tri_nodes,
+                               const double radius, bool *const contact, double *const delta,
+                               double normal[3][3], double *const vertex_angle);
+
+    bool weightedWallFormulation_;
+};
+
+// *************************************
+#include "tri_mesh_I.h"
+#ifdef SUPERQUADRIC_ACTIVE_FLAG
+#include "tri_mesh_I_superquadric.h"
+#endif
+
+#ifdef TRI_LINE_ACTIVE_FLAG
+#include "tri_mesh_I_line.h"
+#endif
+// *************************************
 
 } /* LAMMPS_NS */
 #endif /* TRIMESH_H_ */

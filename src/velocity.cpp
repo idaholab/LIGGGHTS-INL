@@ -525,7 +525,7 @@ void Velocity::ramp(int narg, char **arg)
   } else if (v_dim == 1) {
     v_lo = yscale*force->numeric(FLERR,arg[1]);
     v_hi = yscale*force->numeric(FLERR,arg[2]);
-  } else if (v_dim == 2) {
+  } else { // if (v_dim == 2)
     v_lo = zscale*force->numeric(FLERR,arg[1]);
     v_hi = zscale*force->numeric(FLERR,arg[2]);
   }
@@ -543,7 +543,7 @@ void Velocity::ramp(int narg, char **arg)
   } else if (coord_dim == 1) {
     coord_lo = yscale*force->numeric(FLERR,arg[4]);
     coord_hi = yscale*force->numeric(FLERR,arg[5]);
-  } else if (coord_dim == 2) {
+  } else { // if (coord_dim == 2)
     coord_lo = zscale*force->numeric(FLERR,arg[4]);
     coord_hi = zscale*force->numeric(FLERR,arg[5]);
   }

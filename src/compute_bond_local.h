@@ -65,7 +65,7 @@ class ComputeBondLocal : public Compute {
   double memory_usage();
 
  private:
-  int nvalues,dflag,eflag;
+  int nvalues;
   int ncount;
   int *bstyle;
   int singleflag;

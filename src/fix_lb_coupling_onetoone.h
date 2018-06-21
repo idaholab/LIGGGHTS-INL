@@ -70,7 +70,7 @@ namespace LAMMPS_NS {
     class FixPropertyAtom* fix_hdtorque_; // hdtorque = hydrodynamic torque
   }; /* class FixLbCouplingOnetoone */
 
-}; /* LAMMPS_NS */
+} /* LAMMPS_NS */
 
 #endif /* FIX_LB_COUPLING_ONETOONE */
 #endif /* FIX_CLASS */

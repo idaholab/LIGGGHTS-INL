@@ -84,7 +84,7 @@ class FixPropertyAtom : public Fix {
   void set_all(double value,bool ghost = true);
 
   void write_restart(FILE *);
-  virtual void restart(char *);
+  virtual void restart(char *, const Version &);
 
   int pack_exchange(int, double *);
   int unpack_exchange(int, double *);
@@ -92,8 +92,12 @@ class FixPropertyAtom : public Fix {
   void unpack_restart(int, int);
   int size_restart(int);
   int maxsize_restart();
+  int get_comm_size() const
+  { return nvalues; }
   int pack_comm(int, int *, double *, int, int *);
   void unpack_comm(int, int, double *);
+  int get_reverse_comm_size() const
+  { return nvalues; }
   int pack_reverse_comm(int, int, double *);
   void unpack_reverse_comm(int, int *, double *);
   virtual double compute_vector(int n);

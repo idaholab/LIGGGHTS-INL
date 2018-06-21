@@ -1,4 +1,4 @@
-"Previous Section"_Section_howto.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_python.html :c
+"Previous Section"_Section_gran_howto.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_python.html :c
 
 :link(liws,http://www.cfdem.com)
 :link(ld,Manual.html)
@@ -6,7 +6,7 @@
 
 :line
 
-9. Modifying & extending LIGGGHTS(R)-INL :h3
+10. Modifying & extending LIGGGHTS(R)-INL :h3
 
 This section describes how to customize LIGGGHTS(R)-INL by modifying
 and extending its source code.
@@ -33,7 +33,7 @@ END_RST -->
 9.9 "Thermodynamic output options"_#mod_9
 9.10 "Variable options"_#mod_10
 9.11 "Submitting new features for inclusion in LIGGGHTS(R)-INL"_#mod_11 :all(b)
-<!--END_HTML_ONLY -->
+<!-- END_HTML_ONLY -->
 
 LIGGGHTS(R)-INL is designed in a modular fashion so as to be easy to modify and
 extend with new functionality.  In fact, about 75% of its source code
@@ -491,8 +491,8 @@ thermo keywords = ke, vol, atoms, ...
 other variables = v_a, v_myvar, ...
 math functions = div(x,y), mult(x,y), add(x,y), ...
 group functions = mass(group), xcm(group,x), ...
-atom values = x[123], y[3], vx[34], ...
-compute values = c_mytemp[0], c_thermo_press[3], ...
+atom values = x\[123\], y\[3\], vx\[34\], ...
+compute values = c_mytemp\[0\], c_thermo_press\[3\], ... :pre
 
 Adding keywords for the "thermo_style custom"_thermo_style.html command
 (which can then be accessed by variables) was discussed

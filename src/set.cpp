@@ -907,7 +907,6 @@ void Set::set(int keyword)
 
         double shape_[3]={1.0, 1.0, 1.0};
         double f_;
-        double vol = atom->volume[i];
         MathExtraLiggghtsNonspherical::volume_superquadric(shape_, atom->blockiness[i], &f_);
         atom->shape[i][0] = cbrt(atom->volume[i] / (k1*k2*f_));
         atom->shape[i][1] = k1*atom->shape[i][0];

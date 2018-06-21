@@ -16,7 +16,7 @@ ID, group-ID are documented in "compute"_compute.html command :ulb,l
 surface = style name of this compute command  :l
 general_keywords general_values are documented in "compute"_compute.html" :l
 zero or more keyword/value pairs may be appended :l
-keyword = {angle} or {point_up} or {n_vec_up} or {use_com} :l
+keyword = {angle} or {point_up} or {n_vec_up} or {use_com} or {region} :l
   {angle} values = ang
     ang = maximum contact angle of particle (degrees)
   {point_up} values = px py pz
@@ -25,7 +25,9 @@ keyword = {angle} or {point_up} or {n_vec_up} or {use_com} :l
     nx, ny, nz = coordinates of normal vector NUP (length units)
   {use_com} values = yes or no
     yes = do use particle center of mass for calculation for vector NUP
-    no = do not use particle center of mass for calculation for vector NUP :pre
+    no = do not use particle center of mass for calculation for vector NUP
+  {region} value = regID
+    regID = ID of a "region"_region.html which determines which particles are included in the calculation :pre
 :ule
 
 [Examples:]
@@ -55,6 +57,11 @@ keyword, or (b) directly via the {n_vec_up} keyword.
 A note on keywords: {angle} must be defined, and either - for case (a) -
 {use_com} and {point_up} must be defined, or - for case (b) - {n_vec_up}
 must be defined.
+
+If the keyword {region} is used a "region"_region.html ID must be provided as
+argument to this keyword. In this case the particles considered in the algorithm
+described above must be contained in the specified region in order to be
+considered.
 
 Please note that the list of neighbors is looped to calculate criterion
 (2), which will depend on your "neighbor"_neighbor.html and

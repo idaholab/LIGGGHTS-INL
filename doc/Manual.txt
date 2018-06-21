@@ -19,7 +19,7 @@
 :line
 
 :line
-LIGGGHTS(R)-INL Documentation, Version 3.X :c,h3
+LIGGGHTS(R)-INL Documentation, Version 4.X :c,h3
 :line
 :c,image(LIGGGHTS_logo.png)
 :line
@@ -148,29 +148,31 @@ END_RST -->
   8.8 "Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)"_howto_8 :b
   8.9 "Walls"_howto_9 :b
   8.10 "Library interface to LIGGGHTS(R)-INL"_#howto_10 :ule,b
+"Specific granular How-to discussions"_Section_gran_howto.html :l
+  9.1 "List of available How-to discussion"_granhowto_1 :ule,b
 "Modifying & extending LIGGGHTS(R)-INL"_Section_modify.html :l
-  9.1 "Atom styles"_mod_1 :ulb,b
-  9.2 "Compute styles"_mod_2 :b
-  9.4 "Dump styles"_mod_3 :b
-  9.5 "Dump custom output options"_mod_4 :b
-  9.6 "Fix styles"_mod_5 :b
-  9.6 "Input script commands"_mod_6 :b
-  9.7 "Pairwise potentials"_mod_7 :b
-  9.8 "Region styles"_mod_8 :b
-  9.9 "Thermodynamic output options"_mod_9 :b
-  9.10 "Variable options"_mod_10 :b
-  9.11 "Submitting new features for inclusion in LIGGGHTS(R)-INL"_mod_11 :ule,b
+  10.1 "Atom styles"_mod_1 :ulb,b
+  10.2 "Compute styles"_mod_2 :b
+  10.4 "Dump styles"_mod_3 :b
+  10.5 "Dump custom output options"_mod_4 :b
+  10.6 "Fix styles"_mod_5 :b
+  10.6 "Input script commands"_mod_6 :b
+  10.7 "Pairwise potentials"_mod_7 :b
+  10.8 "Region styles"_mod_8 :b
+  10.9 "Thermodynamic output options"_mod_9 :b
+  10.10 "Variable options"_mod_10 :b
+  10.11 "Submitting new features for inclusion in LIGGGHTS(R)-INL"_mod_11 :ule,b
 "Python interface"_Section_python.html :l
-  10.1 "Building LIGGGHTS(R)-INL as a shared library"_py_1 :ulb,b
-  10.2 "Installing the Python wrapper into Python"_py_2 :b
-  10.3 "Extending Python with MPI to run in parallel"_py_3 :b
-  10.4 "Testing the Python-LIGGGHTS(R)-INL interface"_py_4 :b
-  10.5 "Using LIGGGHTS(R)-INL from Python"_py_5 :b
-  10.6 "Example Python scripts that use LIGGGHTS(R)-INL"_py_6 :ule,b
+  11.1 "Building LIGGGHTS(R)-INL as a shared library"_py_1 :ulb,b
+  11.2 "Installing the Python wrapper into Python"_py_2 :b
+  11.3 "Extending Python with MPI to run in parallel"_py_3 :b
+  11.4 "Testing the Python-LIGGGHTS(R)-INL interface"_py_4 :b
+  11.5 "Using LIGGGHTS(R)-INL from Python"_py_5 :b
+  11.6 "Example Python scripts that use LIGGGHTS(R)-INL"_py_6 :ule,b
 "Errors"_Section_errors.html :l
-  11.1 "Common problems"_err_1 :ulb,b
-  11.2 "Reporting bugs"_err_2 :b
-  11.3 "Error & warning messages"_err_3 :ule,b
+  12.1 "Common problems"_err_1 :ulb,b
+  12.2 "Reporting bugs"_err_2 :b
+  12.3 "Error & warning messages"_err_3 :ule,b
 
 :ole
 
@@ -212,6 +214,8 @@ END_RST -->
 :link(howto_9,Section_howto.html#howto_9)
 :link(howto_10,Section_howto.html#howto_10)
 
+:link(granhowto_1,Section_gran_howto.html)
+
 :link(mod_1,Section_modify.html#mod_1)
 :link(mod_2,Section_modify.html#mod_2)
 :link(mod_3,Section_modify.html#mod_3)
@@ -237,4 +241,4 @@ END_RST -->
 
 </BODY>
 
-<!--END_HTML_ONLY -->
+<!-- END_HTML_ONLY -->

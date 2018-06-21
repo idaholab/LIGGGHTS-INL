@@ -117,6 +117,7 @@ bool RegionNeighborList<INTERPOLATE>::hasOverlap_superquadric(double * x, double
       const Particle<INTERPOLATE> & p = *pit;
       double del[3];
       vectorSubtract3D(x, p.x, del);
+
       const double rsq = vectorMag3DSquared(del);
       const double radsum = radius + p.radius;
       if(check_obb_flag) {
@@ -162,7 +163,7 @@ bool RegionNeighborList<INTERPOLATE>::hasOverlapWith(double * x, double radius, 
     if((ibin+offset < 0) || ((size_t)(ibin+offset) >= bins.size()))
     {
         
-        error->one(FLERR,"assertion failed");
+        error->one(FLERR,"Assertion failed. Could not identify appropriate bin.\nThis issue often occurs if periodic boundary conditions are used and if mesh elements (triangles) with bounding spheres larger than the extent of the domain box in the periodic direction. In this case reduce the element size of your mesh triangles to reduce the bounding spheres of the elements.");
     }
     const std::vector<Particle<INTERPOLATE> > & plist = bins[ibin+offset].particles;
 
@@ -593,14 +594,14 @@ double RegionNeighborList<INTERPOLATE>::bin_distance(int i, int j, int k)
  */
 
 template<bool INTERPOLATE>
-inline void RegionNeighborList<INTERPOLATE>::coord2bin_calc_interpolation_weights(double *x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const
+inline void RegionNeighborList<INTERPOLATE>::coord2bin_calc_interpolation_weights(const double * const x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const
 {
     quadrant = 0;
     wx = wy = wz = 0.;
 }
 
 template<>
-inline void RegionNeighborList<true>::coord2bin_calc_interpolation_weights(double *x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const
+inline void RegionNeighborList<true>::coord2bin_calc_interpolation_weights(const double * const x,int ibin,int ix,int iy, int iz,int &quadrant,double &wx,double &wy,double &wz) const
 {
       double dx = (((x[0]-bboxlo[0])*bininvx) - static_cast<int> ((x[0]-bboxlo[0])*bininvx));//*bininvx;
       double dy = (((x[1]-bboxlo[1])*bininvy) - static_cast<int> ((x[1]-bboxlo[1])*bininvy));//*bininvy;
@@ -645,7 +646,7 @@ inline void RegionNeighborList<true>::coord2bin_calc_interpolation_weights(doubl
 }
 
 template<bool INTERPOLATE>
-int RegionNeighborList<INTERPOLATE>::coord2bin(double *x,int &quadrant,double &wx,double &wy,double &wz) const
+int RegionNeighborList<INTERPOLATE>::coord2bin(const double * const x,int &quadrant,double &wx,double &wy,double &wz) const
 {
   int ix,iy,iz;
 

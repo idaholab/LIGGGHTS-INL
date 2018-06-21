@@ -273,7 +273,7 @@ void ParticleToInsertMultisphere::random_rotate(double rn1,double rn2, double rn
     {
         if     (i==0) vert_before_rot=ex_space;
         else if(i==1) vert_before_rot=ey_space;
-        else if(i==2) vert_before_rot=ez_space;
+        else vert_before_rot=ez_space; //if(i==2)
 
         vert_after_rot[0] = vert_before_rot[0]*cos_phiy*cos_phiz+vert_before_rot[1]*(cos_phiz*sin_phix*sin_phiy-cos_phix*sin_phiz)+vert_before_rot[2]*(cos_phix*cos_phiz*sin_phiy+sin_phix*sin_phiz);
         vert_after_rot[1] = vert_before_rot[0]*cos_phiy*sin_phiz+vert_before_rot[2]*(-cos_phiz*sin_phix+cos_phix*sin_phiy*sin_phiz)+vert_before_rot[1]*(cos_phix*cos_phiz+sin_phix*sin_phiy*sin_phiz);

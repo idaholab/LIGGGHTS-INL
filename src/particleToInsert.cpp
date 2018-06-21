@@ -176,7 +176,6 @@ int ParticleToInsert::check_near_set_x_v_omega(double *x,double *v, double *omeg
         vectorSubtract3D(x_ins[0],xnear[i],del);
         rsq = vectorMag3DSquared(del);
         
-/*
         radsum = radius_ins[0] + xnear[i][3];
 
         // no success in overlap
@@ -363,6 +362,7 @@ void ParticleToInsert::scale_pti(double r_scale)
     for(int i = 0; i < nparticles; i++)
     {
         radius_ins[i] *= r_scale;
+        radius_ins_max *= r_scale;
         vectorScalarMult3D(x_ins[i],r_scale);
     }
 

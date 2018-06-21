@@ -387,7 +387,7 @@ T* CustomValueTracker::addElementProperty(const char *_id,
     return elementProperties_.bufSize(operation,scale,translate,rotate);
   }
 
-  int CustomValueTracker::pushAllElemToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate)
+  int CustomValueTracker::pushAllElemToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     return elementProperties_.pushToBuffer(buf,operation,scale,translate,rotate);
   }
@@ -401,14 +401,14 @@ T* CustomValueTracker::addElementProperty(const char *_id,
    push / pop for list of elements
   ------------------------------------------------------------------------- */
 
-  int CustomValueTracker::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate)
+  int CustomValueTracker::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const
   {
     return elementProperties_.elemListBufSize(n,operation,scale,translate,rotate);
   }
 
-  int CustomValueTracker::pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, std::list<std::string> * properties, double *dlo, double *dhi, bool scale,bool translate, bool rotate)
+  int CustomValueTracker::pushElemListToBuffer(const int n, const int *const list, double *const buf, const int operation, std::list<std::string> *const properties, const int pbc_flag, const int *const pbc, Domain *const domain, const bool scale, const bool translate, const bool rotate) const
   {
-    return elementProperties_.pushElemListToBuffer(n,list, wraplist, buf,operation, properties, dlo, dhi, scale,translate,rotate);
+    return elementProperties_.pushElemListToBuffer(n, list, buf, operation, properties, pbc_flag, pbc, domain, scale, translate, rotate);
   }
 
   int CustomValueTracker::popElemListFromBuffer(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
@@ -416,12 +416,12 @@ T* CustomValueTracker::addElementProperty(const char *_id,
     return elementProperties_.popElemListFromBuffer(first,n,buf,operation, properties, scale,translate,rotate);
   }
 
-  int CustomValueTracker::pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int CustomValueTracker::pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate) const
   {
     return elementProperties_.pushElemListToBufferReverse(first,n,buf,operation, properties, scale,translate,rotate);
   }
 
-  int CustomValueTracker::popElemListFromBufferReverse(int n, int *list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int CustomValueTracker::popElemListFromBufferReverse(int n, const int *const list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
   {
     return elementProperties_.popElemListFromBufferReverse(n,list,buf,operation, properties, scale,translate,rotate);
   }
@@ -430,13 +430,13 @@ T* CustomValueTracker::addElementProperty(const char *_id,
    push / pop for element i
   ------------------------------------------------------------------------- */
 
-  int CustomValueTracker::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate)
+  int CustomValueTracker::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate) const
   {
     
     return elementProperties_.elemBufSize(operation, properties, scale,translate,rotate);
   }
 
-  int CustomValueTracker::pushElemToBuffer(int i, double *buf, int operation,bool scale,bool translate, bool rotate)
+  int CustomValueTracker::pushElemToBuffer(int i, double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     return elementProperties_.pushElemToBuffer(i,buf,operation,scale,translate,rotate);
   }
@@ -450,7 +450,7 @@ T* CustomValueTracker::addElementProperty(const char *_id,
    push / pop for global properties
   ------------------------------------------------------------------------- */
 
-  int CustomValueTracker::globalPropsBufSize(int operation,bool scale,bool translate,bool rotate)
+  int CustomValueTracker::globalPropsBufSize(int operation,bool scale,bool translate,bool rotate) const
   {
     int n = 0;
     n += globalProperties_.bufSize(operation,scale,translate,rotate);
@@ -458,7 +458,7 @@ T* CustomValueTracker::addElementProperty(const char *_id,
     return n;
   }
 
-  int CustomValueTracker::pushGlobalPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate)
+  int CustomValueTracker::pushGlobalPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     int n = 0;
     n += globalProperties_.pushToBuffer(&(buf[n]),operation,scale,translate,rotate);

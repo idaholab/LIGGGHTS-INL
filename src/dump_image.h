@@ -62,6 +62,7 @@ class DumpImage : public DumpCustom {
 
   DumpImage(class LAMMPS *, int, char**);
   virtual ~DumpImage();
+  int get_comm_size() const { return comm_forward; }
   int pack_comm(int, int *, double *, int, int *);
   void unpack_comm(int, int, double *);
 

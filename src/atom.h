@@ -159,6 +159,7 @@ class Atom : protected Pointers {
 
   int sphere_flag,ellipsoid_flag,line_flag,tri_flag,body_flag;
   int superquadric_flag;
+  int convex_hull_flag;
   int peri_flag,electron_flag;
   int ecp_flag;
   int wavepacket_flag,sph_flag;

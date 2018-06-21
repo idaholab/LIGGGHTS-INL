@@ -206,7 +206,7 @@ void Run::command(int narg, char **arg, bigint nsteps_input_ext)
     if (stopflag) update->endstep = stop;
     else update->endstep = update->laststep;
 
-    if (preflag || update->first_update == 0)
+    if (preflag || update->first_update == 0 || !input->get_last_command_was_run())
     {
       lmp->init();
       update->integrate->setup();
@@ -250,7 +250,7 @@ void Run::command(int narg, char **arg, bigint nsteps_input_ext)
       if (stopflag) update->endstep = stop;
       else update->endstep = update->laststep;
 
-      if (preflag || iter == 0)
+      if (preflag || iter == 0 || !input->get_last_command_was_run())
       {
         lmp->init();
         update->integrate->setup();
@@ -291,6 +291,8 @@ void Run::command(int narg, char **arg, bigint nsteps_input_ext)
 
       if (SignalHandler::request_quit)
           break;
+      if (update->run_into_wall_clock())
+          break;
     }
   }
 
@@ -302,4 +304,5 @@ void Run::command(int narg, char **arg, bigint nsteps_input_ext)
     for (int i = 0; i < ncommands; i++) delete [] commands[i];
     delete [] commands;
   }
+  input->executed_run();
 }

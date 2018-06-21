@@ -82,6 +82,8 @@ namespace ContactModels
       fo_offset = hsetup->add_history_value("fo", "1");
       c->add_history_offset("kc_offset", kc_offset);
       c->add_history_offset("fo_offset", fo_offset);
+      if (!(c->contact_match("surface", "default") || c->contact_match("surface", "sphere/surfaceheating") || c->contact_match("surface", "multicontact")))
+          error->all(FLERR, "Cohesion model bubble/coalescence is incompatible with non-spherical surface models");
     }
 
     void registerSettings(Settings & settings)
@@ -92,7 +94,7 @@ namespace ContactModels
       //TODO error->one(FLERR,"TODO here also check if right surface model used");
     }
 
-	inline void postSettings(IContactHistorySetup *, ContactModelBase *) {}
+	void postSettings(IContactHistorySetup *, ContactModelBase *) {}
 
     void connectToProperties(PropertyRegistry & registry) {
 
@@ -122,12 +124,12 @@ namespace ContactModels
 
     // effective exponent for stress-strain relationship
 
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
       return 1.5;
     }
 
-    inline double calculate_deltan_p_max (double deltan_p, double * const history, int count_flag, const double f_0, double fTmp, const double k2, double dex, double dex_i, double deltan, double k_adh)
+    double calculate_deltan_p_max (double deltan_p, double * const history, int count_flag, const double f_0, double fTmp, const double k2, double dex, double dex_i, double deltan, double k_adh)
     {
       //calculating the maximum overlap
       double deltan_p_max;
@@ -146,7 +148,7 @@ namespace ContactModels
       return history[0];
     }
 
-    inline double whichd(double fTmp, double k1, double deltan_e, double d1, double d2)
+    double whichd(double fTmp, double k1, double deltan_e, double d1, double d2)
     {
       //calculation distance between the particles based on branch
       if (fTmp >= k1 * deltan_e){
@@ -156,7 +158,7 @@ namespace ContactModels
       }
     }
 
-    inline double calculate_k_adh(double d, double risq, double rjsq, const double g_surf, double f_min_lim, double deltan_pe_max, double deltan_p_max, const double k2, const double dex_i, const double cex)
+    double calculate_k_adh(double d, double risq, double rjsq, const double g_surf, double f_min_lim, double deltan_pe_max, double deltan_p_max, const double k2, const double dex_i, const double cex)
     {
       double new_k_c, delta_min, a, f_min, dsq;
        dsq = d*d;
@@ -174,7 +176,7 @@ namespace ContactModels
       return new_k_c;
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       const int itype = sidata.itype;
       const int jtype = sidata.jtype;

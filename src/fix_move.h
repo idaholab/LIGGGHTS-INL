@@ -70,7 +70,7 @@ class FixMove : public Fix {
 
   double memory_usage();
   void write_restart(FILE *);
-  void restart(char *);
+  void restart(char *, const Version &);
   void grow_arrays(int);
   void copy_arrays(int, int, int);
   void set_arrays(int);
@@ -84,11 +84,13 @@ class FixMove : public Fix {
   void reset_dt();
 
  private:
+  void rotate_particles(double phi, double vel_pre_factor);
+
   char *xvarstr,*yvarstr,*zvarstr,*vxvarstr,*vyvarstr,*vzvarstr;
   int mstyle;
   int vxflag,vyflag,vzflag,axflag,ayflag,azflag;
   double vx,vy,vz,ax,ay,az;
-  double period,omega_rotate;
+  double period,omega_rotate,amplitude;
   double point[3],axis[3],runit[3];
   double dt,dtv,dtf;
   int xvar,yvar,zvar,vxvar,vyvar,vzvar;

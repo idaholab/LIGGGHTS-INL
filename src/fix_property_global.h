@@ -52,71 +52,74 @@ FixStyle(property/atomtypepair,FixPropertyGlobal)
 #define LMP_FIX_PROPERTYGLOBAL_H
 #include "fix.h"
 #include "input.h"
+#include "property_type_base.h"
 
 namespace LAMMPS_NS {
 
 enum
 {
-        FIXPROPERTY_GLOBAL_SCALAR = 0,
-        FIXPROPERTY_GLOBAL_VECTOR = 1,
-        FIXPROPERTY_GLOBAL_MATRIX = 2
+    FIXPROPERTY_GLOBAL_SCALAR = 0,
+    FIXPROPERTY_GLOBAL_VECTOR = 1,
+    FIXPROPERTY_GLOBAL_MATRIX = 2
 };
 
-class FixPropertyGlobal : public Fix {
- friend class CfdDatacouplingFile;
- friend class FixSph;
- friend class PairSph;
- friend class Properties;
- friend class FixTempFromFile;
+enum
+{
+    FIXPROPERTY_GLOBAL_TYPE_CONSTANT = 0,
+    FIXPROPERTY_GLOBAL_TYPE_LOOKUP = 1
+};
 
- public:
-  FixPropertyGlobal(class LAMMPS *, int, char **);
-  ~FixPropertyGlobal();
-  int setmask();
-  void init();
-  void pre_delete(bool unfixflag);
+class FixPropertyGlobal : public Fix
+{
+public:
+    FixPropertyGlobal(class LAMMPS *, int, char **);
+    ~FixPropertyGlobal();
+    int setmask();
+    void init();
+    void pre_delete(bool unfixflag);
 
-  Fix* check_fix(const char *varname,const char *svmstyle,int len1,int len2,const char *caller,bool errflag);
+    Fix* check_fix(const char *varname,const char *svmstyle,int len1,int len2,const char *caller,bool errflag);
 
-  double memory_usage();
-  double compute_scalar();
-  double compute_vector(int);
-  double compute_vector_modified(int);
-  double compute_array(int,int);
-  double compute_array_modified(int,int);
-  void vector_modify(int,double);
-  void array_modify(int,int,double);
-  void new_array(int l1,int l2);
-  int modify_param(int narg, char **arg);
+    double memory_usage();
+    double compute_scalar();
+    double compute_vector(int);
+    double compute_array(int,int);
 
-  //bool checkCorrectness(int,char*,int,int);
+    double operator() (const double x);
+    double operator() (const double x, const int i);
+    double operator() (const double x, const int i, const int j);
 
-  const double* get_values() {return values;}
-  const double* get_values_modified() {return values_recomputed;}
-  double const* const* get_array() {return array;}
-  double const* const* get_array_modified() {return array_recomputed;}
+    void vector_modify(int,double);
+    void array_modify(int,int,double);
+    void new_array(int l1,int l2);
+    int modify_param(int narg, char **arg);
 
-  void grow(int,int);
+    double* get_values() const;
+    double* get_values_modified() const;
+    double const* const* get_array() const;
+    double const* const* get_array_modified() const;
+    int get_nvalues() const { return nvalues; }
+    int get_data_type() const { return data_type_; }
 
-  void write();
+    void grow(int,int);
 
- private:
+    void write();
 
-  char *variablename;        // name of the variable (used for identification by other fixes)
-  int data_style;            // 0 if a scalar is registered, 1 if vector, 2 if 2d array (matrix)
-  int nvalues;
-  int nvalues_new_array;
+private:
+    int nvalues;
 
-  bool is_symmetric;         // flag if values must be symmetric (only applicable for matrix)
-  bool is_atomtype_bound;    // flag if # values is bound to # atom types
-  double *values;            // original values to be stored in this fix
-  double *values_recomputed; // values to be stored in this fix, recomputed by eg another fix
-  double **array;
-  double **array_recomputed;
+    char *variablename;        // name of the variable (used for identification by other fixes)
+    int data_style;            // 0 if a scalar is registered, 1 if vector, 2 if 2d array (matrix)
+    int data_type_;            // 0 if constant, 1 if lookup table from file, 2 if linear function
 
-  char *filename;
-  char *grpname;
-  int me;
+    bool is_symmetric;         // flag if values must be symmetric (only applicable for matrix)
+    bool is_atomtype_bound;    // flag if # values is bound to # atom types
+
+    char *filename;
+    char *grpname;
+    int me;
+
+    PropertyTypeBase *property_;
 
 }; //end class
 

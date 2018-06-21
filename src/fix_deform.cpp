@@ -697,7 +697,7 @@ void FixDeform::pre_exchange()
   for (int i = 0; i < nlocal; i++) domain->remap(x[i],image[i]);
 
   domain->x2lamda(atom->nlocal);
-  irregular->migrate_atoms();
+  irregular->migrate_all();
   domain->lamda2x(atom->nlocal);
 
   flip = 0;

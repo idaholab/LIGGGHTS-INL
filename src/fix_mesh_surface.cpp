@@ -38,6 +38,7 @@
     Christoph Kloss (DCS Computing GmbH, Linz)
     Christoph Kloss (JKU Linz)
     Philippe Seil (JKU Linz)
+    Philippe Seil (DCS Computing GmbH, Linz)
     Arno Mayrhofer (CFDEMresearch GmbH, Linz)
 
     Copyright 2012-     DCS Computing GmbH, Linz
@@ -69,6 +70,7 @@
 #include "style_mesh_module.h"
 #include "mesh_module_stress.h"
 #include "variable.h"
+#include "compute_velocity_mesh.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -77,35 +79,37 @@ using namespace FixConst;
 
 enum{NONE,CONSTANT,EQUAL};
 
-FixMeshSurface::FixMeshSurface(LAMMPS *lmp, int narg, char **arg)
-: FixMesh(lmp, narg, arg),
-  fix_contact_history_mesh_(0),
-  fix_mesh_neighlist_(0),
-  fix_meshforce_contact_(NULL),
-  fix_meshforce_contact_stress_(NULL),
-  fix_mesh_multicontact_data_(NULL),
-  velFlag_(false),
-  vSurfStrX_(NULL),
-  vSurfStrY_(NULL),
-  vSurfStrZ_(NULL),
-  vSurfVarX_(-1),
-  vSurfVarY_(-1),
-  vSurfVarZ_(-1),
-  vSurfStyleX_(-1),
-  vSurfStyleY_(-1),
-  vSurfStyleZ_(-1),
-  angVelFlag_(false),
-  omegaStr_(NULL),
-  omegaVar_(-1),
-  omegaStyle_(-1),
-  n_dump_active_(0),
-  curvature_(0.),
-  curvature_tolerant_(false),
-  extrude_mesh_(false),
-  extrusion_length_(0.0),
-  extrusion_tri_count_(0),
-  extrusion_tri_nodes_(NULL),
-  extrusion_created_(false)
+FixMeshSurface::FixMeshSurface(LAMMPS *lmp, int narg, char **arg) :
+    FixMesh(lmp, narg, arg),
+    fix_contact_history_mesh_(0),
+    fix_mesh_neighlist_(0),
+    fix_meshforce_contact_(NULL),
+    fix_meshforce_contact_stress_(NULL),
+    fix_mesh_multicontact_data_(NULL),
+    velFlag_(false),
+    vSurfStrX_(NULL),
+    vSurfStrY_(NULL),
+    vSurfStrZ_(NULL),
+    vSurfVarX_(-1),
+    vSurfVarY_(-1),
+    vSurfVarZ_(-1),
+    vSurfStyleX_(-1),
+    vSurfStyleY_(-1),
+    vSurfStyleZ_(-1),
+    angVelFlag_(false),
+    omegaStr_(NULL),
+    omegaVar_(-1),
+    omegaStyle_(-1),
+    n_dump_active_(0),
+    curvature_(0.),
+    curvature_tolerant_(false),
+    allActiveFlag_(false),
+    weightedWallFormulation_(false),
+    extrude_mesh_(false),
+    extrusion_length_(0.),
+    extrusion_tri_count_(0),
+    extrusion_tri_nodes_(NULL),
+    extrusion_created_(false)
 {
     // check if type has been read
     if(atom_type_mesh_ == -1)
@@ -186,41 +190,65 @@ FixMeshSurface::FixMeshSurface(LAMMPS *lmp, int narg, char **arg)
                 omegaStyle_ = CONSTANT;
             }
             hasargs = true;
-      } else if (strcmp(arg[iarg_],"curvature") == 0) {
-          if (narg < iarg_+2)
-            error->fix_error(FLERR,this,"not enough arguments for 'curvature'");
-          iarg_++;
-          curvature_ = force->numeric(FLERR,arg[iarg_++]);
-          if(curvature_ <= 0. || curvature_ > 60)
-            error->fix_error(FLERR,this,"0° < curvature < 60° required");
-          curvature_ = cos(curvature_*M_PI/180.);
-          hasargs = true;
-      } else if (strcmp(arg[iarg_],"curvature_tolerant") == 0) {
-          if (narg < iarg_+2)
-            error->fix_error(FLERR,this,"not enough arguments for 'curvature_tolerant'");
-          iarg_++;
-          if(0 == strcmp(arg[iarg_],"yes"))
-            curvature_tolerant_= true;
-          else if(0 == strcmp(arg[iarg_],"no"))
-            curvature_tolerant_= false;
-          else
-            error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'curvature_tolerant'");
-          iarg_++;
-          hasargs = true;
-      } else if (strcmp(arg[iarg_], "extrude_planar") == 0) {
-          if (narg < iarg_+2)
-            error->fix_error(FLERR,this,"not enough arguments for 'extrude_planar'");
-          iarg_++;
-          extrude_mesh_ = true;
-          extrusion_length_ = force->numeric(FLERR,arg[iarg_]);
-          iarg_++;
-          hasargs = true;
-      } else if (strcmp(style,"mesh/surface") == 0) {
-          char *errmsg = new char[strlen(arg[iarg_])+50];
-          sprintf(errmsg,"unknown keyword or wrong keyword order: %s", arg[iarg_]);
-          error->fix_error(FLERR,this,errmsg);
-          delete []errmsg;
-      }
+        } else if (strcmp(arg[iarg_],"curvature") == 0) {
+            if (narg < iarg_+2)
+              error->fix_error(FLERR,this,"not enough arguments for 'curvature'");
+            iarg_++;
+            curvature_ = force->numeric(FLERR,arg[iarg_++]);
+            if(curvature_ <= 0. || curvature_ > 60)
+              error->fix_error(FLERR,this,"0° < curvature < 60° required");
+            curvature_ = cos(curvature_*M_PI/180.);
+            hasargs = true;
+        } else if (strcmp(arg[iarg_],"curvature_tolerant") == 0) {
+            if (narg < iarg_+2)
+              error->fix_error(FLERR,this,"not enough arguments for 'curvature_tolerant'");
+            iarg_++;
+            if(0 == strcmp(arg[iarg_],"yes"))
+              curvature_tolerant_= true;
+            else if(0 == strcmp(arg[iarg_],"no"))
+              curvature_tolerant_= false;
+            else
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'curvature_tolerant'");
+            iarg_++;
+            hasargs = true;
+        } else if (strcmp(arg[iarg_], "extrude_planar") == 0) {
+            if (narg < iarg_+2)
+              error->fix_error(FLERR,this,"not enough arguments for 'extrude_planar'");
+            iarg_++;
+            extrude_mesh_ = true;
+            extrusion_length_ = force->numeric(FLERR,arg[iarg_]);
+            iarg_++;
+            hasargs = true;
+        } else if (strcmp(arg[iarg_], "all_edges_corners_active") == 0) {
+            if (narg < iarg_+2)
+              error->fix_error(FLERR,this,"not enough arguments for 'all_edges_corners_active'");
+            iarg_++;
+            if(0 == strcmp(arg[iarg_],"yes"))
+              allActiveFlag_= true;
+            else if(0 == strcmp(arg[iarg_],"no"))
+              allActiveFlag_= false;
+            else
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'all_edges_corners_active'");
+            iarg_++;
+            hasargs = true;
+        } else if (strcmp(arg[iarg_], "weighted_wall_formulation") == 0) {
+            if (narg < iarg_+2)
+              error->fix_error(FLERR,this,"not enough arguments for 'weighted_wall_formulation'");
+            iarg_++;
+            if(0 == strcmp(arg[iarg_],"yes"))
+              weightedWallFormulation_ = true;
+            else if(0 == strcmp(arg[iarg_],"no"))
+              weightedWallFormulation_ = false;
+            else
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'all_edges_corners_active'");
+            iarg_++;
+            hasargs = true;
+        } else if (strcmp(style,"mesh/surface") == 0) {
+            char *errmsg = new char[strlen(arg[iarg_])+50];
+            sprintf(errmsg,"unknown keyword or wrong keyword order: %s", arg[iarg_]);
+            error->fix_error(FLERR,this,errmsg);
+            delete []errmsg;
+        }
     }
 
     // get list of available mesh modules
@@ -325,12 +353,25 @@ FixMeshSurface::FixMeshSurface(LAMMPS *lmp, int narg, char **arg)
 
 FixMeshSurface::~FixMeshSurface()
 {
+    int i = 0;
+    while (true)
+    {
+        ComputeVelocityMesh *ptr = dynamic_cast<ComputeVelocityMesh*>(modify->find_compute_style_strict("velocity/mesh", i));
+        if (!ptr)
+            break;
+        else
+            ptr->remove_fms_ptr(this);
+        i++;
+    }
     delete [] vSurfStrX_;
     delete [] vSurfStrY_;
     delete [] vSurfStrZ_;
     delete [] omegaStr_;
     if (extrusion_tri_nodes_)
         delete [] extrusion_tri_nodes_;
+    std::map<std::string, MeshModule*>::iterator it;
+    for(it = active_mesh_modules.begin(); it != active_mesh_modules.end(); it++)
+        delete it->second;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -353,6 +394,12 @@ void FixMeshSurface::post_create()
 
     if(angVelFlag_)
         initAngVel();
+
+    if(allActiveFlag_ || weightedWallFormulation_)
+        triMesh()->setAllEdgesCornersActive(true);
+
+    if (weightedWallFormulation_)
+        triMesh()->setWeightedWallFormulation(true);
 
     std::vector<std::string>::iterator it;
     for(it = mesh_module_order.begin(); it != mesh_module_order.end(); it++)
@@ -471,6 +518,15 @@ int FixMeshSurface::setmask()
 
 /* ---------------------------------------------------------------------- */
 
+void FixMeshSurface::setup_pre_exchange()
+{
+    std::vector<std::string>::iterator it;
+    for(it = mesh_module_order.begin(); it != mesh_module_order.end(); it++)
+        active_mesh_modules[*it]->setup_pre_exchange();
+}
+
+/* ---------------------------------------------------------------------- */
+
 void FixMeshSurface::setup_pre_force(int vflag)
 {
     FixMesh::setup_pre_force(vflag);
@@ -493,6 +549,17 @@ void FixMeshSurface::setup_pre_force(int vflag)
         can_create_mesh_ = true;
     }
 
+}
+
+/* ---------------------------------------------------------------------- */
+
+void FixMeshSurface::pre_exchange()
+{
+    FixMesh::pre_exchange();
+
+    std::vector<std::string>::iterator it;
+    for(it = mesh_module_order.begin(); it != mesh_module_order.end(); it++)
+        active_mesh_modules[*it]->pre_exchange();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1041,11 +1108,11 @@ MeshModule *FixMeshSurface::meshmodule_creator(LAMMPS *lmp, int &iarg_, int narg
   return new T(lmp, iarg_, narg, arg, fix_mesh);
 }
 
-void FixMeshSurface::add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall)
+void FixMeshSurface::add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall, double* contact_history)
 {
     std::vector<std::string>::iterator it;
     for(it = mesh_module_order.begin(); it != mesh_module_order.end(); it++)
-        active_mesh_modules[*it]->add_particle_contribution(ip, frc, delta, iTri, v_wall);
+        active_mesh_modules[*it]->add_particle_contribution(ip, frc, delta, iTri, v_wall, contact_history);
 }
 
 /* ----------------------------------------------------------------------
@@ -1084,6 +1151,10 @@ int FixMeshSurface::modify_param(int narg, char **arg)
     }
     else
     {
+        ret = FixMesh::modify_param(narg,arg);
+        if (ret > 0) // already done
+            return ret;
+
         // Basic divide and conquer algorithm for modify_param in mesh modules. Note that this can cause issues if
         // two mesh modules use the same keyword.
         std::vector<std::string>::iterator it;

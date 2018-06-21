@@ -97,8 +97,8 @@ RegWedge::RegWedge(LAMMPS *lmp, int narg, char **arg) : Region(lmp, narg, arg)
   } else if (axis == 'y') {
     if(strcmp(arg[iarg++],"center"))
         error->all(FLERR,"Illegal region wegde command, expecting keyword 'center'");
-    c1 = xscale*atof(arg[iarg++]);
-    c2 = zscale*atof(arg[iarg++]);
+    c1 = zscale*atof(arg[iarg++]);
+    c2 = xscale*atof(arg[iarg++]);
     if(strcmp(arg[iarg++],"radius"))
         error->all(FLERR,"Illegal region wegde command, expecting keyword 'radius'");
     radius = xscale*atof(arg[iarg++]);
@@ -192,7 +192,7 @@ RegWedge::RegWedge(LAMMPS *lmp, int narg, char **arg) : Region(lmp, narg, arg)
   if (radius <= 0.0) error->all(FLERR,"Illegal region cylinder command");
   if (dang < 5.0*M_PI/180.0) error->all(FLERR,"Wedge too flat. Wedge-angle has "
                                         "to be >= 5.0 degrees");
-  if (dang > 180.0) error->all(FLERR, "Maximum wedge-angle of 180 "
+  if (dang > M_PI) error->all(FLERR, "Maximum wedge-angle of 180 "
                                           "deg exceeded");
 
   // calculate helper variables
@@ -272,12 +272,12 @@ RegWedge::RegWedge(LAMMPS *lmp, int narg, char **arg) : Region(lmp, narg, arg)
       extent_zhi = c2 + bmax;
     }
     if (axis == 'y') {
-      extent_xlo = c1 + bmin;
-      extent_xhi = c1 + bmax;
+      extent_xlo = c2 + bmin;
+      extent_xhi = c2 + bmax;
       extent_ylo = lo;
       extent_yhi = hi;
-      extent_zlo = c2 + amin;
-      extent_zhi = c2 + amax;
+      extent_zlo = c1 + amin;
+      extent_zhi = c1 + amax;
     }
     if (axis == 'z') {
       extent_xlo = c1 + amin;
@@ -367,7 +367,201 @@ int RegWedge::inside(double x, double y, double z){
  -----------------------------------------------------------------------------*/
 int RegWedge::surface_exterior(double *x, double cutoff){
 
-  error->all(FLERR,"surface_exterior not implemented");
+  double del1, del2,r,angPt,angleCutoff;
+  double xp,yp,zp;
+
+  if (axis == 'x')
+  {
+    del1 = x[1] - c1;
+    del2 = x[2] - c2;
+    r = sqrt(del1*del1 + del2*del2);
+    angleCutoff = cutoff*180/M_PI*r;
+
+    // calculate the angle of the point
+    if (del1 > 0 && del2 <= 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI;
+    } else if (del1 < 0 )
+    {
+        angPt = -atan(del2/del1)*180/M_PI+180;
+    } else if (del1 > 0 && del2 > 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI+360;
+    } else if (del1 == 0 && del2 < 0)
+    {
+        angPt = 90;
+    } else if (del2 == 0 && del2 > 0)  
+    {
+        angPt = 270;
+    }
+
+    // x is far enough from wedge that there is no contact
+    // x is interior to wedge
+    if (r >= radius+cutoff || x[0] <= lo-cutoff || x[0] >= hi+cutoff || angPt <= angle1 - angleCutoff || angPt >= angle2 + angleCutoff) return 0;
+    if (r < radius && x[0] > lo && x[0] < hi && angPt > angle1 && angPt < angle2) return 0;
+
+    // x is exterior of wedge or on its surface
+    if (r > radius && angPt >= angle1 && angPt <= angle2) 
+    {
+        yp = c1 + del1 * radius / r;
+        zp = c2 + del2 * radius / r;        
+    } else if (r < radius && angPt < angle1 )
+    {
+        yp = c1 + sin(angPt)*r;
+        zp = c2 + cos(angPt)*r;
+    } else if (r < radius && angPt > angle2)
+    {
+        yp = c1 + sin(angPt)*r;
+        zp = c2 + cos(angPt)*r;
+    }
+
+    if (x[0] < lo ) xp = lo;
+    else if (x[0] > hi) xp = hi;
+    else zp = x[0];
+
+    add_contact(0,x,xp,yp,zp);
+    if (contact[0].r < cutoff) return 1;
+    return 0;
+
+    // x is far enough from the cylinder that there is no contact
+
+    return 0;
+  } else if (axis == 'y')
+  {
+    del1 = x[2] - c1;
+    del2 = x[0] - c2;
+    r = sqrt(del1*del1 + del2*del2);
+    angleCutoff = 0.1;//cutoff*180/M_PI*r;
+
+    // calculate the angle of the point
+    if (del1 > 0 && del2 <= 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI+270;
+    } else if (del1 < 0 )
+    {
+        angPt = -atan(del2/del1)*180/M_PI+90;
+    } else if (del1 > 0 && del2 > 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI+270;
+    } else if (del1 == 0 && del2 < 0)
+    {
+        angPt = 180;
+    } else if (del2 == 0 && del2 > 0)  
+    {
+        angPt = 0;
+    }
+
+    // y is far enough from wedge that there is no contact
+    // y is interior to wedge
+    if (r >= radius+cutoff || x[1] <= lo-cutoff || x[1] >= hi+cutoff || angPt <= angle1 - angleCutoff || angPt >= angle2 + angleCutoff) return 0;
+    if (r < radius && x[1] > lo && x[1] < hi && angPt > angle1 && angPt < angle2) return 0;
+
+    // y is exterior of wedge or on its surface
+    if (r > radius && angPt >= angle1 && angPt <= angle2) 
+    {
+        xp = c1 + del1 * radius / r;
+        zp = c2 + del2 * radius / r;        
+    } else if (r < radius && angPt < angle1 )
+    {
+        xp = c1 + sin(angPt)*r;
+        zp = c2 + cos(angPt)*r;
+    } else if (r < radius && angPt > angle2 )
+    {
+        xp = c1 + sin(angPt)*r;
+        zp = c2 + cos(angPt)*r;
+    } else
+    {
+        xp = x[0];  
+        yp = x[1];
+    }
+
+    if (x[1] < lo ) yp = lo;
+    else if (x[1] > hi) yp = hi;
+    else yp = x[1];
+
+    add_contact(0,x,xp,yp,zp);
+    if (contact[0].r < cutoff) return 1;
+    return 0;
+
+  } else if (axis == 'z')
+  {
+    del1 = x[0] - c1;
+    del2 = x[1] - c2;
+    r = sqrt(del1*del1 + del2*del2);
+    angleCutoff = cutoff*180/M_PI*r;
+    
+    if (del1 > 0 && del2 >= 0)
+    {
+        angPt = atan(del2/del1)*180/M_PI;
+    } else if (del1 > 0 && del2 < 0)
+    {
+        angPt = 360 + atan(del2/del1)*180/M_PI;
+    } else if (del2 < 0) 
+    {
+        angPt = 180 + atan(del2/del1)*180/M_PI;
+    } else if (del1 == 0 && del2 > 0)
+    {
+        angPt = 90;
+    } else if (del1 == 0 && del2 < 0)
+    {
+        angPt = 270;
+    }
+
+    // calculate the angle of the point
+    /*if (del1 > 0 && del2 <= 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI;
+    } else if (del1 < 0 )
+    {
+        angPt = -atan(del2/del1)*180/M_PI+180;
+    } else if (del1 > 0 && del2 > 0)
+    {
+        angPt = -atan(del2/del1)*180/M_PI+360;
+    } else if (del1 == 0 && del2 < 0)
+    {
+        angPt = 90;
+    } else if (del2 == 0 && del2 > 0)  
+    {
+        angPt = 270;
+    }*/
+
+    // z is far enough from wedge that there is no contact
+    // z is interior to wedge
+    /*if (r >= radius+cutoff || x[2] <= lo-cutoff || x[2] >= hi+cutoff || angPt <= angle1 - angleCutoff || angPt >= angle2 + angleCutoff) return 0;
+    if (r < radius && x[2] > lo && x[2] < hi && angPt > angle1 && angPt < angle2 ) return 0;*/
+
+    // z is exterior of wedge or on its surface
+    /*if (r > radius ) //&& angPt > angle1 && angPt < angle2) 
+    {
+        xp = c1 + del1 * radius / r;
+        yp = c2 + del2 * radius / r;        
+    } else if (r < radius && angPt < angle1 )
+    {
+        xp = c1 + cos(angPt)*r;
+        yp = c2 + sin(angPt)*r;
+    } else if (r < radius && angPt > angle2)
+    {
+        xp = c1 + cos(angPt)*r;
+        yp = c2 + sin(angPt)*r;
+    } else
+    {
+        xp = x[0];
+        yp = x[1];
+    }*/
+
+        xp = x[0];
+        yp = x[1];
+
+    if (x[2] < lo ) zp = lo;
+    else if (x[2] > hi) zp = hi;
+    else zp = x[2];
+
+    add_contact(0,x,xp,yp,zp);
+    if (contact[0].r < cutoff) return 1;
+    return 0;
+  }
+
+  //error->all(FLERR,"surface_exterior not implemented");
 
   return 0;
 }

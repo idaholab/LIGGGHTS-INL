@@ -64,6 +64,7 @@
 #include "fix.h"
 #include "compute.h"
 #include "group.h"
+#include "irregular.h"
 #include "update.h"
 #include "domain.h"
 #include "memory.h"
@@ -119,6 +120,7 @@ Modify::Modify(LAMMPS *lmp) : Pointers(lmp)
   nfix_restart_peratom = 0;
   id_restart_peratom = style_restart_peratom = NULL;
   index_restart_peratom = NULL;
+  nfix_restart_pb = 0;
 
   ncompute = maxcompute = 0;
   compute = NULL;
@@ -213,7 +215,6 @@ void Modify::init()
   list_init(INITIAL_INTEGRATE,n_initial_integrate,list_initial_integrate);
   list_init(POST_INTEGRATE,n_post_integrate,list_post_integrate);
   list_init_pre_exchange(PRE_EXCHANGE,n_pre_exchange,list_pre_exchange);
-  //list_init(PRE_EXCHANGE,n_pre_exchange,list_pre_exchange);
   list_init(PRE_NEIGHBOR,n_pre_neighbor,list_pre_neighbor);
   list_init(PRE_FORCE,n_pre_force,list_pre_force);
   list_init(POST_FORCE,n_post_force,list_post_force);
@@ -310,22 +311,7 @@ void Modify::init()
 
 void Modify::setup(int vflag)
 {
-  
-  int nlocal = atom->nlocal;
-  int *mask = atom->mask;
-
-  for (int i = 0; i < nfix; i++)
-  {
-     if (!fix[i]->recent_restart && fix[i]->just_created && fix[i]->create_attribute)
-     {
-         fix[i]->just_created = 0;
-         fix[i]->pre_set_arrays();
-         for(int j = 0; j < nlocal; j++)
-           if(mask[j] & fix[i]->groupbit) fix[i]->set_arrays(j);
-     }
-     else if(fix[i]->just_created) fix[i]->just_created = 0;
-     fix[i]->recent_restart = 0;
-  }
+  init_fixes();
 
   // compute setup needs to come before fix setup
   // b/c NH fixes need use DOF of temperature computes
@@ -731,6 +717,31 @@ int Modify::min_dof()
 }
 
 /* ----------------------------------------------------------------------
+   call set_arrays to init data for all particles that were present at fix creation
+   do this only for fixes that were just created
+   do not do this is case of restart
+------------------------------------------------------------------------- */
+
+void Modify::init_fixes()
+{
+  int nlocal = atom->nlocal;
+  int *mask = atom->mask;
+
+  for (int i = 0; i < nfix; i++)
+  {
+    if (!fix[i]->recent_restart && fix[i]->just_created && fix[i]->create_attribute)
+    {
+      fix[i]->just_created = 0;
+      fix[i]->pre_set_arrays();
+      for(int j = 0; j < nlocal; j++)
+        if(mask[j] & fix[i]->groupbit) fix[i]->set_arrays(j);
+    }
+    else if(fix[i]->just_created) fix[i]->just_created = 0;
+       fix[i]->recent_restart = 0;
+  }
+}
+
+/* ----------------------------------------------------------------------
    reset reference state of fix, only for relevant fixes
 ------------------------------------------------------------------------- */
 
@@ -870,7 +881,7 @@ void Modify::add_fix(int narg, char **arg, char *suffix)
           )
        )
       {
-          fix[ifix]->restart(state_restart_global[i]);
+          fix[ifix]->restart(state_restart_global[i],restart_version);
           fix[ifix]->recent_restart = 1; 
           if (comm->me == 0) {
             char *str = (char *) ("Resetting global state of Fix %s Style %s "
@@ -906,7 +917,36 @@ void Modify::add_fix(int narg, char **arg, char *suffix)
     }
   }
 
-  fix[ifix]->post_create(); 
+  // check if Fix is in restart_pb list
+  // if yes, load restart per-element data
+  for (int i = 0; i < nfix_restart_pb; i++)
+  {
+    if ( strcmp(id_restart_pb[i].c_str(),fix[ifix]->id) == 0 &&
+         ( strcmp(style_restart_pb[i].c_str(),fix[ifix]->style) == 0 ||
+           (fix[ifix]->accepts_restart_data_from_style && strcmp(style_restart_peratom[i],fix[ifix]->accepts_restart_data_from_style) == 0)
+         )
+       )
+    {
+      ParallelBase* pb = fix[ifix]->get_parallel_base_ptr();
+      if (!state_restart_pb[i].empty()) // not all procs may have restart data
+          pb->unpack_restart(state_restart_pb[i].data());
+      pb->finalize_restart(); // must be called by all procs, since MPI communication is done here
+      fix[ifix]->recent_restart = 1;
+      fix[ifix]->restart_reset = 1;
+      if (comm->me == 0) {
+        const char *str = "Resetting per-element state of Fix %s Style %s "
+                     "from restart file info\n";
+        if (screen) fprintf(screen,str,fix[ifix]->id,fix[ifix]->style);
+        if (logfile) fprintf(logfile,str,fix[ifix]->id,fix[ifix]->style);
+      }
+      Irregular *irregular = new Irregular(lmp);
+      irregular->migrate_pb(pb);
+      delete irregular;
+
+    }
+  }
+
+  fix[ifix]->post_create();
 }
 
 /* ----------------------------------------------------------------------
@@ -1160,6 +1200,33 @@ void Modify::write_restart(FILE *fp)
       fix[i]->write_restart(fp);
     }
 
+  // write global ParallelBase information
+  // only proc 0 has to perform this task
+  if (me == 0)
+  {
+      count = 0;
+      for (int ifix = 0; ifix < nfix; ifix++)
+          if (fix[ifix]->get_parallel_base_ptr())
+              count++;
+
+      fwrite(&count,sizeof(int),1,fp);
+
+      for (int ifix = 0; ifix < nfix; ifix++)
+      {
+          ParallelBase* pb = fix[ifix]->get_parallel_base_ptr();
+          if (pb)
+          {
+              n = strlen(fix[ifix]->id) + 1;
+              fwrite(&n,sizeof(int),1,fp);
+              fwrite(fix[ifix]->id,sizeof(char),n,fp);
+              n = strlen(fix[ifix]->style) + 1;
+              fwrite(&n,sizeof(int),1,fp);
+              fwrite(fix[ifix]->style,sizeof(char),n,fp);
+          }
+      }
+  }
+
+  // write per-atom information
   count = 0;
   for (int i = 0; i < nfix; i++)
     if (fix[i]->restart_peratom) count++;
@@ -1189,8 +1256,10 @@ void Modify::write_restart(FILE *fp)
    return maxsize of extra info that will be stored with any atom
 ------------------------------------------------------------------------- */
 
-int Modify::read_restart(FILE *fp)
+int Modify::read_restart(FILE *fp, const Version &ver)
 {
+  restart_version = ver;
+
   // nfix_restart_global = # of restart entries with global state info
 
   int me = comm->me;
@@ -1227,6 +1296,46 @@ int Modify::read_restart(FILE *fp)
     state_restart_global[i] = new char[n];
     if (me == 0) fread(state_restart_global[i],sizeof(char),n,fp);
     MPI_Bcast(state_restart_global[i],n,MPI_CHAR,0,world);
+  }
+
+  /* Read and communicate ParallelBase (per-element) global data from
+   * restart file.
+   * Only fix ids and styles are communicated, thus every proc has a
+   * complete list of fixes with ParallelBase restart data
+   */
+  if (ver >= Version(3,9))
+  {
+      if (me == 0) fread(&nfix_restart_pb,sizeof(int),1,fp);
+      MPI_Bcast(&nfix_restart_pb,1,MPI_INT,0,world);
+
+      // allocate space for each entry
+
+      if (nfix_restart_pb) {
+        id_restart_pb.resize(nfix_restart_pb);
+        style_restart_pb.resize(nfix_restart_pb);
+        state_restart_pb.resize(nfix_restart_pb);
+      }
+
+      // read each entry and Bcast to all procs
+      // each entry has id string, style string, chunk of state data
+
+      for (int i = 0; i < nfix_restart_pb; i++) {
+        if (me == 0) fread(&n,sizeof(int),1,fp);
+        MPI_Bcast(&n,1,MPI_INT,0,world);
+        char *current_id_restart_pb = new char[n];
+        if (me == 0) fread(current_id_restart_pb,sizeof(char),n,fp);
+        MPI_Bcast(current_id_restart_pb,n,MPI_CHAR,0,world);
+        id_restart_pb[i] = current_id_restart_pb;
+        delete [] current_id_restart_pb;
+
+        if (me == 0) fread(&n,sizeof(int),1,fp);
+        MPI_Bcast(&n,1,MPI_INT,0,world);
+        char *current_style_restart_pb = new char[n];
+        if (me == 0) fread(current_style_restart_pb,sizeof(char),n,fp);
+        MPI_Bcast(current_style_restart_pb,n,MPI_CHAR,0,world);
+        style_restart_pb[i] = current_style_restart_pb;
+        delete [] current_style_restart_pb;
+      }
   }
 
   // nfix_restart_peratom = # of restart entries with peratom info
@@ -1272,6 +1381,115 @@ int Modify::read_restart(FILE *fp)
   return maxsize;
 }
 
+void Modify::write_restart_pb(FILE *fp, bool multiproc)
+{
+    const int me = comm->me;
+    const int nprocs = comm->nprocs;
+
+    for (int ifix = 0; ifix < nfix; ifix++)
+    {
+        ParallelBase* pb = fix[ifix]->get_parallel_base_ptr();
+        if (pb)
+        {
+            // TODO: Remove this out of the loop and create the buffer only once
+            // create buffer for ParallelBase restart functions
+            int max_size;
+            int send_size = pb->size_restart();
+            MPI_Allreduce(&send_size,&max_size,1,MPI_INT,MPI_MAX,world);
+
+            double *buf;
+            
+            if (me == 0 && multiproc == 0)
+                memory->create(buf,max_size,"write_restart:buf");
+            else
+                memory->create(buf,send_size,"write_restart:buf");
+
+            const int size = pb->pack_restart(&buf[0]);
+
+            // if single file:
+            //   write one chunk of atoms per proc to file
+            //   proc 0 pings each proc, receives its chunk, writes to file
+            //   all other procs wait for ping, send their chunk to proc 0
+            // else if one file per proc:
+            //   each proc opens its own file and writes its chunk directly
+
+            if (multiproc == 0)
+            {
+                int tmp,recv_size;
+                MPI_Status status;
+                MPI_Request request;
+
+                if (me == 0)
+                {
+                    for (int iproc = 0; iproc < nprocs; iproc++)
+                    {
+                        if (iproc)
+                        {
+                            MPI_Irecv(buf,max_size,MPI_DOUBLE,iproc,0,world,&request);
+                            MPI_Send(&tmp,0,MPI_INT,iproc,0,world);
+                            MPI_Wait(&request,&status);
+                            MPI_Get_count(&status,MPI_DOUBLE,&recv_size);
+                        }
+                        else
+                            recv_size = send_size;
+
+                        fwrite(&recv_size,sizeof(int),1,fp);
+                        
+                        fwrite(buf,sizeof(double),recv_size,fp);
+                    }
+                }
+                else
+                {
+                    MPI_Recv(&tmp,0,MPI_INT,0,0,world,&status);
+                    MPI_Rsend(buf,send_size,MPI_DOUBLE,0,0,world);
+                }
+            }
+            else
+            {
+                fwrite(&send_size,sizeof(int),1,fp);
+                fwrite(buf,sizeof(double),send_size,fp);
+            }
+
+            memory->destroy(buf);
+        }
+    }
+}
+
+/* ----------------------------------------------------------------------
+   Read ParallelBase (per-element) data from restart file
+   This function may be called multiple times (with different files fp)
+------------------------------------------------------------------------- */
+
+void Modify::read_restart_pb(FILE *fp, const int nprocs)
+{
+    int n = 0;
+    for (int i = 0; i < nfix_restart_pb; i++)
+    {
+        // per-element properties
+
+        for (int j = 0; j < nprocs; j++)
+        {
+            // proc reads data and combine information of his files
+            fread(&n,sizeof(int),1,fp);
+            std::vector<double> recevbuf(n,0);
+            fread(recevbuf.data(),sizeof(double),n,fp);
+
+            // internal structure is always: nlocal + per-element data
+            // combine information:
+            //   nlocal_new = nlocal_old + nlocal_current
+            //   append per-element info at the end
+            if (!state_restart_pb[i].empty())
+            {
+                const int nlocal_old = static_cast<int>(state_restart_pb[i][0]);
+                const int nlocal_current = static_cast<int>(recevbuf[0]);
+                state_restart_pb[i][0] = static_cast<double>(nlocal_old+nlocal_current);
+                recevbuf.erase(recevbuf.begin()); 
+            }
+            state_restart_pb[i].insert(state_restart_pb[i].end(),recevbuf.begin(),recevbuf.end());
+        }
+    }
+}
+
 /* ----------------------------------------------------------------------
    delete all lists of restart file Fix info
 ------------------------------------------------------------------------- */
@@ -1307,7 +1525,16 @@ void Modify::restart_deallocate()
     delete [] index_restart_peratom;
   }
 
-  nfix_restart_global = nfix_restart_peratom = 0;
+  if (nfix_restart_pb) {
+      for (int i = 0; i < nfix_restart_pb; i++) {
+        state_restart_pb[i].clear();
+      }
+      id_restart_pb.clear();
+      style_restart_pb.clear();
+      state_restart_pb.clear();
+  }
+
+  nfix_restart_global = nfix_restart_peratom = nfix_restart_pb = 0;
 
   if(0 == n_ms && have_ms_in_restart)
     error->all(FLERR,"Restart data contains multi-sphere data, which was not restarted. In order to restart it,\n"
@@ -1348,14 +1575,12 @@ void Modify::list_init_pre_exchange(int mask, int &n, int *&list)
   for (int i = 0; i < nfix; i++) if (fmask[i] & mask)
   {
     if(0 == strncmp(fix[i]->style,"contacthistory",14))
-    //if(0 == strcmp(fix[i]->style,"contacthistory"))
         list[n++] = i;
   }
 
   for (int i = 0; i < nfix; i++)
   {
       if(0 == strncmp(fix[i]->style,"contacthistory",14))
-      //if(0 == strcmp(fix[i]->style,"contacthistory"))
         continue;
 
       if (fmask[i] & mask) list[n++] = i;

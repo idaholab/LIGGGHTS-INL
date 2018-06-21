@@ -55,6 +55,13 @@ namespace LAMMPS_NS
   : xLo(xLo_), xHi(xHi_), yLo(yLo_), yHi(yHi_), zLo(zLo_), zHi(zHi_), initGiven(true), dirty(true)
   {}
 
+  BoundingBox::BoundingBox(BoundingBox const &orig)
+  : xLo(orig.xLo), xHi(orig.xHi),
+    yLo(orig.yLo), yHi(orig.yHi),
+    zLo(orig.zLo), zHi(orig.zHi),
+    initGiven(orig.initGiven), dirty(orig.dirty)
+  {}
+
   BoundingBox::~BoundingBox()
   {}
 

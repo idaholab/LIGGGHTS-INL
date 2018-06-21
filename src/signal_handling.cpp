@@ -109,5 +109,5 @@ void usr1_handler(int signum)
 #endif
 }
 
-};
-};
+}
+}

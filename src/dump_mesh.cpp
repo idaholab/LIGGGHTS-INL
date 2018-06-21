@@ -570,7 +570,7 @@ void DumpMesh::getRefs()
             }
             else
             {
-                temp_per_element_.push_back(true);
+                temp_per_element_.push_back(false);
                 T_[i] = (*mesh)->prop().getGlobalProperty<ScalarContainer<double> >("Temp");
             }
             //if(0 == comm->me && !T_[i])

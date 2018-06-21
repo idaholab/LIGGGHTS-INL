@@ -1,0 +1,86 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+How To LIGGGHTS(R)-INL4.X vs. LIGGGHTS(R)-INL3.X - syntax changes :h3
+
+Introduction: :h4
+
+This is a short outline of the most important changes in LIGGGHTS(R)-INL 4.X
+compared to LIGGGHTS(R)-INL 3.X regarding the syntax of major commands. The
+motivation for these changes was to make the script language more readable and to
+improve extendability (in the sense of object oriented programming) with respect
+to modelling approaches.
+
+Commands covered by this tutorial: :h4
+
+fix nve/nonspherical :l
+fix multisphere :l
+fix concave :l
+fix couple/cfd/force :l
+fix nve/cfd_cn :l
+:ule
+
+Changes in syntax for each command: :h4
+
+Changes are indicated as follows
+
+OLD: old_syntax
+NEW: new_syntax  :pre
+
+where {old_syntax} refers to the syntax used in LIGGGHTS(R)-INL 3.X and before,
+and {new_syntax} refers to the syntax used in LIGGGHTS(R)-INL 4.X.
+
+:line
+
+[fix nve/nonspherical:]
+
+OLD: fix ID group-ID nve/superquadric
+OLD: fix ID group-ID nve/convexhull
+NEW: fix ID group-ID nve/nonspherical :pre
+
+All integrators for atom types superquadric and convexhull used to require a
+specialized integrator. These integrators have now been combined in a single
+"fix nve/nonspherical"_fix_nve_nonspherical.html to improve code quality and
+simplify the input script generation
+
+:line
+
+[fix multisphere & fix concave:]
+
+OLD: fix ID group-ID multisphere
+NEW: fix ID group-ID multisphere
+     fix ID group-ID nve/nonspherical :pre
+
+OLD: fix ID group-ID concave
+NEW: fix ID group-ID concave
+     fix ID group-ID nve/nonspherical :pre
+
+Previously the "fix multisphere"_fix_multisphere.html would also contain the
+multisphere integrator and the same is true for "fix concave"_fix_concave.html.
+This is no longer correct due to the rewrite mentioned above. Because of this it
+is now necessary to specify an integrator explicitly. As all non-spherical
+integrators have been unified into one fix this is the same "fix
+nve/nonspherical"_fix_nve_nonspherical.html.
+
+It was possible in 3.X to specify a {fix multisphere/nointegration} the same can
+now be achieved by using a {fix multisphere} without the nonspherical
+integrator.
+
+:line
+
+[fix nve/cfd_cn & fix couple/cfd/force:]
+
+OLD: fix ID group-ID couple/cfd/force/implicit
+     fix ID group-ID nve/sphere
+NEW: fix ID group-ID couple/cfd/force
+     fix ID group-ID nve/cfd_cn/sphere
+
+The fix couple/cfd/force/implicit has been removed and most functionality was moved
+to the regular couple/cfd/force. To consider the drag in an implicit formulation
+the integrators fix nve/cfd_cn/* can be used. For more details please read the
+CFDEMcoupling documentation.

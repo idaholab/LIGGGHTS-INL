@@ -32,6 +32,11 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
+
+    Christoph Kloss (DCS Computing GmbH, Linz)
+    Christoph Kloss (JKU Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
+
     This file is from LAMMPS, but has been modified. Copyright for
     modification:
 
@@ -53,98 +58,148 @@
 #define LMP_COMM_H
 
 #include "pointers.h"
+#include "parallel_base.h"
 #include <vector>
+#include <list>
 
 namespace LAMMPS_NS {
+
+enum{LAYOUT_UNIFORM,LAYOUT_NONUNIFORM,LAYOUT_TILED};    // several files
 
 class Comm : protected Pointers {
  friend class Info;
 
  public:
+  int style;     // comm pattern: 0 = 6-way stencil, 1 = irregular tiling
+  int mode;      // 0 = single cutoff, 1 = multi-type cutoff
+
   int me,nprocs;                    // proc info
-  int procgrid[3];                  // procs assigned in each dim of 3d grid
-  int user_procgrid[3];             // user request for procs in each dim
-  int myloc[3];                     // which proc I am in each dim
-  int procneigh[3][2];              // my 6 neighboring procs, 0/1 = left/right
   int ghost_velocity;               // 1 if ghost atoms have velocity, 0 if not
-  int uniform;                      // 1 = equal subdomains, 0 = load-balanced
-  double *xsplit,*ysplit,*zsplit;   // fractional (0-1) sub-domain sizes
   double cutghost[3];               // cutoffs used for acquiring ghost atoms
-  double cutghostuser;              // user-specified ghost cutoff
-  int ***grid2proc;                 // which proc owns i,j,k loc in 3d grid
+  double cutghostuser;              // user-specified ghost cutoff (mode == 0)
+  double *cutusermulti;            // per type user ghost cutoff (mode == 1)
   int recv_from_partition;          // recv proc layout from this partition
   int send_to_partition;            // send my proc layout to this partition
                                     // -1 if no recv or send
-  int other_partition_style;        // 0 = recv layout dims must be multiple of
-                                    //     my layout dims
   int maxexchange_atom;             // max contribution to exchange from AtomVec
   int maxexchange_fix;              // max contribution to exchange from Fixes
   int nthreads;                     // OpenMP threads per MPI process
 
+  // public settings specific to layout = UNIFORM, NONUNIFORM
+
+  int procgrid[3];                  // procs assigned in each dim of 3d grid
+  int user_procgrid[3];             // user request for procs in each dim
+  int myloc[3];                     // which proc I am in each dim
+  int procneigh[3][2];              // my 6 neighboring procs, 0/1 = left/right
+  double *xsplit,*ysplit,*zsplit;   // fractional (0-1) sub-domain sizes
+  int ***grid2proc;                 // which proc owns i,j,k loc in 3d grid
+
   //exchange events recorder
-  
   bool               exchangeEvents;                 //main switch to record exchange events
   std::vector<int>   exchangeEventsLocalId;          //local ids that change processor
   std::vector<int>   exchangeEventsReceivingProcess; //process IDs that receive the atom
   std::vector<int>   exchangeEventsGlobalProblemIds; //list with global ids that change more than one dim
 
+  // methods
+
   Comm(class LAMMPS *);
   virtual ~Comm();
-
+  // NOTE: copy_arrays is called from a constructor and must not be made virtual
+  void copy_pointers(class Comm *);
+  void copy_arrays(class Comm *);
   virtual void init();
-  virtual void set_proc_grid(int outflag = 1); // setup 3d grid of procs
-  virtual void setup();                       // setup 3d comm pattern
-  virtual void forward_comm(int dummy = 0);   // forward comm of atom coords
-  virtual void reverse_comm();                // reverse comm of forces
-  virtual void exchange();                    // move atoms to new procs
-  virtual void borders();                     // setup list of atoms to comm
+  void set(int, char **);         // set communication style; equivalent to LAMMPS comm_modify
 
-  virtual void forward_comm_pair(class Pair *);    // forward comm from a Pair
-  virtual void reverse_comm_pair(class Pair *);    // reverse comm from a Pair
-  virtual void forward_comm_fix(class Fix *);      // forward comm from a Fix
-  virtual void reverse_comm_fix(class Fix *);      // reverse comm from a Fix
-  virtual void forward_comm_variable_fix(class Fix *); // variable-size variant
-  virtual void reverse_comm_variable_fix(class Fix *); // variable-size variant
-  virtual void forward_comm_compute(class Compute *);  // forward from a Compute
-  virtual void reverse_comm_compute(class Compute *);  // reverse from a Compute
-  virtual void forward_comm_dump(class Dump *);    // forward comm from a Dump
-  virtual void reverse_comm_dump(class Dump *);    // reverse comm from a Dump
-  void forward_comm_array(int, double **);         // forward comm of array
+  void set_processors(int, char **);      // set 3d processor grid attributes
+  virtual void set_proc_grid(int outflag = 1); // setup 3d grid of procs
+
+  virtual void setup() = 0;                       // setup 3d comm pattern
+  virtual void forward_comm(int dummy = 0) = 0;   // forward comm of atom coords
+  virtual void reverse_comm() = 0;                // reverse comm of forces
+  virtual void exchange() = 0;                    // move atoms to new procs
+  virtual void borders() = 0;                     // setup list of atoms to comm
+
+  // forward/reverse comm from a Pair, Fix, Compute, Dump
+
+  virtual void forward_comm_pair(class Pair *) = 0;    // forward comm from a Pair
+  virtual void reverse_comm_pair(class Pair *) = 0;    // reverse comm from a Pair
+  virtual void forward_comm_fix(class Fix *) = 0;      // forward comm from a Fix
+  virtual void reverse_comm_fix(class Fix *) = 0;      // reverse comm from a Fix
+  virtual void forward_comm_variable_fix(class Fix *) = 0; // variable-size variant
+  virtual void forward_comm_compute(class Compute *) = 0;  // forward from a Compute
+  virtual void reverse_comm_compute(class Compute *) = 0;  // reverse from a Compute
+  virtual void forward_comm_dump(class Dump *) = 0;    // forward comm from a Dump
+  virtual void reverse_comm_dump(class Dump *) = 0;    // reverse comm from a Dump
+
+  // forward comm of an array
+  // exchange of info on neigh stencil
+  // set processor mapping options
+
+  virtual void forward_comm_array(int, double **) = 0; // forward comm of array
+  int binary(double, int, double *);
+
+  // map a point to a processor, based on current decomposition
+
+  virtual void coord2proc_setup() {}
+  virtual int coord2proc(const double *const, int &, int &, int &);
+
+  // memory usage
+
+  virtual bigint memory_usage() = 0;
+
+  // non-virtual functions common to all Comm styles
 
   void ring(int, int, void *, int, void (*)(int, char *),   // ring comm
             void *, int self = 1);
   int read_lines_from_file(FILE *, int, int, char *);  // read/bcast file lines
-  int read_lines_from_file_universe(FILE *, int, int, char *);
 
-  virtual void set(int, char **);         // set communication style
-  void set_processors(int, char **);      // set 3d processor grid attributes
+  double* get_buf_send()
+  { return buf_send; }
+  double* get_buf_recv()
+  { return buf_recv; }
 
-  virtual bigint memory_usage();
+  double* check_grow_send(const int n, const int flag, const int requestextra = -1); // reallocate send buffer if required
+
+  void register_subcomm(Comm *comm)
+  { subcomms_.push_back(comm); }
+
+  double get_mysplit(const int i, const int j) const
+  { return mysplit[i][j]; }
+
+  void set_mysplit(const double _mysplit[3][2]);
+  void set_rcbnew(const int _rcbnew);
+  void set_rcbcutfrac(const double _rcbcutfrac);
+  void set_rcbcutdim(const int _rcbdim);
+  void set_sizes(const int _size_border, const int _size_forward, const int _size_reverse, const int _maxforward, const int _maxreverse);
+  void set_layout(const int _layout);
+
+  int get_layout()
+  { return layout; }
+
+  // for tiled only, copies exchproc info from main comm to sub comms
+  virtual void copy_exchange_info_from_main_comm()
+  {}
 
  protected:
-  int style;                        // single vs multi-type comm
-  int nswap;                        // # of swaps to perform = sum of maxneed
-  int recvneed[3][2];               // # of procs away I recv atoms from
-  int sendneed[3][2];               // # of procs away I send atoms to
-  int maxneed[3];                   // max procs away any proc needs, per dim
-  int triclinic;                    // 0 if domain is orthog, 1 if triclinic
-  int maxswap;                      // max # of swaps memory is allocated for
+  void grow_send(int, int, const int requestextra = -1); // reallocate send buffer
+  void grow_recv(int);                 // free/allocate recv buffer
+
+  int layout;    // LAYOUT_UNIFORM = equal-sized bricks
+                 // LAYOUT_NONUNIFORM = logical bricks, but diff sizes via LB
+                 // LAYOUT_TILED = general tiling, due to RCB LB
+
+  int bordergroup;                  // only communicate this group in borders
+
+  int map_style;                    // non-0 if global->local mapping is done
+  int comm_x_only,comm_f_only;      // 1 if only exchange x,f in for/rev comm
+
   int size_forward;                 // # of per-atom datums in forward comm
   int size_reverse;                 // # of datums in reverse comm
   int size_border;                  // # of datums in forward border comm
-  int *sendnum,*recvnum;            // # of atoms to send/recv in each swap
-  int *sendproc,*recvproc;          // proc to send/recv to/from at each swap
-  int *size_forward_recv;           // # of values to recv in each forward comm
-  int *size_reverse_send;           // # to send in each reverse comm
-  int *size_reverse_recv;           // # to recv in each reverse comm
-  double *slablo,*slabhi;           // bounds of slab to send at each swap
-  double **multilo,**multihi;       // bounds of slabs for multi-type swap
-  double **cutghostmulti;           // cutghost on a per-type basis
-  int *pbc_flag;                    // general flag for sending atoms thru PBC
-  int **pbc;                        // dimension flags for PBC adjustments
-  int comm_x_only,comm_f_only;      // 1 if only exchange x,f in for/rev comm
-  int map_style;                    // non-0 if global->local mapping is done
-  int bordergroup;                  // only communicate this group in borders
+
+  int maxforward,maxreverse;        // max # of datums in forward/reverse comm
+  int maxexchange;                  // max # of datums/atom in exchange comm
+
   int gridflag;                     // option for creating 3d grid
   int mapflag;                      // option for mapping procs to 3d grid
   char xyz[4];                      // xyz mapping of procs to 3d grid
@@ -159,39 +214,24 @@ class Comm : protected Pointers {
   int coregrid[3];                  // 3d grid of cores within a node
   int user_coregrid[3];             // user request for cores in each dim
 
-  int *firstrecv;                   // where to put 1st recv atom in each swap
-  int **sendlist;                   // list of atoms to send in each swap
-  int *maxsendlist;                 // max size of send list for each swap
-
   double *buf_send;                 // send buffer for all comm
   double *buf_recv;                 // recv buffer for all comm
   int maxsend,maxrecv;              // current size of send/recv buffer
-  int maxforward,maxreverse;        // max # of datums in forward/reverse comm
-
-  int maxexchange;                  // max # of datums/atom in exchange comm
   int bufextra;                     // extra space beyond maxsend in send buffer
 
-  int updown(int, int, int, double, int, double *);
-                                            // compare cutoff to procs
-  virtual void grow_send(int,int);          // reallocate send buffer
-  virtual void grow_recv(int);              // free/allocate recv buffer
-  virtual void grow_list(int, int);         // reallocate one sendlist
-  virtual void grow_swap(int);              // grow swap and multi arrays
-  virtual void allocate_swap(int);          // allocate swap arrays
-  virtual void allocate_multi(int);         // allocate multi arrays
-  virtual void free_swap();                 // free swap arrays
-  virtual void free_multi();                // free multi arrays
-  virtual void exchangeEventsRecorder();    // Recorder for Exchange events
-  virtual void exchangeEventsCorrector();   // Corrects receiving process ids
+  // public settings specific to layout = TILED
 
-  bool use_gran_opt();
-  bool decide(int i,int dim,double lo,double hi,int ineed);
-  bool decide_wedge(int i,int dim,double lo,double hi,int ineed);
+  int rcbnew;                       // 1 if just reset by rebalance, else 0
+  double mysplit[3][2];             // fractional (0-1) bounds of my sub-domain
+  double rcbcutfrac;                // fractional RCB cut by this proc
+  int rcbcutdim;                    // dimension of RCB cut
 
-  class DomainWedge *dw_;
-  int ia,iphi;
-  
-  double nleft[2],nright[2],pleft[2],pright[2],c[2];
+  // Extension of comm beyond particles
+  ParallelBase *pb_;
+
+  // Other comms
+  bool is_subcomm;
+  std::list<Comm*> subcomms_;
 };
 
 }

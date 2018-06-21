@@ -126,7 +126,7 @@ void Coarsegraining::command(int narg, char **arg)
         if(cg < 1.)
             error->all(FLERR,"Illegal coarsegraining command, cg > 1 expected, or illegal coarsegraining command, unknown keyword");
 
-           typeSpecificCG = force->setCG(cg);
+        typeSpecificCG = force->setCG(cg);
         #if VERBOSE_COARSEGRAINING
            printf("\n\nCoarsegraining:typeSpecificCG: %d, value: %g. \n", typeSpecificCG,cg);
         #endif

@@ -199,6 +199,8 @@ Neighbor::Neighbor(LAMMPS *lmp) : Pointers(lmp)
   improperlist = NULL;
 
   last_setup_bins_timestep = 0;
+
+  exclude_gran_only = 0; 
 }
 
 /* ---------------------------------------------------------------------- */
@@ -269,6 +271,9 @@ void Neighbor::init()
 
   if (pgsize < 10*oneatom)
     error->all(FLERR,"Neighbor page size must be >= 10x the one atom setting");
+
+  if(contactDistanceFactor >= 10.)
+    error->all(FLERR,"contactDistanceFactor must be < 10");
 
   // ------------------------------------------------------------------
   // settings
@@ -2008,7 +2013,9 @@ void Neighbor::modify_params(int narg, char **arg)
         if (ex_mol_group[nex_mol] == -1)
           error->all(FLERR,"Invalid group ID in neigh_modify command");
         nex_mol++;
-        iarg += 3;
+        if (iarg+3 < narg && strcmp(arg[iarg+3],"gran") == 0) 
+          exclude_gran_only = 1;
+        iarg += 4;
 
       } else if (strcmp(arg[iarg+1],"none") == 0) {
         nex_type = nex_group = nex_mol = 0;
@@ -2074,7 +2081,7 @@ void Neighbor::bin_atoms()
    for triclinic, doesn't matter since stencil & neigh list built differently
 ------------------------------------------------------------------------- */
 
-int Neighbor::coord2bin(double *x)
+int Neighbor::coord2bin(double *x) const
 {
   int ix,iy,iz;
 
@@ -2109,7 +2116,7 @@ int Neighbor::coord2bin(double *x)
    same as coord2bin, but also return ix,iy,iz offsets in each dim
 ------------------------------------------------------------------------- */
 
-int Neighbor::coord2bin(double *x, int &ix, int &iy, int &iz)
+int Neighbor::coord2bin(double *x, int &ix, int &iy, int &iz) const
 {
   if (x[0] >= bboxhi[0])
     ix = static_cast<int> ((x[0]-bboxhi[0])*bininvx) + nbinx;
@@ -2159,7 +2166,8 @@ void Neighbor::bin_center(int ix, int iy, int iz, double * center)
 ------------------------------------------------------------------------- */
 
 int Neighbor::exclusion(int i, int j, int itype, int jtype,
-                        int *mask, int *molecule) const {
+                        int *mask, int *molecule, bool is_gran) const {
+
   int m;
   
   if (nex_type && ex_type[itype][jtype]) return 1;
@@ -2171,11 +2179,14 @@ int Neighbor::exclusion(int i, int j, int itype, int jtype,
     }
   }
 
-  if (nex_mol) {
-    for (m = 0; m < nex_mol; m++)
-      if (mask[i] & ex_mol_bit[m] && mask[j] & ex_mol_bit[m] &&
-          (molecule[i] > -1 && molecule[j] > -1) &&  
-          molecule[i] == molecule[j]) return 1;
+  if((is_gran && exclude_gran_only) || !exclude_gran_only)
+  {
+    if (nex_mol) {
+      for (m = 0; m < nex_mol; m++)
+        if (mask[i] & ex_mol_bit[m] && mask[j] & ex_mol_bit[m] &&
+            (molecule[i] > -1 && molecule[j] > -1) &&  
+            molecule[i] == molecule[j]) return 1;
+    }
   }
 
   return 0;

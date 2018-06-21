@@ -65,6 +65,7 @@
 #include "comm.h"
 #include "math_extra.h"
 #include "string_liggghts.h"
+#include "parallel_base.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -76,7 +77,6 @@ FixMesh::FixMesh(LAMMPS *lmp, int narg, char **arg)
   atom_type_mesh_(-1),
   temperature_mesh_(0.),
   mass_temperature_(0.),
-  trackPerElementTemp_(false),
   mesh_(NULL),
   setupFlag_(false),
   pOpFlag_(false),
@@ -343,6 +343,7 @@ void FixMesh::create_mesh(char *mesh_fname, bool is_fix)
 
         // set properties that are important for reading
         mesh_->setMeshID(id);
+        mesh_->set_type(atom_type_mesh_);
         if(verbose_) mesh_->setVerbose();
         if(autoRemoveDuplicates_) mesh_->autoRemoveDuplicates();
         if(precision_ > 0.) mesh_->setPrecision(precision_);
@@ -527,7 +528,7 @@ void FixMesh::initialSetup()
     mesh_->initialSetup();
 
     // warn if there are elements that extend outside box
-    if(!mesh_->allNodesInsideSimulationBox() && 0 == comm->me)
+    if(!mesh_->allNodesInsideSimulationBox() && comm->me == 0)
        error->warning(FLERR,"Not all nodes of fix mesh inside simulation box, "
                             "elements will be deleted or wrapped around periodic boundary conditions");
     if(comm->me == 0)
@@ -677,17 +678,20 @@ void FixMesh::scaleMesh(double const factor)
 
 void FixMesh::write_restart(FILE *fp)
 {
-    mesh_->writeRestart(fp);
+    mesh_->write_restart_parallel(fp);
 }
 
 /* ----------------------------------------------------------------------
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixMesh::restart(char *buf)
+void FixMesh::restart(char *buf, const Version &ver)
 {
     double *list = (double *) buf;
-    mesh_->restart(list);
+    if ( ver < Version(3,9) )
+        mesh_->restart_serial(list);
+    else
+        mesh_->restart_parallel(list);
 }
 
 /* ----------------------------------------------------------------------
@@ -714,6 +718,12 @@ void FixMesh::box_extent(double &xlo,double &xhi,double &ylo,double &yhi,double 
             zhi = std::max(zhi,node[2]);
         }
     }
+    MPI_Min_Scalar(xlo, world);
+    MPI_Max_Scalar(xhi, world);
+    MPI_Min_Scalar(ylo, world);
+    MPI_Max_Scalar(yhi, world);
+    MPI_Min_Scalar(zlo, world);
+    MPI_Max_Scalar(zhi, world);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -746,4 +756,30 @@ void FixMesh::rotate(const double dphi, const double * const axis, const double 
         if (found)
             (*it)->rotate(dphi, axis, center);
     }
+}
+
+/* ---------------------------------------------------------------------- */
+
+int FixMesh::modify_param(int narg, char **arg)
+{
+        fprintf(screen,"FixMesh::modify_param\n");
+    if (strcmp(arg[0],"temperature") == 0)
+    {
+        if (narg < 2)
+          error->fix_error(FLERR,this,"not enough arguments for 'temperature'");
+        temperature_mesh_ = force->numeric(FLERR,arg[1]);
+        return 2;
+    }
+
+    return 0;
+}
+
+/* ---------------------------------------------------------------------- */
+ParallelBase* FixMesh::get_parallel_base_ptr() const
+{
+    if (!mesh_->doParallelization())
+        return NULL;
+    ParallelBase* pb = dynamic_cast<ParallelBase*>(dynamic_cast<TriMesh*>(mesh_));
+    pb->prepare();
+    return pb;
 }

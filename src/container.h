@@ -41,11 +41,6 @@
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
 
-#ifndef LMP_CONTAINER
-#define LMP_CONTAINER
-
 #include "scalar_container.h"
 #include "vector_container.h"
 #include "multi_vector_container.h"
-
-#endif /* CONTAINER_H_ */

@@ -74,13 +74,13 @@ namespace ContactModels
       
     }
 
-    inline void registerSettings(Settings &settings)
+    void registerSettings(Settings &settings)
     {
       settings.registerOnOff("disableTangentialWhenBonded", disable_when_bonded_, false);
       settings.registerOnOff("computeDissipatedEnergy", dissipatedflag_, false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
     {
       if (disable_when_bonded_)
       {
@@ -92,24 +92,24 @@ namespace ContactModels
       {
         if (cmb->is_wall())
         {
-            fix_dissipated_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy_wall", "property/atom", "vector", 0, 0, "dissipated energy"));
+            fix_dissipated_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy_wall_tangential", "property/atom", "vector", 0, 0, "dissipated energy"));
             dissipation_history_offset_ = cmb->get_history_offset("dissipation_force");
             if (!dissipation_history_offset_)
                 error->one(FLERR, "Internal error: Could not find dissipation history offset");
         }
         else
-            fix_dissipated_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy", "property/atom", "vector", 0, 0, "dissipated energy"));
+            fix_dissipated_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dissipated_energy_tangential", "property/atom", "vector", 0, 0, "dissipated energy"));
         if (!fix_dissipated_)
             error->one(FLERR, "Surface model has not registered dissipated_energy fix");
       }
     }
 
-    inline void connectToProperties(PropertyRegistry & registry){
+    void connectToProperties(PropertyRegistry & registry){
       registry.registerProperty("coeffFrict", &MODEL_PARAMS::createCoeffFrict);
       registry.connect("coeffFrict", coeffFrict,"tangential_model history");
     }
 
-    inline void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces) {
+    void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces) {
       if(sidata.contact_flags) *sidata.contact_flags |= CONTACT_TANGENTIAL_MODEL;
       const double xmu = coeffFrict[sidata.itype][sidata.jtype];
       const double enx = sidata.en[0];
@@ -238,10 +238,10 @@ namespace ContactModels
       }
     }
 
-    inline void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
-    inline void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
+    void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
+    void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
 
-    inline void surfacesClose(SurfacesCloseData &scdata, ForceData&, ForceData&)
+    void surfacesClose(SurfacesCloseData &scdata, ForceData&, ForceData&)
     {
         if(scdata.contact_flags) *scdata.contact_flags &= ~CONTACT_TANGENTIAL_MODEL;
     }

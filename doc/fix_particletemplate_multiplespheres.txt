@@ -10,7 +10,7 @@ fix particletemplate/multiplespheres command :h3
 
 [Syntax:]
 
-fix ID group-ID particletemplate/multiplespheres seed nspheres nspheresvalue keyword values ntry ntryvalue spheres (or spheres_different_type) values_spheres type mt opt_keyword opt_values :pre
+fix ID group-ID particletemplate/multiplespheres seed nspheres nspheresvalue keyword values ntry ntryvalue spheres (or spheres_different_types) values_spheres type mt opt_keyword opt_values :pre
 
 ID, group-ID are documented in "fix"_fix.html command :ulb,l
 particletemplate/multisphere = style name of this fix command  :l
@@ -21,12 +21,12 @@ zero or more keyword/value pairs can be appended :l
 keyword, values are documented in "fix particletemplate/sphere"_fix_particletemplate_sphere.html command :l
 ntry = obligatory keyword :l
 ntryvalue: number of tries for Monte Carlo approach :l
-spheres or spheres_different_type = obligatory keyword :l
+spheres or spheres_different_types = obligatory keyword :l
 values_spheres = one out of the following options :l
     option 1 (when keyword spheres is used) = {file} {filename}
     option 2 (when keyword spheres is used) = {file} {filename} {scale} {scalefactor}
     option 3 (when keyword spheres is used) = {x1 y1 z1 r1 x2 y2 r2...} where x/y/z are sphere positions and r are the radii
-    option 4 (when keyword spheres_different_type is used) = {x1 y1 z1 t1 r1 x2 y2 r2 t2...} where x/y/z are sphere positions, r are the radii and t the atom types :pre
+    option 4 (when keyword spheres_different_types is used) = {x1 y1 z1 t1 r1 x2 y2 r2 t2...} where x/y/z are sphere positions, r are the radii and t the atom types :pre
 opt_keyword = {bonded} :l
     {bonded} value = 'yes' or 'no'
         yes = bonds are created between adjacent spheres
@@ -56,6 +56,9 @@ defined in this command. Comments can be made in this file via the '#'
 character. Optionally, when a file is used for defining the multi-sphere
 template, keyword {scale} can be used to define a {scalefactor} to scale
 up or down the particle positions and radii.
+
+In case keyword {spheres_different_types} is used, the textfile contains 
+the type as last element in each line.
 
 After the spheres are read, a Monte Carlo procedure is used to assess
 center of mass of the assembly.

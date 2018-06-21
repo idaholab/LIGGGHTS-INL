@@ -56,8 +56,9 @@ fix		integrsp spheres nve/sphere
 
 #integrator for multisphere rigid bodies
 #initialize group as empty
-group           multispheres region reg
-fix		integrms multispheres multisphere
+group   multispheres region reg
+fix     ms multispheres multisphere
+fix     integr multispheres nve/nonspherical
 
 
 #distributions for insertion
@@ -94,7 +95,6 @@ compute		rke all erotate/sphere
 thermo_style	custom step atoms ke c_rke f_ts[1] f_ts[2] vol
 thermo		400
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 compute  cmpbond all  pair/gran/local/bond
 
 #insert the first particles so that dump is not empty

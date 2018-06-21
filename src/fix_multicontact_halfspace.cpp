@@ -387,7 +387,7 @@ void FixMultiContactHalfSpace::pre_force(int)
         (*contact_property_atom)->do_forward_comm();
 }
 
-const int HistoryData::get_npartners(const int i)
+int HistoryData::get_npartners(const int i)
 {
     if (type == 'p') {
         NeighList* list = static_cast<PairGranProxy*>(fix_ptr)->list;
@@ -399,7 +399,7 @@ const int HistoryData::get_npartners(const int i)
     }
 }
 
-double * const HistoryData::get_data_ptr(const int i, const int jj)
+double * HistoryData::get_data_ptr(const int i, const int jj)
 {
     if (type == 'p') {
         NeighList* list = static_cast<PairGranProxy*>(fix_ptr)->list;

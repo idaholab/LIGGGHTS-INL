@@ -128,6 +128,7 @@ int mldivide3(const double m[3][3], const double *v, double *ans)
    compute evalues and evectors of 3x3 real symmetric matrix
    based on Jacobi rotations
    adapted from Numerical Recipes jacobi() function
+   Note: Upper off-diagonal elements in matrix can be set to 0
 ------------------------------------------------------------------------- */
 
 int jacobi(double matrix[3][3], double *evalues, double evectors[3][3])

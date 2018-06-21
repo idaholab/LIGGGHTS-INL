@@ -70,8 +70,6 @@ Multisphere::Multisphere(LAMMPS *lmp) :
   vcm_          (*customValues_.addElementProperty< VectorContainer<double,3> >("vcm","comm_exchange_borders","frame_invariant", "restart_yes")),
   fcm_          (*customValues_.addElementProperty< VectorContainer<double,3> >("fcm","comm_none","frame_invariant", "restart_no")),
   torquecm_     (*customValues_.addElementProperty< VectorContainer<double,3> >("torque","comm_none","frame_invariant", "restart_no")),
-  dragforce_cm_ (*customValues_.addElementProperty< VectorContainer<double,3> >("dragforce_cm","comm_none","frame_invariant", "restart_no")),
-  hdtorque_cm_  (*customValues_.addElementProperty< VectorContainer<double,3> >("hdtorque_cm","comm_none","frame_invariant", "restart_no")),
 
   angmom_ (*customValues_.addElementProperty< VectorContainer<double,3> >("angmom","comm_exchange_borders","frame_invariant", "restart_yes")),
   omega_  (*customValues_.addElementProperty< VectorContainer<double,3> >("omega","comm_exchange_borders","frame_invariant", "restart_yes")),
@@ -142,8 +140,6 @@ void Multisphere::add_body(int nspheres, double *xcm_ins, double *xcm_to_xbound_
     vcm_.set(n,v_ins);
     fcm_.set(n,zerovec);
     torquecm_.set(n,zerovec);
-    dragforce_cm_.set(n,zerovec);
-    hdtorque_cm_.set(n,zerovec);
 
     angmom_.set(n,zerovec);
     omega_.set(n,omega_ins);
@@ -526,12 +522,17 @@ bool Multisphere::check_lost_atoms(int *body, double *atom_delflag, double *body
    restart - not available in PUBLIC
 ------------------------------------------------------------------------- */
 
-void Multisphere::writeRestart(FILE *)
+void Multisphere::restart_serial(double *)
+{
+    error->one(FLERR,"Multisphere restart is not available in your version. See www.cfdem.com for details");
+}
+
+void Multisphere::write_restart_parallel(FILE *)
 {
     error->one(FLERR,"Multisphere write_restart is not available in your version. See www.cfdem.com for details");
 }
 
-void Multisphere::restart(double *)
+void Multisphere::restart_parallel(double *)
 {
     error->one(FLERR,"Multisphere restart is not available in your version. See www.cfdem.com for details");
 }
@@ -668,4 +669,29 @@ double Multisphere::extract_omega_ave()
 
   MPI_Sum_Scalar(omega_ave,world);
   return omega_ave/nbody_all_;
+}
+
+int Multisphere::size_restart() const
+{
+    error->one(FLERR,"Multisphere write_restart is not available in your version. See www.cfdem.com for details");
+    return 0;
+}
+
+int Multisphere::pack_restart(double * const buf) const
+{
+    UNUSED(buf);
+    error->one(FLERR,"Multisphere write_restart is not available in your version. See www.cfdem.com for details");
+    return 0;
+}
+
+int Multisphere::unpack_restart(double * const buf)
+{
+    UNUSED(buf);
+    error->one(FLERR,"Multisphere write_restart is not available in your version. See www.cfdem.com for details");
+    return 0;
+}
+
+void Multisphere::finalize_restart()
+{
+    error->one(FLERR,"Multisphere write_restart is not available in your version. See www.cfdem.com for details");
 }

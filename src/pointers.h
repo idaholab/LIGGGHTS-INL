@@ -95,6 +95,7 @@ class Pointers {
     infile(ptr->infile),
     screen(ptr->screen),
     logfile(ptr->logfile),
+    warnfile(ptr->warnfile),
     thermofile(ptr->thermofile) {}
   virtual ~Pointers() {}
 
@@ -120,6 +121,7 @@ class Pointers {
   FILE *&infile;
   FILE *&screen;
   FILE *&logfile;
+  FILE *&warnfile;
   FILE *&thermofile;
 };
 

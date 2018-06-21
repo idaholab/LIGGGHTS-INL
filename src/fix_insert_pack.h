@@ -60,10 +60,11 @@ class FixInsertPack : public FixInsert {
   ~FixInsertPack();
 
   void init();
-  virtual void restart(char *);
+  virtual void restart(char *, const Version &);
 
  protected:
 
+  void check_fiber_insertion();
   virtual void calc_insertion_properties();
   void init_defaults();
 
@@ -92,8 +93,11 @@ class FixInsertPack : public FixInsert {
   // ratio how many particles have been inserted
   double insertion_ratio;
 
-  // enforce that
+  // enforce that checks are done that particles inserted on separate procs dont overlap
   bool check_dist_from_subdomain_border_;
+  int  reduce_dist_from_subdomain_border_dims_;  
+                                                 
+  bool fiber_insert_;
 
   // warn if region extends outside box
   bool warn_region;

@@ -68,6 +68,10 @@ SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::SurfaceMesh(LAMMPS *lmp)
     nBelowAngle_softLimit_(0),
     nTooManyNeighs_(0),
     nOverlapping_(0),
+    nonCoplanarEdgesActive_(false),
+    coplanarEdgesActive_(false),
+    nonColinearCornersActive_(false),
+    colinearCornersActive_(false),
 
     area_         (*this->prop().template addElementProperty< ScalarContainer<double> >                   ("area",         "comm_none","frame_trans_rot_invariant", "restart_no",2)),
     areaAcc_      (*this->prop().template addElementProperty< ScalarContainer<double> >                   ("areaAcc",      "comm_none","frame_trans_rot_invariant", "restart_no",2)),
@@ -114,6 +118,22 @@ template<int NUM_NODES, int NUM_NEIGH_MAX>
 void SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::setCurvatureTolerant(bool _tol)
 {
     curvature_tolerant_ = _tol;
+}
+
+/* ----------------------------------------------------------------------
+   set mesh curvature tolerance
+------------------------------------------------------------------------- */
+
+template<int NUM_NODES, int NUM_NEIGH_MAX>
+void SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::setAllEdgesCornersActive(bool _active)
+{
+    // coplanar edges/corners still need to be inactive
+    // because otherwise an edge contact can shadow a face contact
+    // in some rare circumstances
+    nonCoplanarEdgesActive_ = _active;
+    coplanarEdgesActive_ = false;//_active;
+    nonColinearCornersActive_ = _active;
+    colinearCornersActive_ = false;//_active;
 }
 
 /* ----------------------------------------------------------------------
@@ -680,8 +700,12 @@ void SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::qualityCheck()
     {
         fprintf(this->screen,"Mesh %s: %d mesh elements have a really unreasonably high aspect ratio (hard limit: smallest angle must be > %f °)  \n",
                 this->mesh_id_,nBelowAngle_hardLimit,this->angleHardLimit());
-        this->error->one(FLERR,"Fix mesh: Bad mesh, cannot continue. You will need to fix or remove these element. Remedies:\n"
-                                " - You can use the 'element_exclusion_list' feature to remove elements with too many neighbors and elements with angles below the hard limit\n");
+        if (this->elementExclusionList()) // stop with error code = 0
+            this->error->exit_one(FLERR,"Fix mesh: Bad mesh. The 'element_exclusion_list' was written:\n"
+                                    " - Rerun the simulation with 'element_exclusion_list read' feature to remove elements with too many neighbors and elements with angles below the hard limit\n");
+        else
+            this->error->one(FLERR,"Fix mesh: Bad mesh, cannot continue. You will need to fix or remove these element. Remedies:\n"
+                                   " - You can use the 'element_exclusion_list' feature to remove elements with too many neighbors and elements with angles below the hard limit\n");
     }
 
     if(this->nTooManyNeighs() > 0 && 0 == me)
@@ -689,9 +713,15 @@ void SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::qualityCheck()
         
         fprintf(this->screen,"Mesh %s: %d mesh elements have more than %d neighbors \n",
                 this->mesh_id_,this->nTooManyNeighs(),NUM_NEIGH_MAX);
-        this->error->one(FLERR,"Fix mesh: Bad mesh, cannot continue. Possibly corrupt elements with too many neighbors. Remedies:\n"
-                               " - You can use the 'element_exclusion_list' feature to remove elements with too many neighbors and elements with angles below the hard limit\n"
-                               " -  If you know what you're doing, you can alternatively also try to change the definition of SurfaceMeshBase in tri_mesh.h and recompile");
+        if (this->elementExclusionList()) // stop with error code = 0
+            this->error->exit_one(FLERR,"Fix mesh: Bad mesh. The 'element_exclusion_list' was written:\n"
+                                   " - Rerun the simulation with 'element_exclusion_list read' feature to remove elements with too many neighbors and elements with angles below the hard limit\n"
+                                   " -  If you know what you're doing, you can alternatively also try to change the definition of SurfaceMeshBase in tri_mesh.h and recompile");
+
+        else
+            this->error->one(FLERR,"Fix mesh: Bad mesh, cannot continue. Possibly corrupt elements with too many neighbors. Remedies:\n"
+                                   " - You can use the 'element_exclusion_list' feature to remove elements with too many neighbors and elements with angles below the hard limit\n"
+                                   " -  If you know what you're doing, you can alternatively also try to change the definition of SurfaceMeshBase in tri_mesh.h and recompile");
     }
 
     if(nOverlapping() > 0)
@@ -1084,22 +1114,22 @@ void SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::handleSharedEdge(int iSrf, int iEdge,
         if(TrackingMesh<NUM_NODES>::id(iSrf) < TrackingMesh<NUM_NODES>::id(jSrf))
         {
             
-            edgeActive(iSrf)[iEdge] = false;
+            edgeActive(iSrf)[iEdge] = false || nonCoplanarEdgesActive_;
             edgeActive(jSrf)[jEdge] = true;
         }
         else
         {
             
             edgeActive(iSrf)[iEdge] = true;
-            edgeActive(jSrf)[jEdge] = false;
+            edgeActive(jSrf)[jEdge] = false || nonCoplanarEdgesActive_;
         }
     }
     else // coplanar
     {
         if(!coplanar) this->error->one(FLERR,"internal error");
         
-        edgeActive(iSrf)[iEdge] = false;
-        edgeActive(jSrf)[jEdge] = false;
+        edgeActive(iSrf)[iEdge] = false || coplanarEdgesActive_;
+        edgeActive(jSrf)[jEdge] = false || coplanarEdgesActive_;
     }
 }
 
@@ -1142,12 +1172,12 @@ int SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::handleCorner(int iSrf, int iNode,
     }
 
     if(hasTwoColinearEdges || !anyActiveEdge)
-        cornerActive(iSrf)[iNode] = false;
+        cornerActive(iSrf)[iNode] = false || colinearCornersActive_;
     
     else if(TrackingMesh<NUM_NODES>::id(iSrf) == maxId)
         cornerActive(iSrf)[iNode] = true;
     else
-        cornerActive(iSrf)[iNode] = false;
+        cornerActive(iSrf)[iNode] = false || nonColinearCornersActive_;
 
     return nIdListHasNode;
 }
@@ -1303,6 +1333,52 @@ bool SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::isOnSurface(double *pos)
     }
 
     return on_surf;
+}
+
+template<int NUM_NODES, int NUM_NEIGH_MAX>
+bool SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::isClosedVolume()
+{
+    int flag = 0;
+
+    // check if all local surfaces have as many neighs as they have nodes
+    for(int i=0;i<this->sizeLocal();i++)
+    {
+        if(nNeighs(i) != NUM_NODES)
+        {
+            flag = 1;
+            break;
+        }
+    }
+
+    // if all flags are 0, so is their sum
+    MPI_Sum_Scalar<int>(flag,this->world);
+
+    return flag == 0;
+}
+
+template<int NUM_NODES, int NUM_NEIGH_MAX>
+bool SurfaceMesh<NUM_NODES,NUM_NEIGH_MAX>::pointsOnSameSideConvex(double *p1, double *p2)
+{
+    // iterate over owned & ghost triangles
+    int const nall = this->sizeLocal()+this->sizeGhost();
+    for(int i=0;i<nall;i++)
+    {
+        double center[3], surfNorm[3];
+        this->center(i,center);
+        this->surfaceNorm(i,surfNorm);
+
+        double const cp1[] = {p1[0] - center[0],p1[1] - center[1],p1[2] - center[2]};
+
+        double const cp2[] = {p2[0] - center[0], p2[1] - center[1], p2[2] - center[2]};
+
+        double const cp1_n = vectorDot3D(cp1,surfNorm);
+        double const cp2_n = vectorDot3D(cp2,surfNorm);
+
+        if(cp1_n*cp2_n < 0) // then they have opposite signs
+            return false;
+
+    }
+    return true;
 }
 
 /* ----------------------------------------------------------------------

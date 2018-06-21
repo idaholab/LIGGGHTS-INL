@@ -65,7 +65,7 @@ void PairGranProxy::settings(int nargs, char ** args)
   delete impl;
 
   //TODO add additional map here which maps tangential "custom" to "history"
-  int64_t variant = LIGGGHTS::PairStyles::Factory::instance().selectVariant("gran", nargs, args,force->custom_contact_models);
+  int64_t variant = LIGGGHTS::PairStyles::Factory::instance().selectVariant("gran", nargs, args, lmp);
   if (variant == -1)
       error->all(FLERR, "Invalid model specified (check for typos and enable at least one model)");
   impl = LIGGGHTS::PairStyles::Factory::instance().create("gran", variant, lmp, this);
@@ -88,7 +88,7 @@ void PairGranProxy::write_restart_settings(FILE * fp)
   impl->write_restart_settings(fp);
 }
 
-void PairGranProxy::read_restart_settings(FILE * fp, const int major, const int minor)
+void PairGranProxy::read_restart_settings(FILE * fp, const Version &ver)
 {
   int me = comm->me;
 
@@ -101,9 +101,9 @@ void PairGranProxy::read_restart_settings(FILE * fp, const int major, const int 
   }
   MPI_Bcast(&selected,8,MPI_CHAR,0,world);
 
-  if (major < 3)
+  if (ver < Version(3))
       error->all(FLERR, "LIGGGHTS major version < 3 not supported");
-  else if (major == 3 && minor < 4)
+  else if (ver < Version(3,4))
   {
       // use old style hash table
       const int M = (15) & selected;
@@ -128,9 +128,9 @@ void PairGranProxy::read_restart_settings(FILE * fp, const int major, const int 
   }
 }
 
-void PairGranProxy::compute_force(int eflag, int vflag, int addflag)
+void PairGranProxy::compute_force(int eflag, int vflag)
 {
-  impl->compute_force(this, eflag, vflag, addflag);
+  impl->compute_force(this, eflag, vflag);
 }
 
 double PairGranProxy::stressStrainExponent()

@@ -64,14 +64,16 @@ namespace LAMMPS_NS
         virtual void post_create() {}
         virtual void init() {}
         virtual void setup(int vflag) {}
+        virtual void setup_pre_exchange() {}
         virtual void setup_pre_force(int vflag) {}
+        virtual void pre_exchange() {}
         virtual void pre_force(int vflag) {}
         virtual void initial_integrate(int vflag) {}
         virtual void final_integrate_pre_comm() {}
         virtual void final_integrate() {}
         virtual void end_of_step() {}
         virtual double compute_vector(int n) { return 0.0; }
-        virtual void add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall) {}
+        virtual void add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall, double *contact_history) {}
         virtual int modify_param(int narg, char **arg) { return 0; }
 
         virtual int  setmask()

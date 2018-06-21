@@ -79,7 +79,7 @@ namespace LAMMPS_NS
     virtual void setup_pre_force(int vflag);
     void initial_integrate(int vflag);
     void add_particle_contribution(int ip, double *frc,
-                                   double *delta, int iTri, double *v_wall);
+                                   double *delta, int iTri, double *v_wall, double *contact_history);
     void final_integrate();
 
     void reset_dt();

@@ -66,7 +66,6 @@ class Region : protected Pointers {
   double extent_ylo,extent_yhi;
   double extent_zlo,extent_zhi;
   int bboxflag;                     // 1 if bounding box is computable
-  int varshape;                     // 1 if region shape changes over time
 
   // contact = particle near region surface
 
@@ -125,16 +124,23 @@ class Region : protected Pointers {
   virtual int inside(double, double, double) = 0;
   virtual int surface_interior(double *, double) = 0;
   virtual int surface_exterior(double *, double) = 0;
-  virtual void shape_update() {}
   virtual void pretransform();
+  void update_region();
+
+  bool has_varshape() const
+  { return varshape; }
 
  protected:
   void add_contact(int, double *, double, double, double);
   void options(int, char **);
+  virtual void shape_update() {};
 
   int seed;
   class RanPark *random;
-  
+
+  int varshape;                     // 1 if region shape changes over time
+  bigint lastshape,lastdynamic;
+
  private:
   double volume_limit_;             //volume below which error will be thrown
   int dynamic;                      // 1 if region position/orientation changes over time
@@ -143,7 +149,6 @@ class Region : protected Pointers {
   char *xstr,*ystr,*zstr,*tstr;
   int xvar,yvar,zvar,tvar;
   double dx,dy,dz,theta;
-  bigint lastshape,lastdynamic;
 
   void forward_transform(double &, double &, double &);
   void inverse_transform(double &, double &, double &);

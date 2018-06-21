@@ -87,10 +87,9 @@ namespace ContactModels
       alpha2_offset = hsetup->add_history_value("a2", "0");
       cmb->add_history_offset("alpha1_offset", alpha1_offset);
       cmb->add_history_offset("alpha2_offset", alpha2_offset);
-      cmb->get_history_offset("alpha2_offset");
     }
 
-    inline void registerSettings(Settings& settings) {
+    void registerSettings(Settings& settings) {
       settings.registerDoubleSetting("curvatureLimitFactor",curvatureLimitFactor, 0.0);
       settings.registerYesNo("meanCurvature", meanCurvature, false);
       settings.registerYesNo("gaussianCurvature", gaussianCurvature, false);
@@ -102,10 +101,10 @@ namespace ContactModels
         error->one(FLERR,"meanCurvature and gaussianCurvature cannot be simultaneously yes !");
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
-    inline void connectToProperties(PropertyRegistry&) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void connectToProperties(PropertyRegistry&) {}
 
-    inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
+    bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
     {
       sidata.is_non_spherical = true;
       bool particles_in_contact = false;
@@ -204,7 +203,7 @@ namespace ContactModels
       return particles_in_contact;
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
     {
       if(sidata.is_wall) {
         sidata.reff = sidata.radi;
@@ -219,12 +218,12 @@ namespace ContactModels
       MathExtraLiggghtsNonspherical::surfacesIntersectNonSpherical(sidata, atom->x);
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData&,TriMesh *, double * const) {}
-    inline void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&){}
+    void endSurfacesIntersect(SurfacesIntersectData&,TriMesh *, double * const) {}
+    void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&){}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
-    inline void tally_pp(double,int,int,int) {}
-    inline void tally_pw(double,int,int,int) {}
+    void tally_pp(double,int,int,int) {}
+    void tally_pw(double,int,int,int) {}
 
   protected:
      double curvatureLimitFactor;

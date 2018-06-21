@@ -289,6 +289,8 @@ void FixTemplateSphere::randomize_single()
     double radius = rand(pdf_radius,random_insertion);
     pti->radius_ins[0] = pti->r_bound_ins = radius;
 
+    pti->radius_ins_max = pti->radius_ins[0];
+
     // randomize density
     pti->density_ins = rand(pdf_density,random_insertion);
 
@@ -341,6 +343,7 @@ void FixTemplateSphere::randomize_ptilist(int n_random,int distribution_groupbit
         double radius = rand(pdf_radius,random_insertion);
 
         pti_list[i]->radius_ins[0] = pti_list[i]->r_bound_ins = radius;
+        pti_list[i]->radius_ins_max = radius;
 
         // randomize density
         pti_list[i]->density_ins = rand(pdf_density,random_insertion);
@@ -369,6 +372,7 @@ void FixTemplateSphere::direct_set_ptlist(const int i, const void * const data, 
     pti_list[i]->atom_type = atom_type;
     const double radius = sphere->get_radius();
     pti_list[i]->radius_ins[0] = radius;
+    pti_list[i]->radius_ins_max = radius;
     pti_list[i]->density_ins = sphere->get_density();
     pti_list[i]->volume_ins = radius*radius*radius*4.1887902047863909;
     pti_list[i]->mass_ins = pti_list[i]->density_ins*pti_list[i]->volume_ins;
@@ -503,7 +507,7 @@ void FixTemplateSphere::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixTemplateSphere::restart(char *buf)
+void FixTemplateSphere::restart(char *buf, const Version &)
 {
   double *list = (double *) buf;
 

@@ -157,8 +157,8 @@ Compute::~Compute()
 void Compute::modify_params(int narg, char **arg)
 {
   if (narg == 0) error->all(FLERR,"Illegal compute_modify command");
-  if (!lmp->wb && strcmp(id, "thermo_temp") == 0 && comm->me == 0)
-    error->warning(FLERR,"Changing thermo_temp compute object. This object is deprecated and will be removed in the future.");
+  if (strcmp(id, "thermo_temp") == 0)
+    error->all(FLERR,"Changing thermo_temp compute object. This object is deprecated and has ben removed.\nMost likely reason is that there is a line 'compute_modify thermo_temp dynamic yes' in your input script. This line can be removed without any change to the results and the input script will work again.");
 
   int iarg = 0;
   while (iarg < narg) {
@@ -197,6 +197,22 @@ void Compute::reset_extra_compute_fix(const char *)
 {
   error->all(FLERR,
              "Compute does not allow an extra compute or fix to be reset");
+}
+
+/* ----------------------------------------------------------------------
+   implementation of ILoopCallbackCallable interface
+------------------------------------------------------------------------- */
+
+void Compute::registerNextCall(bigint ntimestep)
+{
+    if (!timeflag)
+        error->all(FLERR,"Compute does not store list of timesteps it's called on");
+    addstep(ntimestep);
+}
+
+bool Compute::callRequired(bigint ntimestep)
+{
+    return matchstep(ntimestep);
 }
 
 /* ----------------------------------------------------------------------

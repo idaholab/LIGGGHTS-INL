@@ -141,8 +141,8 @@ Domain::Domain(LAMMPS *lmp) :
 
     prd[0] = prd[1] = prd[2] = 1.0;
     prd_half[0] = prd_half[1] = prd_half[2] = 0.5;
-    prd_lamda[0] = prd_lamda[1] = prd_lamda[2] = 0.0;
-    prd_half_lamda[0] = prd_half_lamda[1] = prd_half_lamda[2] = 0.0;
+    prd_lamda[0] = prd_lamda[1] = prd_lamda[2] = 1.0;
+    prd_half_lamda[0] = prd_half_lamda[1] = prd_half_lamda[2] = 0.5;
 
     boxlo[0] = boxlo[1] = boxlo[2] = -0.5;
     boxhi[0] = boxhi[1] = boxhi[2] = 0.5;
@@ -327,19 +327,27 @@ void Domain::set_global_box()
 
 void Domain::set_lamda_box()
 {
-  int *myloc = comm->myloc;
-  double *xsplit = comm->xsplit;
-  double *ysplit = comm->ysplit;
-  double *zsplit = comm->zsplit;
+  if (comm->get_layout() != LAYOUT_TILED) {
+    const int *const myloc = comm->myloc;
+    const double *const xsplit = comm->xsplit;
+    const double *const ysplit = comm->ysplit;
+    const double *const zsplit = comm->zsplit;
 
-  sublo_lamda[0] = xsplit[myloc[0]];
-  subhi_lamda[0] = xsplit[myloc[0]+1];
+    sublo_lamda[0] = xsplit[myloc[0]];
+    subhi_lamda[0] = xsplit[myloc[0]+1];
+    sublo_lamda[1] = ysplit[myloc[1]];
+    subhi_lamda[1] = ysplit[myloc[1]+1];
+    sublo_lamda[2] = zsplit[myloc[2]];
+    subhi_lamda[2] = zsplit[myloc[2]+1];
 
-  sublo_lamda[1] = ysplit[myloc[1]];
-  subhi_lamda[1] = ysplit[myloc[1]+1];
-
-  sublo_lamda[2] = zsplit[myloc[2]];
-  subhi_lamda[2] = zsplit[myloc[2]+1];
+  } else {
+    sublo_lamda[0] = comm->get_mysplit(0,0);
+    subhi_lamda[0] = comm->get_mysplit(0,1);
+    sublo_lamda[1] = comm->get_mysplit(1,0);
+    subhi_lamda[1] = comm->get_mysplit(1,1);
+    sublo_lamda[2] = comm->get_mysplit(2,0);
+    subhi_lamda[2] = comm->get_mysplit(2,1);
+  }
 }
 
 /* ----------------------------------------------------------------------
@@ -351,28 +359,40 @@ void Domain::set_lamda_box()
 
 void Domain::set_local_box()
 {
-  int *myloc = comm->myloc;
-  int *procgrid = comm->procgrid;
-  double *xsplit = comm->xsplit;
-  double *ysplit = comm->ysplit;
-  double *zsplit = comm->zsplit;
+  if (triclinic) return;
 
-  if (triclinic == 0) {
+  if (comm->get_layout() != LAYOUT_TILED) {
+    const int *const myloc = comm->myloc;
+    const int *const procgrid = comm->procgrid;
+    const double *const xsplit = comm->xsplit;
+    const double *const ysplit = comm->ysplit;
+    const double *const zsplit = comm->zsplit;
+
     sublo[0] = boxlo[0] + xprd*xsplit[myloc[0]];
-    if (myloc[0] < procgrid[0]-1)
-      subhi[0] = boxlo[0] + xprd*xsplit[myloc[0]+1];
+    if (myloc[0] < procgrid[0]-1) subhi[0] = boxlo[0] + xprd*xsplit[myloc[0]+1];
     else subhi[0] = boxhi[0];
 
     sublo[1] = boxlo[1] + yprd*ysplit[myloc[1]];
-    if (myloc[1] < procgrid[1]-1)
-      subhi[1] = boxlo[1] + yprd*ysplit[myloc[1]+1];
+    if (myloc[1] < procgrid[1]-1) subhi[1] = boxlo[1] + yprd*ysplit[myloc[1]+1];
     else subhi[1] = boxhi[1];
 
     sublo[2] = boxlo[2] + zprd*zsplit[myloc[2]];
-    if (myloc[2] < procgrid[2]-1)
-      subhi[2] = boxlo[2] + zprd*zsplit[myloc[2]+1];
+    if (myloc[2] < procgrid[2]-1) subhi[2] = boxlo[2] + zprd*zsplit[myloc[2]+1];
     else subhi[2] = boxhi[2];
 
+  } else {
+
+    sublo[0] = boxlo[0] + xprd*comm->get_mysplit(0,0);
+    if (comm->get_mysplit(0,1) < 1.0) subhi[0] = boxlo[0] + xprd*comm->get_mysplit(0,1);
+    else subhi[0] = boxhi[0];
+
+    sublo[1] = boxlo[1] + yprd*comm->get_mysplit(1,0);
+    if (comm->get_mysplit(1,1) < 1.0) subhi[1] = boxlo[1] + yprd*comm->get_mysplit(1,1);
+    else subhi[1] = boxhi[1];
+
+    sublo[2] = boxlo[2] + zprd*comm->get_mysplit(2,0);
+    if (comm->get_mysplit(2,1) < 1.0) subhi[2] = boxlo[2] + zprd*comm->get_mysplit(2,1);
+    else subhi[2] = boxhi[2];
   }
 }
 
@@ -769,6 +789,36 @@ void Domain::box_too_small_check()
   if (flagall && comm->me == 0)
     error->warning(FLERR,
                    "Bond/angle/dihedral extent > half of periodic box length");
+}
+
+/* ----------------------------------------------------------------------
+  check warn if any proc's subbox is smaller than thresh
+    since may lead to lost atoms in comm->exchange()
+  current callers set thresh = neighbor skin
+------------------------------------------------------------------------- */
+
+void Domain::subbox_too_small_check(double thresh)
+{
+  int flag = 0;
+  if (!triclinic) {
+    if (subhi[0]-sublo[0] < thresh || subhi[1]-sublo[1] < thresh) flag = 1;
+    if (dimension == 3 && subhi[2]-sublo[2] < thresh) flag = 1;
+  } else {
+    double delta = subhi_lamda[0] - sublo_lamda[0];
+    if (delta*prd[0] < thresh) flag = 1;
+    delta = subhi_lamda[1] - sublo_lamda[1];
+    if (delta*prd[1] < thresh) flag = 1;
+    if (dimension == 3) {
+      delta = subhi_lamda[2] - sublo_lamda[2];
+      if (delta*prd[2] < thresh) flag = 1;
+    }
+  }
+
+  int flagall;
+  MPI_Allreduce(&flag,&flagall,1,MPI_INT,MPI_SUM,world);
+  if (flagall && comm->me == 0)
+    error->warning(FLERR,"Proc sub-domain size < neighbor skin, "
+                   "could lead to lost atoms");
 }
 
 /* ----------------------------------------------------------------------
@@ -1389,6 +1439,8 @@ void Domain::add_region(int narg, char **arg)
     #include "region_intersect.h"
     #include "region_sphere.h"
     #include "region_union.h"
+    #include "region_cone.h"
+    #include "region_wedge.h"
     #undef REGION_CLASS
     else error->all(FLERR,"Invalid region style");
   }
@@ -1752,5 +1804,31 @@ void Domain::box_corners()
   corners[6][0] = 0.0; corners[6][1] = 1.0; corners[6][2] = 1.0;
   lamda2x(corners[6],corners[6]);
   corners[7][0] = 1.0; corners[7][1] = 1.0; corners[7][2] = 1.0;
+  lamda2x(corners[7],corners[7]);
+}
+
+/* ----------------------------------------------------------------------
+   compute 8 corner pts of any triclinic box with lo/hi in lamda coords
+   8 output corners are ordered with x changing fastest, then y, finally z
+   could be more efficient if just coded with xy,yz,xz explicitly
+------------------------------------------------------------------------- */
+
+void Domain::lamda_box_corners(double *lo, double *hi)
+{
+  corners[0][0] = lo[0]; corners[0][1] = lo[1]; corners[0][2] = lo[2];
+  lamda2x(corners[0],corners[0]);
+  corners[1][0] = hi[0]; corners[1][1] = lo[1]; corners[1][2] = lo[2];
+  lamda2x(corners[1],corners[1]);
+  corners[2][0] = lo[0]; corners[2][1] = hi[1]; corners[2][2] = lo[2];
+  lamda2x(corners[2],corners[2]);
+  corners[3][0] = hi[0]; corners[3][1] = hi[1]; corners[3][2] = lo[2];
+  lamda2x(corners[3],corners[3]);
+  corners[4][0] = lo[0]; corners[4][1] = lo[1]; corners[4][2] = hi[2];
+  lamda2x(corners[4],corners[4]);
+  corners[5][0] = hi[0]; corners[5][1] = lo[1]; corners[5][2] = hi[2];
+  lamda2x(corners[5],corners[5]);
+  corners[6][0] = lo[0]; corners[6][1] = hi[1]; corners[6][2] = hi[2];
+  lamda2x(corners[6],corners[6]);
+  corners[7][0] = hi[0]; corners[7][1] = hi[1]; corners[7][2] = hi[2];
   lamda2x(corners[7],corners[7]);
 }

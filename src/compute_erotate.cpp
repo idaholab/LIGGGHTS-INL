@@ -111,7 +111,6 @@ ComputeERotate::ComputeERotate(LAMMPS * lmp, int &iarg, int narg, char **arg) :
     const int len = strlen(arg[1])+1;
     id_group_ = new char[len];
     strncpy(id_group_, arg[1], len);
-    printf("igrpu: %s\n", id_group_);
 }
 
 void ComputeERotate::post_create()

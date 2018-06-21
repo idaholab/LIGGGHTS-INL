@@ -42,7 +42,7 @@
 #ifdef FIX_CLASS
 
 FixStyle(couple/cfd/force,FixCfdCouplingForce)
-FixStyle(couple/cfd/dragforce,FixCfdCouplingForce)
+FixStyle(couple/cfd/force/implicit,FixCfdCouplingForce)
 
 #else
 
@@ -53,12 +53,28 @@ FixStyle(couple/cfd/dragforce,FixCfdCouplingForce)
 
 namespace LAMMPS_NS {
 
+enum cfdCoupleType {SCALAR,VECTOR,VECTOR2D,QUATERNION,SCALARMULTISPHERE,VECTORMULTISPHERE,SCALARGLOB,VECTORGLOB,MATRIXGLOB};
+
+// starts with property atoms, later <= quaternion is used to check this, so don't mess around
+
+struct coupleParams
+{
+//coupleParams shall have fix property pointer, bool push, bool pull, type cfdCoupleType
+  class Fix* fix_property_;
+  bool push;
+  bool pull;
+  cfdCoupleType type;
+};
+
 class FixCfdCouplingForce : public Fix  {
  public:
   FixCfdCouplingForce(class LAMMPS *, int, char **);
   ~FixCfdCouplingForce();
   void post_create();
   void pre_delete(bool unfixflag);
+  void registerProp(std::string propName, bool push, bool pull, cfdCoupleType type);
+
+  double getCAddRhoFluid() { return CAddRhoFluid_; };
 
   int setmask();
   virtual void init();
@@ -70,35 +86,23 @@ class FixCfdCouplingForce : public Fix  {
 
   int iarg;
 
-  void dont_use_force()
-  { use_force_ = false; }
+// coupleList shall have fix property pointer, bool push, bool pull, bool vector
+  std::map<std::string, coupleParams> coupleList_;
 
+  double CAddRhoFluid_; //Cadd*rhofluid
+
+  class FixPropertyAtom* fix_dragforce_; //explicit part!
+  class FixPropertyAtom* fix_dragforce_implicit_;
+  class FixPropertyAtom* fix_dragforce_total_; //explicit+implicit
   double dragforce_total[3];
+  class FixPropertyAtom* fix_hdtorque_;
+  class FixPropertyAtom* fix_hdtorque_implicit_;
   double hdtorque_total[3];
+
   class FixCfdCoupling* fix_coupling_;
-  class FixPropertyAtom* fix_dragforce_;
-  class FixPropertyAtom* fix_hdtorque_; // hdtorque = hydrodynamic torque
 
-  class FixPropertyAtom* fix_dispersionTime_;
-  class FixPropertyAtom* fix_dispersionVel_;
-
-  class FixPropertyAtom* fix_UrelOld_;
-
-  bool use_force_, use_torque_, use_dens_, use_type_;
-  bool use_stochastic_;
-  bool use_virtualMass_;
-  bool use_superquadric_;
-  bool use_id_;
-
- private:
-  bool use_property_;
-  char property_name[200];
-  char property_type[200];
-
-  bool use_fiber_topo_;
-  class FixPropertyAtom* fix_fiber_axis_;
-  class FixPropertyAtom* fix_fiber_ends_;
-
+  bool use_torque_;
+  bool dragforce_implicit_;
 };
 
 }

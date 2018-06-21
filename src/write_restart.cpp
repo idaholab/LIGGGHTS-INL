@@ -95,7 +95,7 @@ enum{VERSION,SMALLINT,TAGINT,BIGINT,
        BOXLO_0,BOXHI_0,BOXLO_1,BOXHI_1,BOXLO_2,BOXHI_2,
        SPECIAL_LJ_1,SPECIAL_LJ_2,SPECIAL_LJ_3,
        SPECIAL_COUL_1,SPECIAL_COUL_2,SPECIAL_COUL_3,
-       XY,XZ,YZ};
+       XY,XZ,YZ,ATIME};
 enum{MASS};
 enum{PAIR,BOND,ANGLE,DIHEDRAL,IMPROPER};
 
@@ -103,12 +103,13 @@ enum{IGNORE,WARN,ERROR};                    // same as thermo.cpp
 
 /* ---------------------------------------------------------------------- */
 
-WriteRestart::WriteRestart(LAMMPS *lmp) : Pointers(lmp)
+WriteRestart::WriteRestart(LAMMPS *lmp) :
+    Pointers(lmp),
+    fp(NULL),
+    region(NULL)
 {
   MPI_Comm_rank(world,&me);
   MPI_Comm_size(world,&nprocs);
-
-  region = NULL; 
 }
 
 /* ----------------------------------------------------------------------
@@ -231,7 +232,6 @@ void WriteRestart::write(char *file)
   else multiproc = 0;
 
   // open single restart file or base file for multiproc case
-
   if (me == 0) {
     char *hfile;
     if (multiproc) {
@@ -368,8 +368,6 @@ void WriteRestart::write(char *file)
         
         fwrite(buf,sizeof(double),recv_size,fp);
       }
-      fclose(fp);
-
     } else {
       MPI_Recv(&tmp,0,MPI_INT,0,0,world,&status);
       MPI_Rsend(buf,send_size,MPI_DOUBLE,0,0,world);
@@ -392,10 +390,14 @@ void WriteRestart::write(char *file)
     delete [] perproc;
     fwrite(&send_size,sizeof(int),1,fp);
     fwrite(buf,sizeof(double),send_size,fp);
-    fclose(fp);
   }
 
   memory->destroy(buf);
+
+  // pack my mesh data into buf
+  modify->write_restart_pb(fp,multiproc);
+  if (fp)
+      fclose(fp);
 
   // invoke any fixes that write their own restart file
 
@@ -488,6 +490,7 @@ void WriteRestart::header()
     write_double(XZ,domain->xz);
     write_double(YZ,domain->yz);
   }
+  write_double(ATIME,update->atime);
 
   // -1 flag signals end of header
 

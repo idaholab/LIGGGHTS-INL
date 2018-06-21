@@ -288,6 +288,6 @@ namespace LMP_PROBABILITY_NS {
       return 0.;
   }
 
-};
+}
 
 #endif

@@ -85,7 +85,6 @@ DumpMeshVTK::DumpMeshVTK(LAMMPS *lmp, int narg, char **arg) :
     DumpVTK(lmp),
     filecurrent(NULL),
     dumpMesh_(NULL),
-    vtk_file_format_(VTK_FILE_FORMATS::VTK),
     dataMode_(0)
 {
     if (narg < 5)
@@ -164,7 +163,7 @@ DumpMeshVTK::DumpMeshVTK(LAMMPS *lmp, int narg, char **arg) :
     allowed_extensions.push_back(VTK_FILE_FORMATS::VTK);
     allowed_extensions.push_back(VTK_FILE_FORMATS::VTP);
     allowed_extensions.push_back(VTK_FILE_FORMATS::PVTP);
-    vtk_file_format_= DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
 
     if (multiproc && dataMode_ != 2)
         error->all(FLERR, "Parallel writing does not allow interpolation on meshes. It is advised to do this in post-processing");
@@ -521,9 +520,9 @@ void DumpMeshVTK::write_data(int n, double *mybuf)
     }
 
     if (vtk_file_format_ == VTK_FILE_FORMATS::PVTP || vtk_file_format_ == VTK_FILE_FORMATS::VTP)
-        DumpVTK::write_vtp(polyData, vtk_file_format_, filecurrent);
+        DumpVTK::write_vtp(polyData, filecurrent);
     else
-        DumpVTK::write_vtk_poly(polyData, vtk_file_format_, filecurrent);
+        DumpVTK::write_vtk_poly(polyData, filecurrent);
 }
 
 #endif

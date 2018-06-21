@@ -74,7 +74,8 @@ style = {linear} or {linear/variable} or {wiggle} or {riggle} or {rotate} or {ro
     period = obligatory keyword
     per_1, ..., per_n = period of rotation (time units) :pre
 
-  {file} args = discussed on "fix move/mesh file"_fix_move_mesh_file.html doc page (might not be available) :pre
+  {file} args = discussed on "fix move/mesh file"_fix_move_mesh_file.html doc page (might not be available)
+  {follow/6dof} args = discussed on "fix move/mesh follow/6dof"_fix_move_mesh_follow_6dof.html doc page (might not be available) :pre
 :ule
 
 [Examples:]
@@ -140,7 +141,7 @@ as input, {rotate/variable} takes angular velocity as input.
 The {riggle} style imposes an oscillatory rotation around a rotation
 axis {R} = (Rx,Ry,Rz) that goes thru a point {P} = (Px,Py,Pz).
 The {period} of the oscillation is specified as well as the {amplitude}
-in grad (°). This style also sets the velocity of
+in degrees. This style also sets the velocity of
 each element accordingly.
 
 The {viblin} style moves meshes in an oscillatory fashion with an vibration
@@ -219,4 +220,3 @@ In this case, an error is generated. See "boundary"_boundary.html command for de
 "fix mesh/surface"_fix_mesh_surface.html
 
 [Default:] none
-

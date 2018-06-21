@@ -84,7 +84,14 @@ class MeshModuleStress6DOF : public MeshModule
       double compute_vector(int n);
 
       inline int get_num_vector_components() const
-      { return 7; }
+      { return 10; }
+
+      void get_xcm(double *xcm)
+      { vectorCopy3D(xcm_(0),xcm); }
+      void get_dX_dx(double *dX, double *dx)
+      { vectorCopy3D(dX_,dX); vectorCopy3D(dx_,dx); }
+      void get_dQ_dq(double *dQ, double *dq)
+      { vectorCopy4D(dQ_,dQ); vectorCopy4D(dq_,dq); }
 
     private:
 
@@ -157,6 +164,10 @@ class MeshModuleStress6DOF : public MeshModule
       bool limit_movement_axis_;
 
       MeshModuleStress *mm_stress;
+
+      // made these class variables because their values are
+      // used by MeshMoverFollow6DOF
+      double dX_[3], dx_[3], dQ_[4], dq_[4], qOld_[4];
 
 }; //end class
 

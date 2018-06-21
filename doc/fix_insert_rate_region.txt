@@ -71,7 +71,16 @@ general_keywords = {verbose} or {maxattampt} or {nparticles} or {mass} or {parti
     omegaz = z-component of angular velocity (1/time units)
   {set_property} values = property-varname val
     property-varname = variable name of a "fix property/atom"_fix_property.html holding a scalar value for each particle
-    val = value to initialize the property with upon insertion  :pre
+    val = value to initialize the property with upon insertion
+  {set_property_vector} values = property-name magnitude const value orientation ...
+    property-name = name of property that should be modified
+    {magnitude} values = const
+      {const} values = value
+        value = magnitude used for vector
+    {orientation} = const or random
+      {const} values = x y z
+        x,y,z = vector used for insertion (should be a unit vector)
+      {random} = no arguments :pre
 
 following the general keyword/value section, one or more rate_region keyword/value pairs can be appended for the fix insert/rate/region command :l
 rate_region keywords = {region} or {check_dist_from_subdomain_border} or {ntry_mc} :l
@@ -108,6 +117,10 @@ mass expectancy given by the particle distribution.
 
 Likewise, you can use the {particlerate} or the {massrate} keyword (but not both)
 to control the insertion rate.
+
+IMPORTANT NOTE: The abovementioned keywords {particlerate}, {nparticles} do apply 
+to the number of particle templates / particle conglomerates in case 
+of using multisphere of multiplespheres templates, not to single spheres.
 
 The frequency of the particle insertion is controlled by the
 keyword {insert_every}, which defines the number of time-steps
@@ -186,6 +199,9 @@ distributed particle velocities with mean and std. deviation.
 The {set_property} option can be used to initialize scalar per-particle
 properties such as temperatures, which are stored in a 
 a "fix property/atom"_fix_property.html.
+
+The {set_property_vector} option allows to initialize vector per-particle
+propeties such as dipole property 'mu'.
 
 [Restart, fix_modify, output, run start/stop, minimize info:]
 

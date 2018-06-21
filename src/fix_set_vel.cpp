@@ -264,12 +264,15 @@ void FixSetVel::initial_integrate(int vflag)
 
     // set force to zero and set velocity
 
-    if (!constant_)
+    if (!constant_ || (iregion_ >= 0 && domain->regions[iregion_]->has_varshape()))
     {
         modify->clearstep_compute();
-        vel_ = input->variable->compute_equal(ivar_);
-        
+        if (!constant_)
+            vel_ = input->variable->compute_equal(ivar_);
+        if (iregion_ >= 0 && domain->regions[iregion_]->has_varshape())
+            domain->regions[iregion_]->update_region();
         modify->addstep_compute(update->ntimestep + 1);
+        
     }
 
     for (int i = 0; i < nlocal; i++)

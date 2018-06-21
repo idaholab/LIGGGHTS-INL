@@ -207,6 +207,8 @@ class Neighbor : protected Pointers {
                                    // stores neighbors of ghosts
 
   int exclude;                     // 0 if no type/group exclusions, 1 if yes
+  
+  int exclude_gran_only;           // 1 if do exclusion only for neigh_gran, 0 if do exclude for all
 
   int nex_type;                    // # of entries in type exclusion list
   int maxex_type;                  // max # in type list
@@ -231,8 +233,8 @@ class Neighbor : protected Pointers {
   void bin_atoms();                     // bin all atoms
   double bin_distance(int, int, int);   // distance between binx
   double bin_largest_distance(int, int, int); 
-  int coord2bin(double *);              // mapping atom coord to a bin
-  int coord2bin(double *, int &, int &, int&); // ditto
+  int coord2bin(double *) const;              // mapping atom coord to a bin
+  int coord2bin(double *, int &, int &, int&) const; // ditto
   void bin_center(int ix, int iy, int iz, double * center);
 
   void binBorders(int, double &, double &, double &, double &, double &, double &); 
@@ -241,7 +243,7 @@ class Neighbor : protected Pointers {
   int binHop(int, int, int, int); 
 
   int exclusion(int, int, int,
-                int, int *, int *) const;  // test for pair exclusion
+                int, int *, int *, bool is_gran) const;  // test for pair exclusion 
 
   virtual void choose_build(int, class NeighRequest *);
   void choose_stencil(int, class NeighRequest *);

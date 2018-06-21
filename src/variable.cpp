@@ -85,6 +85,7 @@ using namespace MathConst;
 #define CHUNK 1024
 
 #define MYROUND(a) (( a-floor(a) ) >= .5) ? ceil(a) : floor(a)
+#define MYHEAVISIDE(a) (a < 0) ? 0 : 1
 
 enum{INDEX,LOOP,WORLD,UNIVERSE,ULOOP,STRING,GETENV,
      SCALARFILE,ATOMFILE,EQUAL,ATOM};
@@ -96,10 +97,10 @@ enum{ARG,OP};
 
 enum{DONE,ADD,SUBTRACT,MULTIPLY,DIVIDE,CARAT,MODULO,UNARY,
      NOT,EQ,NE,LT,LE,GT,GE,AND,OR,
-     SQRT,EXP,LN,LOG,ABS,SIN,COS,TAN,ASIN,ACOS,ATAN,ATAN2,
+     SQRT,EXP,LN,LOG,ABS,SIGN,SIN,COS,TAN,ASIN,ACOS,ATAN,ATAN2,
      RANDOM,NORMAL,CEIL,FLOOR,ROUND,RAMP,STAGGER,LOGFREQ,STRIDE,
      VDISPLACE,SWIGGLE,CWIGGLE,GMASK,RMASK,GRMASK,
-     VALUE,ATOMARRAY,TYPEARRAY,INTARRAY};
+     VALUE,ATOMARRAY,TYPEARRAY,INTARRAY,HEAVISIDE};
 
 // customize by adding a special function
 
@@ -948,7 +949,7 @@ double Variable::evaluate(char *str, Tree **tree)
         // nbracket = # of bracket pairs
         // index1,index2 = int inside each bracket pair
 
-        int nbracket,index1,index2;
+        int nbracket,index1 = -1,index2 = -1;
         if (str[i] != '[') nbracket = 0;
         else {
           nbracket = 1;
@@ -1162,7 +1163,7 @@ double Variable::evaluate(char *str, Tree **tree)
         // nbracket = # of bracket pairs
         // index1,index2 = int inside each bracket pair
 
-        int nbracket,index1,index2;
+        int nbracket,index1 = -1,index2 = -1;
         if (str[i] != '[') nbracket = 0;
         else {
           nbracket = 1;
@@ -1334,7 +1335,7 @@ double Variable::evaluate(char *str, Tree **tree)
         // nbracket = # of bracket pairs
         // index = int inside bracket
 
-        int nbracket,index;
+        int nbracket,index = -1;
         if (str[i] != '[') nbracket = 0;
         else {
           nbracket = 1;
@@ -1883,6 +1884,14 @@ double Variable::collapse_tree(Tree *tree)
     return tree->value;
   }
 
+  if (tree->type == SIGN) {
+    arg1 = collapse_tree(tree->left);
+    if (tree->left->type != VALUE) return 0.0;
+    tree->type = VALUE;
+    tree->value = fabs(arg1) == arg1 ? 1. : -1.;
+    return tree->value;
+  }
+
   if (tree->type == SIN) {
     arg1 = collapse_tree(tree->left);
     if (tree->left->type != VALUE) return 0.0;
@@ -2105,6 +2114,14 @@ double Variable::collapse_tree(Tree *tree)
     return tree->value;
   }
 
+  if (tree->type == HEAVISIDE) {
+    arg1 = collapse_tree(tree->left);
+    if (tree->left->type != VALUE) return 0.0;
+    tree->type = VALUE;
+    tree->value = MYHEAVISIDE(arg1);
+    return tree->value;
+  }
+
   // mask functions do not become a single collapsed value
 
   if (tree->type == GMASK) return 0.0;
@@ -2218,6 +2235,11 @@ double Variable::eval_tree(Tree *tree, int i)
   }
   if (tree->type == ABS)
     return fabs(eval_tree(tree->left,i));
+
+  if (tree->type == SIGN){
+      double x = eval_tree(tree->left,i);
+      return fabs(x) == x ? 1. : -1.;
+  }
 
   if (tree->type == SIN)
     return sin(eval_tree(tree->left,i));
@@ -2366,6 +2388,9 @@ double Variable::eval_tree(Tree *tree, int i)
     return arg;
   }
 
+  if (tree->type == HEAVISIDE)
+    return MYHEAVISIDE(eval_tree(tree->left,i));
+
   if (tree->type == GMASK) {
     if (atom->mask[i] & tree->ivalue1) return 1.0;
     else return 0.0;
@@ -2484,7 +2509,7 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
 
   if (strcmp(word,"sqrt") && strcmp(word,"exp") &&
       strcmp(word,"ln") && strcmp(word,"log") &&
-      strcmp(word,"abs") &&
+      strcmp(word,"abs") && strcmp(word,"sign") &&
       strcmp(word,"sin") && strcmp(word,"cos") &&
       strcmp(word,"tan") && strcmp(word,"asin") &&
       strcmp(word,"acos") && strcmp(word,"atan") &&
@@ -2494,7 +2519,8 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
       strcmp(word,"ramp") && strcmp(word,"stagger") &&
       strcmp(word,"logfreq") && strcmp(word,"stride") &&
       strcmp(word,"vdisplace") &&
-      strcmp(word,"swiggle") && strcmp(word,"cwiggle"))
+      strcmp(word,"swiggle") && strcmp(word,"cwiggle") &&
+      strcmp(word,"H"))
     return 0;
 
   // parse contents for arg1,arg2,arg3 separated by commas
@@ -2605,6 +2631,12 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
       error->all(FLERR,"Invalid math function in variable formula");
     if (tree) newtree->type = ABS;
     else argstack[nargstack++] = fabs(value1);
+
+  } else if (strcmp(word,"sign") == 0) {
+    if (narg != 1)
+      error->all(FLERR,"Invalid math function in variable formula");
+    if (tree) newtree->type = SIGN;
+    else argstack[nargstack++] = fabs(value1) == value1? 1. : -1.;
 
   } else if (strcmp(word,"sin") == 0) {
     if (narg != 1)
@@ -2817,6 +2849,11 @@ int Variable::math_function(char *word, char *contents, Tree **tree,
       double value = value1 + value2*(1.0-cos(omega*delta*update->dt));
       argstack[nargstack++] = value;
     }
+  } else if (strcmp(word,"H") == 0) {
+    if (narg != 1)
+      error->all(FLERR,"Invalid math function in variable formula");
+    if (tree) newtree->type = HEAVISIDE;
+    else argstack[nargstack++] = MYHEAVISIDE(value1);
   }
 
   delete [] arg1;

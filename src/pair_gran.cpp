@@ -82,7 +82,7 @@ using namespace LAMMPS_NS;
 
 /* ---------------------------------------------------------------------- */
 
-PairGran::PairGran(LAMMPS *lmp) : Pair(lmp)
+PairGran::PairGran(LAMMPS *lmp) : Pair(lmp), ILoopCallbackCaller(lmp)
 {
   single_enable = 0;
   no_virial_fdotr_compute = 1;
@@ -104,7 +104,6 @@ PairGran::PairGran(LAMMPS *lmp) : Pair(lmp)
   nmax = 0;
 
   cpl_enable = 1;
-  cpl_ = NULL;
 
   energytrack_enable = 0;
   fppaCPEn = fppaCDEn = fppaCPEt = fppaCDEVt = fppaCDEFt = fppaCTFW = fppaDEH = NULL;
@@ -148,8 +147,8 @@ PairGran::~PairGran()
     delete [] maxrad_frozen;
   }
 
-  // tell cpl that pair gran is deleted
-  if(cpl_) cpl_->reference_deleted();
+  // tell all registered callbacks that this reference is deleted
+  referenceDeleted();
 
   //unregister energy terms as property/atom
   if (fppaCPEn) modify->delete_fix("CPEn");
@@ -533,25 +532,11 @@ void PairGran::init_style()
 
   // set maxrad_dynamic and maxrad_frozen for each type
   for (i = 1; i <= atom->ntypes; i++)
-  onerad_dynamic[i] = onerad_frozen[i] = 0.0;
+    onerad_dynamic[i] = onerad_frozen[i] = 0.0;
 
   // include future particles as dynamic
 
-  for (i = 0; i < modify->nfix; i++)
-  {
-    
-    if(!modify->fix[i]->use_rad_for_cut_neigh_and_ghost())
-        continue;
-
-    for(int j=1;j<=atom->ntypes;j++)
-    {
-        int pour_type = 0;
-        double pour_maxrad = 0.0;
-        pour_type = j;
-        pour_maxrad = modify->fix[i]->max_rad(pour_type);
-        onerad_dynamic[pour_type] = MAX(onerad_dynamic[pour_type],pour_maxrad);
-    }
-  }
+  modify->get_max_radius(false, onerad_dynamic);
 
   // further dynamic and frozen
 
@@ -570,23 +555,6 @@ void PairGran::init_style()
   MPI_Allreduce(&onerad_frozen[1],&maxrad_frozen[1],atom->ntypes,MPI_DOUBLE,MPI_MAX,world);
 
   init_granular();
-}
-
-/* ----------------------------------------------------------------------
-   register and unregister callback to compute
-------------------------------------------------------------------------- */
-
-void PairGran::register_compute_pair_local(ComputePairGranLocal *ptr,int &dnum_compute)
-{
-   if(cpl_ != NULL) error->all(FLERR,"Pair gran allows only one compute of type pair/local");
-   cpl_ = ptr;
-   dnum_compute = dnum_pairgran; //history values
-}
-
-void PairGran::unregister_compute_pair_local(ComputePairGranLocal *ptr)
-{
-   if(cpl_ != ptr) error->all(FLERR,"Illegal situation in PairGran::unregister_compute_pair_local");
-   cpl_ = NULL;
 }
 
 /* ----------------------------------------------------------------------
@@ -666,45 +634,7 @@ void PairGran::compute(int eflag, int vflag)
    shearupdate_ = 1;
    if (update->setupflag) shearupdate_ = 0;
 
-   compute_force(eflag,vflag,0);
-}
-
-/* ----------------------------------------------------------------------
-   compute as called via compute pair gran local
-------------------------------------------------------------------------- */
-
-void PairGran::compute_pgl(int eflag, int vflag)
-{
-  
-  // update rigid body info for owned & ghost atoms if using FixRigid masses
-  // body[i] = which body atom I is in, -1 if none
-  // mass_body = mass of each rigid body
-
-  if (fix_rigid && neighbor->ago == 0) {
-    int tmp;
-    int *body = (int *) fix_rigid->extract("body",tmp);
-    double *mass_body = (double *) fix_rigid->extract("masstotal",tmp);
-    if (atom->nmax > nmax) {
-      memory->destroy(mass_rigid);
-      nmax = atom->nmax;
-      memory->create(mass_rigid,nmax,"pair:mass_rigid");
-    }
-    int nlocal = atom->nlocal;
-    for (int i = 0; i < nlocal; i++)
-      if (body[i] >= 0) mass_rigid[i] = mass_body[body[i]];
-      else mass_rigid[i] = 0.0;
-    comm->forward_comm_pair(this);
-  }
-
-  bool reset_computeflag = (computeflag_ == 1) ? true : false;
-
-  computeflag_ = 0;
-  shearupdate_ = 0;
-
-  compute_force(eflag,vflag,1);
-
-  if(reset_computeflag)
-    computeflag_ = 1;
+   compute_force(eflag,vflag);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -751,9 +681,9 @@ void PairGran::write_restart(FILE *fp)
   proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairGran::read_restart(FILE *fp, const int major, const int minor)
+void PairGran::read_restart(FILE *fp, const Version &ver)
 {
-  read_restart_settings(fp, major, minor);
+  read_restart_settings(fp, ver);
   allocate();
 
   int i,j;
@@ -793,26 +723,4 @@ double PairGran::memory_usage()
 
 bool PairGran::forceoff() {
   return false;
-}
-
-void PairGran::cpl_add_pair(LCM::SurfacesIntersectData & sidata, LCM::ForceData & i_forces)
-{
-    const double fx = i_forces.delta_F[0];
-    const double fy = i_forces.delta_F[1];
-    const double fz = i_forces.delta_F[2];
-    const double tor1 = i_forces.delta_torque[0];
-    const double tor2 = i_forces.delta_torque[1];
-    const double tor3 = i_forces.delta_torque[2];
-    const double * const contact_point =
-#ifdef NONSPHERICAL_ACTIVE_FLAG
-        atom->shapetype_flag ? sidata.contact_point : NULL;
-#else
-        NULL;
-#endif
-    cpl_->add_pair(sidata.i, sidata.j, fx,fy,fz,tor1,tor2,tor3,sidata.contact_history, contact_point);
-}
-
-void PairGran::cpl_pair_finalize()
-{
-    cpl_->pair_finalize();
 }

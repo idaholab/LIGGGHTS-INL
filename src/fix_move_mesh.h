@@ -77,7 +77,7 @@ namespace LAMMPS_NS
         void final_integrate();
 
         void write_restart(FILE *);
-        void restart(char *);
+        void restart(char *, const Version &);
 
         void add_reference_point(double *point);
         void get_reference_point(double *point);

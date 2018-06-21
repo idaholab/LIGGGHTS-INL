@@ -65,6 +65,11 @@
 
 #define PHI_INV 0.61803398874989479
 
+inline double e(int a, int b, const double *m)
+{
+    return m[(b%4)*4 + (a%4)];
+}
+
 namespace MathExtraLiggghtsNonspherical {
 
 double J4[16];
@@ -713,26 +718,27 @@ double calc_F_new(Superquadric *particle1, Superquadric *particle2, double *x1, 
   return sqrt(F[0]*F[0] + F[1]*F[1] + F[2]*F[2] + F[3]*F[3] + F[4]*F[4]);
 }
 
-double invf(int i,int j,const double* m){
+double invf(int i,int j,const double* m)
+{
 
     int o = 2+(j-i);
 
     i += 4+o;
     j += 4-o;
 
-    #define e(a,b) m[ ((j+b)%4)*4 + ((i+a)%4) ]
+    //#define e(a,b) m[ (b%4)*4 + (a%4) ]
 
     double inv =
-     + e(+1,-1)*e(+0,+0)*e(-1,+1)
-     + e(+1,+1)*e(+0,-1)*e(-1,+0)
-     + e(-1,-1)*e(+1,+0)*e(+0,+1)
-     - e(-1,-1)*e(+0,+0)*e(+1,+1)
-     - e(-1,+1)*e(+0,-1)*e(+1,+0)
-     - e(+1,-1)*e(-1,+0)*e(+0,+1);
+     + e(i+1,j-1, m)*e(i+0,j+0, m)*e(i-1,j+1, m)
+     + e(i+1,j+1, m)*e(i+0,j-1, m)*e(i-1,j+0, m)
+     + e(i-1,j-1, m)*e(i+1,j+0, m)*e(i+0,j+1, m)
+     - e(i-1,j-1, m)*e(i+0,j+0, m)*e(i+1,j+1, m)
+     - e(i-1,j+1, m)*e(i+0,j-1, m)*e(i+1,j+0, m)
+     - e(i+1,j-1, m)*e(i-1,j+0, m)*e(i+0,j+1, m);
 
     return (o%2)?inv : -inv;
 
-    #undef e
+    //#undef e
 }
 
 double inverseMatrix4x4(const double *m, double *out)
@@ -1215,13 +1221,13 @@ double minimal_distance(Superquadric *particleA, Superquadric *particleB, const 
     } else {
 
       for(int i = 0; i < ndim; i++) {
-      if(std::isnan(delta[i])) {
-        nan_found = true;
-        break;
+        if(std::isnan(delta[i])) {
+          nan_found = true;
+          break;
+        }
       }
-    }
-    if(nan_found)
-      break;
+      if(nan_found)
+        break;
       if(deltax > 0.01*size) {
         double mag = normN(delta, ndim);
         for(int i = 0; i < ndim; i++)

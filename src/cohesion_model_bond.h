@@ -407,6 +407,7 @@ namespace ContactModels {
           {
             
             double cdf_one = 1.1 * 0.5*maxDist_[i][j]/minrad;
+            
             cdf_all = cdf_one > cdf_all ? cdf_one : cdf_all;
             
           }
@@ -461,6 +462,8 @@ namespace ContactModels {
       }
 
       //set neighbor contact_distance_factor here
+      if(cdf_all > 10.)
+        error->all(FLERR,"Maximum bond distance exceeding 10 x particle diameter, please reduce maxDistanceBond or maxSigmaBond/maxTauBond");
       neighbor->register_contact_dist_factor(cdf_all);
       compute_bond_counter_ = static_cast<ComputeBondCounter*>(modify->find_compute_style_strict("bond/counter", 0));
     }
@@ -878,8 +881,8 @@ namespace ContactModels {
             {
                 if (scdata.is_wall)
                 {
-                    double delta[3];
-                    scdata.fix_mesh->triMesh()->get_global_vel(delta);
+                    double delta[3] = {0.,0.,0.};
+                    vectorCopy3D(scdata.v_j,delta);
                     vectorScalarMult3D(delta, update->dt);
                     // -= because force is in opposite direction
                     // no *dt as delta is v*dt of the contact position
@@ -996,12 +999,12 @@ namespace ContactModels {
       surfacesClose(sidata, i_forces, j_forces);
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
 
     /* ---------------------------------------------------------------------- */
 
   private:
-    inline void createBond(SurfacesCloseData & scdata, double dist)
+    void createBond(SurfacesCloseData & scdata, double dist)
     {
       double * const contflag = &scdata.contact_history[history_offset_];
       double * const initialdist = &scdata.contact_history[history_offset_+1];
@@ -1022,7 +1025,7 @@ namespace ContactModels {
           compute_bond_counter_->bond_created(scdata.is_wall, scdata.i, scdata.j);
     }
 
-    inline void breakBond(SurfacesCloseData & scdata)
+    void breakBond(SurfacesCloseData & scdata)
     {
       double * const contflag = &scdata.contact_history[history_offset_];
       double * const initialdist = &scdata.contact_history[history_offset_+1];

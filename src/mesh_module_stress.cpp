@@ -58,6 +58,8 @@
 using namespace LAMMPS_NS;
 using namespace FixConst;
 
+enum {WEAR_MODEL_TYPE_FINNIE, WEAR_MODEL_TYPE_ARCHARD};
+
 #define EPSILON 0.0001
 
 /* ---------------------------------------------------------------------- */
@@ -71,11 +73,15 @@ MeshModuleStress::MeshModuleStress(LAMMPS *lmp, int &iarg_, int narg, char **arg
     sigma_n_(0),
     sigma_t_(0),
     wear_flag_(0),
-    k_finnie_(0),
+    wear_model_type_(0),
     wear_(0),
     wear_step_(0),
     wear_increment_(NULL),
-    store_wear_increment_(false)
+    store_wear_increment_(false),
+    k_finnie_(0),
+    k_archard_(0),
+    hardness_(0),
+    hardness_value_(0)
 {
     vectorZeroize3D(f_total_);
     vectorZeroize3D(torque_total_);
@@ -126,12 +132,20 @@ MeshModuleStress::MeshModuleStress(LAMMPS *lmp, int &iarg_, int narg, char **arg
             if (narg < iarg_+2)
                 error->one(FLERR,"not enough arguments");
             iarg_++;
-            if(strcmp(arg[iarg_],"finnie") == 0)
+            if(strcmp(arg[iarg_],"finnie") == 0 )
+            {
                 wear_flag_ = 1;
+                wear_model_type_ = WEAR_MODEL_TYPE_FINNIE;
+            }
+            else if (strcmp(arg[iarg_],"archard") ==0)
+            {
+                wear_flag_ = 1;
+                wear_model_type_ = WEAR_MODEL_TYPE_ARCHARD;
+            }
             else if(strcmp(arg[iarg_],"off") == 0)
                 wear_flag_ = 0;
             else
-                error->one(FLERR,"expecting 'finnie' or 'off' as wear argument");
+                error->one(FLERR,"expecting 'finnie' or 'archard' or 'off' as wear argument");
             iarg_++;
             hasargs = true;
         }
@@ -142,7 +156,8 @@ MeshModuleStress::MeshModuleStress(LAMMPS *lmp, int &iarg_, int narg, char **arg
 
 MeshModuleStress::~MeshModuleStress()
 {
-
+    if(hardness_value_)
+        delete []hardness_value_;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -213,6 +228,9 @@ void MeshModuleStress::zeroizeWear()
 
 void MeshModuleStress::init()
 {
+    int max_type = atom->get_properties()->max_type();
+    if(hardness_value_) delete []hardness_value_;
+    hardness_value_ = new double[max_type+1];
     if(stress_flag_)
     {
         f_ = mesh->prop().getElementProperty<VectorContainer<double,3> >("f");
@@ -222,7 +240,7 @@ void MeshModuleStress::init()
             error->one(FLERR,"Internal error");
     }
 
-    if(wear_flag_)
+    if(wear_flag_ && wear_model_type_==WEAR_MODEL_TYPE_FINNIE)
     {
         k_finnie_ = static_cast<FixPropertyGlobal*>(modify->find_fix_property("k_finnie","property/global","peratomtypepair",atom->ntypes,atom->ntypes,"meshmodule/stress"))->get_array();
         wear_ = mesh->prop().getElementProperty<ScalarContainer<double> >("wear");
@@ -231,6 +249,28 @@ void MeshModuleStress::init()
             wear_increment_ = mesh->prop().getElementProperty<ScalarContainer<double> >("wear_increment");
         if(!wear_ || ! wear_step_ || (store_wear_increment_ && !wear_increment_))
             error->one(FLERR,"Internal error");
+    } else if (wear_flag_ && wear_model_type_==WEAR_MODEL_TYPE_ARCHARD)
+    {
+
+        k_archard_ = static_cast<FixPropertyGlobal*>(modify->find_fix_property("k_archard","property/global","peratomtypepair",atom->ntypes,atom->ntypes,"meshmodule/stress"))->get_array();
+        //hardness_ = static_cast<FixPropertyGlobal*>(modify->find_fix_property("hardness","property/global","peratomtype",0,max_type,"meshmodule/stress"))->get_array();
+        hardness_ = static_cast<FixPropertyGlobal*>(modify->find_fix_property("hardness","property/global","peratomtype",atom->ntypes,0,"meshmodule/stress"));
+        wear_ = mesh->prop().getElementProperty<ScalarContainer<double> >("wear");
+        wear_step_ = mesh->prop().getElementProperty<ScalarContainer<double> >("wear_step");
+        if (store_wear_increment_)
+            wear_increment_ = mesh->prop().getElementProperty<ScalarContainer<double> >("wear_increment");
+        if(!wear_ || ! wear_step_ || (store_wear_increment_ && !wear_increment_))
+            error->one(FLERR,"Internal error");
+        for(int i=1;i< atom->ntypes+1; i++)
+        {
+            hardness_value_[i] = hardness_->compute_vector(i-1);
+        }
+        /*min_hardness_value_ = hardness_value_[1];
+        for(int i=1;i< atom->ntypes+1; i++)
+        {
+            if(min_hardness_value_>hardness_value_[i])
+                min_hardness_value_=hardness_value_[i];
+        }*/
     }
 }
 
@@ -274,9 +314,9 @@ void MeshModuleStress::final_integrate()
 ------------------------------------------------------------------------- */
 
 void MeshModuleStress::add_particle_contribution(int ip,double *frc,
-                                double *delta,int iTri,double *v_wall)
+                                double *delta,int iTri,double *v_wall, double *contact_history)
 {
-    double E,c[3],v_rel[3],v_rel_mag,cos_gamma,sin_gamma,sin_2gamma;
+    double E,v_rel[3],v_rel_mag,cos_gamma,sin_gamma,sin_2gamma,Q;
     double contactPoint[3]={},surfNorm[3], tmp[3], tmp2[3];
 
     // do not include if not in fix group
@@ -309,12 +349,9 @@ void MeshModuleStress::add_particle_contribution(int ip,double *frc,
         if (store_wear_increment_)
             wear_increment(iTri) = 0.0;
 
-        vectorSubtract3D(contactPoint,x,c);
-
         // calculate relative velocity
         vectorSubtract3D(v,v_wall,v_rel);
 
-        if(vectorDot3D(c,v_rel) < 0.) return;
         v_rel_mag = vectorMag3D(v_rel);
 
         // get surface normal
@@ -322,33 +359,43 @@ void MeshModuleStress::add_particle_contribution(int ip,double *frc,
         mesh->surfaceNorm(iTri,surfNorm);
 
         // return if no relative velocity
-        if(0.0000001 > v_rel_mag)
+        //fprintf(screen,"v_rel_mag: %f\n",v_rel_mag);
+        if(v_rel_mag < 0.0000001)
             return;
 
-        sin_gamma = MathExtraLiggghts::abs(vectorDot3D(v_rel,surfNorm)) / (v_rel_mag);
-        cos_gamma = MathExtraLiggghts::abs(vectorCrossMag3D(v_rel,surfNorm)) / (v_rel_mag);
-
-        if(cos_gamma > 1.) cos_gamma = 1.;
-        if(sin_gamma > 1.) sin_gamma = 1.;
-
-        if(cos_gamma < EPSILON || 3.*sin_gamma > cos_gamma)
+        if(wear_model_type_ == WEAR_MODEL_TYPE_FINNIE)
         {
-            E = 0.33333 * cos_gamma * cos_gamma;
+
+            if(vectorDot3D(delta,v_rel) < 0.) return;
             
-        }
-        else
+            sin_gamma = MathExtraLiggghts::abs(vectorDot3D(v_rel,surfNorm)) / (v_rel_mag);
+            cos_gamma = MathExtraLiggghts::abs(vectorCrossMag3D(v_rel,surfNorm)) / (v_rel_mag);
+
+            if(cos_gamma > 1.) cos_gamma = 1.;
+            if(sin_gamma > 1.) sin_gamma = 1.;
+
+            if(cos_gamma < EPSILON || 3.*sin_gamma > cos_gamma)
+            {
+                E = 0.33333 * cos_gamma * cos_gamma;
+                
+            }
+            else
+            {
+                sin_2gamma = 2. * sin_gamma * cos_gamma;
+                E = sin_2gamma - 3. * sin_gamma * sin_gamma;
+                
+            }
+            const int atom_type_mesh = fix_mesh->atomTypeWall();
+            E *= 2.*k_finnie_[atom_type_mesh-1][atom->type[ip]-1] * v_rel_mag * vectorMag3D(frc);
+            
+            const double part_wear_increment = E*update->dt / mesh->areaElem(iTri);
+            if (store_wear_increment_)
+                    wear_increment(iTri) = part_wear_increment;
+            wear_step(iTri) += part_wear_increment;
+        } else if(wear_model_type_ == WEAR_MODEL_TYPE_ARCHARD)
         {
-            sin_2gamma = 2. * sin_gamma * cos_gamma;
-            E = sin_2gamma - 3. * sin_gamma * sin_gamma;
-            
+            #include "wear_model_archard.h"
         }
-        const int atom_type_mesh = fix_mesh->atomTypeWall();
-        E *= 2.*k_finnie_[atom_type_mesh-1][atom->type[ip]-1] * v_rel_mag * vectorMag3D(frc);
-        
-        const double part_wear_increment = E*update->dt / mesh->areaElem(iTri);
-        if (store_wear_increment_)
-            wear_increment(iTri) = part_wear_increment;
-        wear_step(iTri) += part_wear_increment;
     }
 }
 
@@ -438,4 +485,28 @@ double MeshModuleStress::compute_vector(int n)
     else if (n < 9)
         return p_ref_(0)[n-6];
     return 0.0;
+}
+
+/* ----------------------------------------------------------------------
+   fix_modify options:
+   - shift mesh
+------------------------------------------------------------------------- */
+
+int MeshModuleStress::modify_param(int narg, char **arg)
+{
+    std::string arg0(arg[0]);
+    std::size_t slash = arg0.find_first_of('/');
+    std::string command(arg0.substr(slash == std::string::npos ? 0 : slash+1));
+
+    if (command.compare("shift") == 0)
+    {
+        if (narg < 4) error->all(FLERR, "not enough arguments for fix_modify 'shift'");
+        double shift[3];
+        shift[0] = force->numeric(FLERR, arg[1]);
+        shift[1] = force->numeric(FLERR, arg[2]);
+        shift[2] = force->numeric(FLERR, arg[3]);
+        mesh->move(shift);
+        return 4;
+    }
+    return 0;
 }

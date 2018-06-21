@@ -82,8 +82,15 @@ FixSph::FixSph(LAMMPS *lmp, int narg, char **arg) :
 
 FixSph::~FixSph()
 {
-  if(kernel_style) delete []kernel_style;
-  if(mass_type) memory->destroy(slComType);
+    if (kernel_style)
+        delete []kernel_style;
+    if (mass_type)
+        memory->destroy(slComType);
+    if (fppaSlType)
+    {
+        if (sl)
+            delete [] sl;
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -161,8 +168,15 @@ void FixSph::post_integrate_respa(int ilevel, int iloop)
 
 void FixSph::updatePtrs()
 {
-  if (fppaSl) sl = fppaSl->vector_atom;
-  if (fppaSlType) sl = fppaSlType->values;
+    if (fppaSl)
+        sl = fppaSl->vector_atom;
+    if (fppaSlType)
+    {
+        const int n = fppaSlType->get_nvalues();
+        sl = new double[n];
+        for (int i = 0; i < n; i++)
+            sl[i] = fppaSlType->compute_vector(i);
+    }
 }
 
 /* ----------------------------------------------------------------------

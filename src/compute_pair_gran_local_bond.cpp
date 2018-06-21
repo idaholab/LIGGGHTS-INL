@@ -38,12 +38,10 @@
     Copyright 2015-     DCS Computing GmbH, Linz
 ------------------------------------------------------------------------- */
 
-#include <string.h>
 #include "compute_pair_gran_local_bond.h"
-#include "pair_gran_proxy.h"
-#include "fix_wall_gran.h"
 #include "error.h"
-#include "math_extra_liggghts.h"
+#include "fix_wall_gran.h"
+#include "pair_gran_proxy.h"
 
 using namespace LAMMPS_NS;
 
@@ -78,20 +76,10 @@ void ComputePairGranLocalBond::init()
     //error->all(FLERR,"TODO here");
     //offset_bond_history_ = pairgran->offset_bond_history();
 
-    if(-1 == bond_history_offset_)
+    if(bond_history_offset_ == -1)
         error->compute_error(FLERR,this,"requires a cohesion bond model to work with");
 }
 
-/* ---------------------------------------------------------------------- */
-
-void ComputePairGranLocalBond::pair_finalize()
-{
-    // ensure have the right number of entries - i.e. the # of sidata.hasforceupdate occurrancies!
-
-    ncount_added_via_pair = ipair;
-    size_local_rows = ncount_added_via_pair;
-
-}
 /* ---------------------------------------------------------------------- */
 
 bool ComputePairGranLocalBond::decide_add(double *hist, double * &contact_pos)

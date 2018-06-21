@@ -78,6 +78,8 @@ class FixScalarTransportEquation : public Fix {
   bool isImplicit() { return implicitMode_;};
   void register_implicit_fixes(char*, double, char*, double);
   void updatePtrsImpl();
+  void set_mixed_capacity(class FixPropertyAtom*, class FixPropertyGlobal*, double);
+  double getTimeScale() const { return timescale_; }
 
   double *get_capacity();
 
@@ -119,6 +121,12 @@ class FixScalarTransportEquation : public Fix {
   double *capacity;
   char *capacity_name;
 
+  // extra varaibles for mixed capacity
+  bool mixed_capacity_flag;
+  class FixPropertyGlobal* fix_mixed_capacity_;
+  class FixPropertyAtom* fix_mixed_indicator_;
+  double mixed_density_;
+
   double quantity_0;  
   double *quantity;   
   double *flux;       
@@ -127,8 +135,17 @@ class FixScalarTransportEquation : public Fix {
   // flag if integrate quantity or not
   bool int_flag;
 
+  bool quantity_max_flag_; //flag if quantity should be limited to quantity_max_
+  double quantity_max_;
+
   int  nevery_; //integrate only this many time steps (to avoid round-off issues)
   bool performedIntegrationLastStep_;
+
+  // timescale increase for sped up particle dynamics
+  //   all heat fluxes and sources will be multiplied by this factor
+  //   this is implemented by multiplying timescale to dt
+  //   on transport equation integration in advanceQty*
+  double timescale_;
 };
 
 }

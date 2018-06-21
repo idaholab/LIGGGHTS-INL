@@ -184,7 +184,7 @@ public:
     return cmodel.stressStrainExponent();
   }
 
-  virtual void compute_force(PairGran * pg, int eflag, int vflag, int addflag)
+  virtual void compute_force(PairGran * pg, int eflag, int vflag)
   {
     if (eflag || vflag)
       pg->ev_setup(eflag, vflag);
@@ -249,6 +249,8 @@ public:
     sidata.shearupdate = pg->shearupdate();
 
     cmodel.beginPass(sidata, i_forces, j_forces);
+    pg->updateRequestedCallbacks();
+    pg->callBeginPass();
 
     // loop over neighbors of my atoms
 
@@ -275,7 +277,7 @@ public:
 
       for (int jj = 0; jj < jnum; jj++) {
         const int j = jlist[jj] & NEIGHMASK;
-
+        
         const double delx = xtmp - x[j][0];
         const double dely = ytmp - x[j][1];
         const double delz = ztmp - x[j][2];
@@ -342,9 +344,9 @@ public:
           sidata.mi = mass[type[i]];
           sidata.mj = mass[type[j]];
         }
+        #endif
         sidata.omega_i = omega[i];
         sidata.omega_j = omega[j];
-        #endif
 
         sidata.v_i     = v[i];
         sidata.v_j     = v[j];
@@ -355,6 +357,9 @@ public:
 
         if (rsq < radsum * radsum && cmodel.checkSurfaceIntersect(sidata)) {
           const double r = sqrt(rsq);
+
+          if(r < 1e-20)
+            error->one(FLERR,"ilegal situation, particle positions identical. Most probable reason: Simulation diverged");
           const double rinv = 1.0 / r;
 
           // unit normal vector for case of spherical particles
@@ -443,8 +448,8 @@ public:
             }
           }
 
-          if (pg->cpl() && addflag)
-            pg->cpl_add_pair(sidata, i_forces);
+          // call all registered callbacks
+          pg->call_post_force_callback(sidata, i_forces, j_forces);
 
           if (pg->evflag)
             pg->ev_tally_xyz(i, j, nlocal, newton_pair, 0.0, 0.0,i_forces.delta_F[0],i_forces.delta_F[1],i_forces.delta_F[2],sidata.delta[0],sidata.delta[1],sidata.delta[2]);
@@ -489,9 +494,7 @@ public:
     }
 
     cmodel.endPass(sidata, i_forces, j_forces);
-
-    if (pg->cpl() && addflag)
-        pg->cpl_pair_finalize();
+    pg->callEndPass();
 
     if(store_contact_forces)
         pg->fix_contact_forces()->do_forward_comm();

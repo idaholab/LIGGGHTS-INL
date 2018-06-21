@@ -224,23 +224,13 @@ FixParticledistributionDiscrete::FixParticledistributionDiscrete(LAMMPS *lmp, in
   pti_list = NULL;
   n_pti = n_pti_max = 0;
 
-  //calc max radius and bounding sphere radius
+  //calc max bounding sphere radius
 
-  maxrad = maxrbound = 0.;
-  minrad = 1000.;
+  maxrbound = 0.;
 
   for(int i = 0; i < ntemplates;i++)
       if(templates[i]->max_r_bound() > maxrbound)
         maxrbound = templates[i]->max_r_bound();
-
-  for(int i = 0; i < ntemplates;i++)
-      if(templates[i]->max_rad() > maxrad)
-        maxrad = templates[i]->max_rad();
-
-  for(int i = 0; i < ntemplates;i++)
-      if(templates[i]->min_rad() < minrad)
-        minrad = templates[i]->min_rad();
-
 }
 
 /* ---------------------------------------------------------------------- */
@@ -686,7 +676,7 @@ void FixParticledistributionDiscrete::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixParticledistributionDiscrete::restart(char *buf)
+void FixParticledistributionDiscrete::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;

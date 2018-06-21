@@ -48,11 +48,51 @@
 #include "memory.h"
 #include "modify.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <stdint.h>
+#else
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 using namespace LAMMPS_NS;
+
+// Return the CPU time for the current process in seconds very
+// much in the same way as MPI_Wtime() returns the wall time.
+
+static double CPU_Time()
+{
+  double rv = 0.0;
+
+#ifdef _WIN32
+
+  // from MSD docs.
+  FILETIME ct,et,kt,ut;
+  union { FILETIME ft; uint64_t ui; } cpu;
+  if (GetProcessTimes(GetCurrentProcess(),&ct,&et,&kt,&ut)) {
+    cpu.ft = ut;
+    rv = cpu.ui * 0.0000001;
+  }
+
+#else /* ! _WIN32 */
+
+  struct rusage ru;
+  if (getrusage(RUSAGE_SELF, &ru) == 0) {
+    rv = (double) ru.ru_utime.tv_sec;
+    rv += (double) ru.ru_utime.tv_usec * 0.000001;
+  }
+
+#endif /* ! _WIN32 */
+
+  return rv;
+}
 
 /* ---------------------------------------------------------------------- */
 
-Timer::Timer(LAMMPS *lmp) : Pointers(lmp)
+Timer::Timer(LAMMPS *lmp) :
+  Pointers(lmp),
+  cpu_array(NULL)
 {
   memory->create(array,TIME_N,"array");
 }
@@ -62,16 +102,24 @@ Timer::Timer(LAMMPS *lmp) : Pointers(lmp)
 Timer::~Timer()
 {
   memory->destroy(array);
+  if (cpu_array)
+    memory->destroy(cpu_array);
 }
 
 /* ---------------------------------------------------------------------- */
 
-void Timer::init()
+void Timer::init(bool save_cpu)
 {
   for (int i = 0; i < TIME_N; i++) array[i] = 0.0;
 
   if(modify->timing) {
     for (int i = 0; i < modify->nfix; i++) modify->fix[i]->reset_time_recording();
+  }
+
+  if (save_cpu)
+  {
+      memory->create(cpu_array,TIME_N,"cpu_array");
+      for (int i = 0; i < TIME_N; i++) cpu_array[i] = 0.0;
   }
 }
 
@@ -82,6 +130,8 @@ void Timer::stamp()
   // uncomment if want synchronized timing
   // MPI_Barrier(world);
   previous_time = MPI_Wtime();
+  if (cpu_array)
+      previous_cpu_time = CPU_Time();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -90,9 +140,15 @@ void Timer::stamp(int which)
 {
   // uncomment if want synchronized timing
   // MPI_Barrier(world);
-  double current_time = MPI_Wtime();
+  const double current_time = MPI_Wtime();
   array[which] += current_time - previous_time;
   previous_time = current_time;
+  if (cpu_array)
+  {
+    const double current_cpu_time = CPU_Time();
+    cpu_array[which] += current_cpu_time - previous_cpu_time;
+    previous_cpu_time = current_cpu_time;
+  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -101,6 +157,8 @@ void Timer::barrier_start(int which)
 {
   MPI_Barrier(world);
   array[which] = MPI_Wtime();
+  if (cpu_array)
+    cpu_array[which] = CPU_Time();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -108,14 +166,26 @@ void Timer::barrier_start(int which)
 void Timer::barrier_stop(int which)
 {
   MPI_Barrier(world);
-  double current_time = MPI_Wtime();
+  const double current_time = MPI_Wtime();
   array[which] = current_time - array[which];
+  if (cpu_array)
+    cpu_array[which] = CPU_Time() - cpu_array[which];
+}
+
+/* ---------------------------------------------------------------------- */
+
+double Timer::cpu_elapsed(int which)
+{
+  if (!cpu_array)
+    return -1.0;
+  const double current_time = CPU_Time();
+  return (current_time - cpu_array[which]);
 }
 
 /* ---------------------------------------------------------------------- */
 
 double Timer::elapsed(int which)
 {
-  double current_time = MPI_Wtime();
+  const double current_time = MPI_Wtime();
   return (current_time - array[which]);
 }

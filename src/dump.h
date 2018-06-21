@@ -77,8 +77,10 @@ class Dump : protected Pointers {
   void init();
   virtual void write();
 
+  virtual int get_comm_size() const { return 0; }
   virtual int pack_comm(int, int *, double *, int, int *) {return 0;}
   virtual void unpack_comm(int, int, double *) {}
+  virtual int get_reverse_comm_size() const { return 0; }
   virtual int pack_reverse_comm(int, int, double *) {return 0;}
   virtual void unpack_reverse_comm(int, int *, double *) {}
 

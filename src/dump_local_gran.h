@@ -85,6 +85,8 @@ class DumpLocalGran : public Pointers {
     virtual void init_style();
     bigint memory_usage();
 
+    void registerNextCall(bigint step);
+
   protected:
 
     int nevery;             // dump frequency for output

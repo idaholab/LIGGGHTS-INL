@@ -40,7 +40,6 @@
 
 #ifdef FIX_CLASS
 
-FixStyle(property/atom/timetracer,FixPropertyAtomRegionTracer)
 FixStyle(property/atom/regiontracer/time,FixPropertyAtomRegionTracer)
 
 #else

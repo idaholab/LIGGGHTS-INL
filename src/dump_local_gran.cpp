@@ -121,6 +121,7 @@ DumpLocalGran::~DumpLocalGran()
     delete [] idregion;
     if (sortBuffer)
         delete sortBuffer;
+    memory->destroy(buf);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -677,6 +678,15 @@ bigint DumpLocalGran::memory_usage()
     if (sortBuffer)
         bytes += sortBuffer->memory_usage(size_one);
     return bytes;
+}
+
+/* ----------------------------------------------------------------------
+     forward to compute pair/gran/local
+------------------------------------------------------------------------- */
+
+void DumpLocalGran::registerNextCall(bigint step)
+{
+    cpgl_->registerNextCall(step);
 }
 
 /* ----------------------------------------------------------------------

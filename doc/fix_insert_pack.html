@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fix insert/pack command &mdash; LIGGGHTS v3.X documentation</title>
+  <title>fix insert/pack command &mdash; LIGGGHTS v4.X documentation</title>
   
 
   
@@ -25,21 +25,15 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -61,7 +55,7 @@
             
             
               <div class="version">
-                v3.X
+                v4.X
               </div>
             
           
@@ -86,17 +80,135 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#what-is-liggghts-r-inl">1.1. What is LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-public-vs-liggghts-premium">1.2. LIGGGHTS-PUBLIC VS. LIGGGHTS-PREMIUM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#history">1.3. History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-features">1.4. LIGGGHTS(R)-INL features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-general-features">1.5. LIGGGHTS(R)-INL General features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-liggghts-public-features">1.6. LIGGGHTS(R)-INL Model features: LIGGGHTS-PUBLIC features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-additional-features-for-liggghts-r-inl">1.7. LIGGGHTS(R)-INL Model features: Additional features for LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#open-source-distribution">1.8. Open source distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#acknowledgments-and-citations">1.9. Acknowledgments and citations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#how-to-obtain-liggghts-r-inl">2.1. How to obtain LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl">2.2. Making LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#read-this-first">2.2.1. <strong>Read this first:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#steps-to-build-a-liggghts-r-inl-executable">2.2.2. <strong>Steps to build a LIGGGHTS(R)-INL executable:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#advanced-building-using-custom-makefiles">2.2.3. <strong>Advanced building using custom makefiles</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#errors-that-can-occur-when-making-liggghts-r-inl">2.2.4. <strong>Errors that can occur when making LIGGGHTS(R)-INL:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-build-tips">2.2.5. <strong>Additional build tips:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-a-mac">2.2.6. <strong>Building for a Mac:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-windows">2.2.7. <strong>Building for Windows:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl-with-optional-packages">2.3. Making LIGGGHTS(R)-INL with optional packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-via-the-make-py-script">2.4. Building LIGGGHTS(R)-INL via the Make.py script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-as-a-library">2.5. Building LIGGGHTS(R)-INL as a library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#static-library">2.5.1. <strong>Static library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#shared-library">2.5.2. <strong>Shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-requirement-for-using-a-shared-library">2.5.3. <strong>Additional requirement for using a shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#calling-the-liggghts-r-inl-library">2.5.4. <strong>Calling the LIGGGHTS(R)-INL library:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#running-liggghts-r-inl">2.6. Running LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#command-line-options">2.7. Command-line options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#liggghts-r-inl-screen-output">2.8. LIGGGHTS(R)-INL screen output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#liggghts-r-inl-input-script">3.1. LIGGGHTS(R)-INL input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#parsing-rules">3.2. Parsing rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#input-script-structure">3.3. Input script structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#an-example-input-script">3.4. An example input script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#list-of-all-commands">4.1. List of all commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#bond-style-potentials">4.2. bond_style potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#compute-styles">4.3. compute styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#dump-styles">4.4. dump styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#fix-styles">4.5. fix styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#pair-style-potentials">4.6. pair_style potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#cohesion-commands">5.1. cohesion commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#model-commands">5.2. model commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#rolling-friction-commands">5.3. rolling_friction commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#surface-commands">5.4. surface commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#tangential-commands">5.5. tangential commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_mesh_modules.html#module-commands">6.1. module commands</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#restarting-a-simulation">8.1. Restarting a simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#d-simulations">8.2. 2d simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#running-multiple-simulations-from-one-input-script">8.3. Running multiple simulations from one input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#granular-models">8.4. Granular models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#coupling-liggghts-r-inl-to-other-codes">8.5. Coupling LIGGGHTS(R)-INL to other codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#visualizing-liggghts-r-inl-snapshots">8.6. Visualizing LIGGGHTS(R)-INL snapshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#triclinic-non-orthogonal-simulation-boxes">8.7. Triclinic (non-orthogonal) simulation boxes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#output-from-liggghts-r-inl-thermo-dumps-computes-fixes-variables">8.8. Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#global-per-atom-local-data">8.8.1. Global/per-atom/local data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#scalar-vector-array-data">8.8.2. Scalar/vector/array data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#thermodynamic-output">8.8.3. Thermodynamic output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#dump-file-output">8.8.4. Dump file output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-write-output-files">8.8.5. Fixes that write output files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-process-output-quantities">8.8.6. Computes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-process-output-quantities">8.8.7. Fixes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-generate-values-to-output">8.8.8. Computes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-generate-values-to-output">8.8.9. Fixes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#variables-that-generate-values-to-output">8.8.10. Variables that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#summary-table-of-output-options-and-data-flow-between-commands">8.8.11. Summary table of output options and data flow between commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#walls">8.9. Walls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#library-interface-to-liggghts-r-inl">8.10. Library interface to LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#atom-styles">9.1. Atom styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#compute-styles">9.2. Compute styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-styles">9.3. Dump styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-custom-output-options">9.4. Dump custom output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#fix-styles">9.5. Fix styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#input-script-commands">9.6. Input script commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#pairwise-potentials">9.7. Pairwise potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#region-styles">9.8. Region styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#thermodynamic-output-options">9.9. Thermodynamic output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#variable-options">9.10. Variable options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#submitting-new-features-for-inclusion-in-liggghts-r-inl">9.11. Submitting new features for inclusion in LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#building-liggghts-r-inl-as-a-shared-library">10.1. Building LIGGGHTS(R)-INL as a shared library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#installing-the-python-wrapper-into-python">10.2. Installing the Python wrapper into Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#extending-python-with-mpi-to-run-in-parallel">10.3. Extending Python with MPI to run in parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#testing-the-python-liggghts-r-inl-interface">10.4. Testing the Python-LIGGGHTS(R)-INL interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-serial">10.4.1. <strong>Test LIGGGHTS(R)-INL and Python in serial:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-parallel">10.4.2. <strong>Test LIGGGHTS(R)-INL and Python in parallel:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#running-python-scripts">10.4.3. <strong>Running Python scripts:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#using-liggghts-r-inl-from-python">10.5. Using LIGGGHTS(R)-INL from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#example-python-scripts-that-use-liggghts-r-inl">10.6. Example Python scripts that use LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#common-problems">11.1. Common problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#reporting-bugs">11.2. Reporting bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error-warning-messages">11.3. Error &amp; warning messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error">11.4. Errors:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#warnings">11.5. Warnings:</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -108,7 +220,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="Manual.html">LIGGGHTS</a>
@@ -118,7 +230,9 @@
 
       
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -181,7 +295,7 @@
 <li>distributiontemplate = obligatory keyword</li>
 <li>dist-ID = ID of a <a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> to be used for particle insertion</li>
 <li>one or more general keyword/value pairs can be appended</li>
-<li>general_keywords = <em>verbose</em> or <em>maxattempt</em> or <em>insert_every</em> or <em>overlapcheck</em> or <em>all_in</em> or <em>random_distribute</em> or <em>compress_tags</em> or <em>vel constant</em> or <em>vel uniform</em> or <em>vel gaussian</em> or <em>orientation</em> or <em>omega</em> or <em>set_property</em></li>
+<li>general_keywords = <em>verbose</em> or <em>maxattempt</em> or <em>insert_every</em> or <em>overlapcheck</em> or <em>all_in</em> or <em>random_distribute</em> or <em>compress_tags</em> or <em>vel constant</em> or <em>vel uniform</em> or <em>vel gaussian</em> or <em>orientation</em> or <em>omega</em> or <em>set_property</em> or <em>set_property_vector</em></li>
 </ul>
 <pre class="literal-block">
 <em>verbose</em> = yes or no
@@ -227,6 +341,15 @@
 <em>set_property</em> values = property-varname val
   property-varname = variable name of a <a class="reference internal" href="fix_property.html"><em>fix property/atom</em></a> holding a scalar value for each particle
   val = value to initialize the property with upon insertion
+<em>set_property_vector</em> values = property-name magnitude const value orientation ...
+  property-name = name of property that should be modified
+  <em>magnitude</em> values = const
+    <em>const</em> values = value
+      value = magnitude used for vector
+  <em>orientation</em> = const or random
+    <em>const</em> values = x y z
+      x,y,z = vector used for insertion (should be a unit vector)
+    <em>random</em> = no arguments
 </pre>
 <ul class="simple">
 <li>following the general keyword/value section, one or more pack keyword/value pairs can be appended for the fix insert/pack command</li>
@@ -255,86 +378,98 @@ pack_keywords = where exactly one out of <em>volumefraction_region</em> or <em>p
 </div>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Insert particles into a granular run either once or every few timesteps
-within the specified region, as defined via the <em>region</em> keyword.</p>
-<p>The <em>verbose</em> keyword controls whether statistics about particle
-insertion is output to the screen each time particles are inserted.</p>
+<p>Insert particles into a granular run either once or every few timesteps within
+the specified region, as defined via the <em>region</em> keyword.</p>
+<p>The <em>verbose</em> keyword controls whether statistics about particle insertion is
+output to the screen each time particles are inserted.</p>
 <p>This command must use the distributiontemplate keyword to refer to a
-<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> (defined by dist-fix-ID) that defines the properties of the
-inserted particles.</p>
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a>
+(defined by dist-fix-ID) that defines the properties of the inserted particles.</p>
 <p>At each insertion step, fix insert/pack tries inserts as many particles as
-needed to reach a defined target, which can be either a region volume
-fraction (keyword <em>volumefraction_region</em>), the total number of particles
-in the region (keyword <em>particles_in_region</em>), or the total particle mass
-in the region (keyword <em>mass_in_region</em>). Exactly one out of the keywords
-<em>volumefraction_region</em>, <em>particles_in_region</em>, <em>mass_in_region</em> must
-be defined.</p>
-<p>The frequency of the particle insertion can be controlled by the
-keyword <em>insert_every</em>, which defines  the number of time-steps between
-two insertions. Alternatively, by specifying <em>insert_every once</em>,
-particles are inserted only once.</p>
+needed to reach a defined target, which can be either a region volume fraction
+(keyword <em>volumefraction_region</em>), the total number of particles in the region
+(keyword <em>particles_in_region</em>), or the total particle mass in the region
+(keyword <em>mass_in_region</em>). Exactly one out of the keywords
+<em>volumefraction_region</em>, <em>particles_in_region</em>, <em>mass_in_region</em> must be
+defined.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The abovementioned keyword <em>particles_in_region</em> does apply to
+the number of particle templates / particle conglomerates to be inserted in case
+of using multisphere of multiplespheres templates, not to single spheres.</p>
+</div>
+<p>The frequency of the particle insertion can be controlled by the keyword
+<em>insert_every</em>, which defines  the number of time-steps between two insertions.
+Alternatively, by specifying <em>insert_every once</em>, particles are inserted only
+once.</p>
 <p>The <em>start</em> keyword can be used to set the time-step at which the insertion
 should start.</p>
 <p>Inserted particles are assigned the atom type specified by the
-particledistribution defined via the <a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> and
-are assigned to 4 groups: the default group &#8220;all&#8221; and the group
-specified in the fix insert command, as well as the groups specified
-in the <a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> and <a class="reference internal" href="fix_particletemplate_sphere.html"><em>fix_particletemplate_sphere</em></a>
-command (all of which can also be &#8220;all&#8221;).</p>
-<p>The keyword <em>overlapcheck</em> controls if overlap is checked for at insertion,
-both within the inserted particle package and with other existing particles.
-If this option is turned off, insertion will scale very well in parallel,
-otherwise not. Be aware that in case of no overlap check, highly overlapping
-configurations will be produced, so you will have to relax these configurations.</p>
-<p>With keyword <em>check_dist_from_subdomain_border</em>, the user can specify if
-in case of <em>overlapcheck</em> = yes particles are inserted only at least one
-bounding radius away from processor domain borders to avoid possible
-overlaps with particles inserted on another process.</p>
-<p>If overlapcheck if performed, the number of insertion attempts per
-particle can be specified via the <em>maxattempt</em> keyword. Each timestep
-particles are inserted, the command will make up to a total of M tries
-to insert the new particles without overlaps, where
-M = # of inserted particles * ma.  If unsuccessful at completing all
-insertions, a warning will be printed.</p>
-<p>The <em>all_in</em> flag determines if the particle is completely contained
-in the insertion region (<em>all_in yes</em>) or only the particle center
-(<em>all_in no</em>). Currently <em>all_in yes</em> is not yet supported for all
-types of insertion.</p>
-<p>Keyword <em>random_distribute</em> controls how the number of particles to
-be inserted is distributed among parallel processors and among the
-particle templates in the particle distribution. For style <em>exact</em>,
-the number of particles to be inserted each step is matched exactly.
-For style <em>uncorrelated</em>, the number of particles to be inserted
-for each particle template will be rounded in an uncorrelated way,
-so the total number of inserted particles may vary for each insertion
-step. However, statistically both ways should produce the same
-result. Style <em>uncorrelated</em> may be faster in parallel since it
-does not need global MPI operations.
-Please note that if the # of particles to be inserted is calculated
-e.g. from a particle mass to be inserted, the number of particles
-to be inserted each insertion step will vary by 1, irrespective of
-the <em>random_distribute</em> settings. This is because in this case the
-# of particles to insert in each step will be a floating point number,
-and applying a simple floor/ceil rounding operation would lead to a
-statistical bias.</p>
-<p>If keyword <em>compress_tags</em> is set to &#8216;yes&#8217;, then atom IDs are re-assigned
-after each insertion procedure. The default is &#8216;no&#8217;. This is typically
-only recommended if some models internally store arrays which have the
-length defined via the max ID of any atom.</p>
+particledistribution defined via the
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> and
+are assigned to 4 groups: the default group &#8220;all&#8221; and the group specified in the
+fix insert command, as well as the groups specified in the
+<a class="reference internal" href="fix_particledistribution_discrete.html"><em>fix_particledistribution_discrete</em></a> and
+<a class="reference internal" href="fix_particletemplate_sphere.html"><em>fix_particletemplate_sphere</em></a> command (all of
+which can also be &#8220;all&#8221;).</p>
+<p>The keyword <em>overlapcheck</em> controls if overlap is checked for at insertion, both
+within the inserted particle package and with other existing particles.  If this
+option is turned off, insertion will scale very well in parallel, otherwise not.
+Be aware that in case of no overlap check, highly overlapping configurations
+will be produced, so you will have to relax these configurations.</p>
+<p>With keyword <em>check_dist_from_subdomain_border</em>, the user can specify if in case
+of <em>overlapcheck</em> = yes particles are inserted only at least one bounding radius
+away from processor domain borders to avoid possible overlaps with particles
+inserted on another process.</p>
+<p>If overlapcheck if performed, the number of insertion attempts per particle can
+be specified via the <em>maxattempt</em> keyword. Each timestep particles are inserted,
+the command will make up to a total of M tries to insert the new particles
+without overlaps, where M = # of inserted particles * ma.  If unsuccessful at
+completing all insertions, a warning will be printed.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If not all particles can be inserted the warning &#8220;<em>Particle
+insertion: Less insertions than requested</em>&#8221; will be printed. Note that the
+algorithm will abort even though there might still be space for smaller
+particles (if using particles of different radii). Try increasing <em>maxattempt</em>
+or decreasing your volume fraction.</p>
+</div>
+<p>The <em>all_in</em> flag determines if the particle is completely contained in the
+insertion region (<em>all_in yes</em>) or only the particle center (<em>all_in no</em>).
+Currently <em>all_in yes</em> is not yet supported for all types of insertion.</p>
+<p>Keyword <em>random_distribute</em> controls how the number of particles to be inserted
+is distributed among parallel processors and among the particle templates in the
+particle distribution. For style <em>exact</em>, the number of particles to be inserted
+each step is matched exactly.  For style <em>uncorrelated</em>, the number of particles
+to be inserted for each particle template will be rounded in an uncorrelated
+way, so the total number of inserted particles may vary for each insertion step.
+However, statistically both ways should produce the same result. Style
+<em>uncorrelated</em> may be faster in parallel since it does not need global MPI
+operations.  Please note that if the # of particles to be inserted is calculated
+e.g. from a particle mass to be inserted, the number of particles to be inserted
+each insertion step will vary by 1, irrespective of the <em>random_distribute</em>
+settings. This is because in this case the # of particles to insert in each step
+will be a floating point number, and applying a simple floor/ceil rounding
+operation would lead to a statistical bias.</p>
+<p>If keyword <em>compress_tags</em> is set to &#8216;yes&#8217;, then atom IDs are re-assigned after
+each insertion procedure. The default is &#8216;no&#8217;. This is typically only
+recommended if some models internally store arrays which have the length defined
+via the max ID of any atom.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Setting <em>compress_tags</em> to &#8216;yes&#8217; will result in all contact
-history to be lost at that point in time. External post-processing tools
-will give wrong results because they typically track atoms via their IDs.</p>
+history to be lost at that point in time. External post-processing tools will
+give wrong results because they typically track atoms via their IDs.</p>
 </div>
-<p>The initial velocity and rotational velocity can be controlled via the
-<em>vel</em> and <em>omega</em> keywords. <em>vel constant</em> simply patches a constant
-velocity to the inserted particles, <em>vel uniform</em> sets uniformly distributed
-velocities with mean and amplitude. <em>vel gaussian</em> sets Gaussian
-distributed particle velocities with mean and std. deviation.</p>
+<p>The initial velocity and rotational velocity can be controlled via the <em>vel</em> and
+<em>omega</em> keywords. <em>vel constant</em> simply patches a constant velocity to the
+inserted particles, <em>vel uniform</em> sets uniformly distributed velocities with
+mean and amplitude. <em>vel gaussian</em> sets Gaussian distributed particle velocities
+with mean and std. deviation.</p>
 <p>The <em>set_property</em> option can be used to initialize scalar per-particle
-properties such as temperatures, which are stored in a
-a <a class="reference internal" href="fix_property.html"><em>fix property/atom</em></a>.</p>
+properties such as temperatures, which are stored in a a <a class="reference internal" href="fix_property.html"><em>fix property/atom</em></a>.</p>
+<p>The <em>set_property_vector</em> option allows to initialize vector per-particle
+propeties such as dipole property &#8216;mu&#8217;.</p>
 <p><strong>Description for fix insert/pack:</strong></p>
 <p>This command must use the <em>region</em> keyword to define an insertion
 volume. The specified region must have been previously defined with a
@@ -392,9 +527,7 @@ duration = insert_every, ntry_mc = 100000, random_distribute = exact,
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -407,7 +540,7 @@ duration = insert_every, ntry_mc = 100000, random_distribute = exact,
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -425,7 +558,7 @@ duration = insert_every, ntry_mc = 100000, random_distribute = exact,
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v3.X',
+            VERSION:'v4.X',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -444,14 +577,13 @@ duration = insert_every, ntry_mc = 100000, random_distribute = exact,
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

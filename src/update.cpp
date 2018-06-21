@@ -65,7 +65,11 @@ using namespace LAMMPS_NS;
 
 /* ---------------------------------------------------------------------- */
 
-Update::Update(LAMMPS *lmp) : Pointers(lmp)
+Update::Update(LAMMPS *lmp) :
+    Pointers(lmp),
+    wall_clock_time(0),
+    execution_nstep(0),
+    stop_execution_because_of_wall_clock(false)
 {
   char *str;
 
@@ -436,6 +440,8 @@ void Update::reset_timestep(int narg, char **arg)
   reset_timestep(newstep);
 }
 
+#include "update_wall_clock_time.h"
+
 /* ----------------------------------------------------------------------
    reset timestep
    set atimestep to new timestep, so future update_time() calls will be correct
@@ -450,7 +456,6 @@ void Update::reset_timestep(int narg, char **arg)
 
 void Update::reset_timestep(bigint newstep)
 {
-  
   ntimestep_reset_since_last_run = true;
   bigint oldtimestep = ntimestep;
 
@@ -466,7 +471,7 @@ void Update::reset_timestep(bigint newstep)
   output->reset_timestep(ntimestep);
 
   for (int i = 0; i < modify->nfix; i++) {
-    if (modify->fix[i]->time_depend && !force_dt_reset_) 
+    if (modify->fix[i]->time_depend && !force_dt_reset_)
       error->all(FLERR,
                  "Cannot reset timestep with a time-dependent fix defined");
     modify->fix[i]->reset_timestep(ntimestep,oldtimestep);
@@ -483,7 +488,13 @@ void Update::reset_timestep(bigint newstep)
   }
 
   for (int i = 0; i < modify->ncompute; i++)
-    if (modify->compute[i]->timeflag) modify->compute[i]->clearstep();
+    if (modify->compute[i]->timeflag)
+    {
+        modify->compute[i]->clearstep();
+        // add this step to ensure update
+        // this is in particluar important for commands like compute pair/gran/local
+        modify->compute[i]->addstep(newstep);
+    }
 
   // NOTE: 7Jun12, adding rerun command, don't think this is required
 

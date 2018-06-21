@@ -288,9 +288,9 @@ void PairSphArtviscTenscorr::write_restart(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSphArtviscTenscorr::read_restart(FILE *fp, const int major, const int minor)
+void PairSphArtviscTenscorr::read_restart(FILE *fp, const Version &ver)
 {
-  read_restart_settings(fp, major, minor);
+  read_restart_settings(fp, ver);
   allocate();
 
   int i,j;
@@ -316,7 +316,7 @@ void PairSphArtviscTenscorr::write_restart_settings(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSphArtviscTenscorr::read_restart_settings(FILE *fp, const int major, const int minor)
+void PairSphArtviscTenscorr::read_restart_settings(FILE *fp, const Version &ver)
 {
   if (comm->me == 0) {
     fread(&artVisc_flag,sizeof(int),1,fp);

@@ -57,37 +57,40 @@ ContactForceCorrector::ContactForceCorrector(LAMMPS *lmp,class FixContactPropert
                                             FixMultisphere const*fix_ms,class Multisphere *msp,
                                             bool wall, const char *wall_id) :
     Pointers(lmp),
-    helper_(0),
+    helper_(NULL),
     fix_contact_(fpca),
     fix_ms_(fix_ms),
     multisphere_(msp),
     max_n_ibody_contact_ 
     (
         wall ?
-        (
-            *new ScalarContainer<int>("max_n_ibody_contact")
-        )
+            NULL
         :
         (
             
-            *multisphere_->prop().addElementProperty< ScalarContainer<int> >
+            multisphere_->prop().addElementProperty< ScalarContainer<int> >
             ("max_n_ibody_contact","comm_exchange_borders","frame_invariant","restart_no",1,multisphere_->n_body())
         )
     ),
     n_ibody_contact_ 
     (
-        wall ?
+        fix_ms ?
         (
-            
-            *multisphere_->prop().addElementProperty< ScalarContainer<int> >
-            (my_strcat("n_ibody_contact_",wall_id),"comm_exchange_borders","frame_invariant","restart_no",1,multisphere_->n_body())
+            wall ?
+            (
+                
+                multisphere_->prop().addElementProperty< ScalarContainer<int> >
+                (my_strcat("n_ibody_contact_",wall_id),"comm_exchange_borders","frame_invariant","restart_no",1,multisphere_->n_body())
+            )
+            :
+            (
+                
+                multisphere_->prop().addElementProperty< ScalarContainer<int> >
+                ("n_ibody_contact","comm_exchange_borders","frame_invariant","restart_no",1,multisphere_->n_body())
+            )
         )
         :
-        (
-            
-            *multisphere_->prop().addElementProperty< ScalarContainer<int> >
-            ("n_ibody_contact","comm_exchange_borders","frame_invariant","restart_no",1,multisphere_->n_body())
-        )
+            NULL
     ),
     is_wall_(wall),
     nbody_max_(0),
@@ -97,9 +100,7 @@ ContactForceCorrector::ContactForceCorrector(LAMMPS *lmp,class FixContactPropert
     ncontacts_page_(0),
     pgsize_(0),
     oneatom_(0)
-{
-    if(helper_) delete [] helper_;
-}
+{ }
 
 /* ---------------------------------------------------------------------- */
 
@@ -114,18 +115,22 @@ const char * ContactForceCorrector::my_strcat(const char* s1,const char* s2)
 
 ContactForceCorrector::~ContactForceCorrector()
 {
-    is_wall_ ? (delete &max_n_ibody_contact_) : (multisphere_->prop().removeElementProperty("max_n_ibody_contact"));
+    if(!is_wall_ && fix_ms_)
+        multisphere_->prop().removeElementProperty("max_n_ibody_contact");
 
-    char container_id[200];
-    n_ibody_contact_.id(container_id);
-    multisphere_->prop().removeElementProperty(container_id);
+    if (fix_ms_)
+    {
+        char container_id[200];
+        n_ibody_contact_->id(container_id);
+        multisphere_->prop().removeElementProperty(container_id);
 
-    // delete locally stored arrays
+        // delete locally stored arrays
 
-    memory->sfree(jbodytags_);
-    memory->sfree(ncontacts_);
-    if(jbodytags_page_) delete [] jbodytags_page_;
-    if(ncontacts_page_) delete [] ncontacts_page_;
+        memory->sfree(jbodytags_);
+        memory->sfree(ncontacts_);
+        if(jbodytags_page_) delete [] jbodytags_page_;
+        if(ncontacts_page_) delete [] ncontacts_page_;
+    }
 }
 
 /* ----------------------------------------------------------------------
@@ -162,6 +167,9 @@ void ContactForceCorrector::allocate_pages()
 
 void ContactForceCorrector::calculate_pair()
 {
+    if (!fix_ms_)
+        return;
+
     allocate_pages();
 
     allocate_pair();
@@ -174,6 +182,8 @@ void ContactForceCorrector::calculate_pair()
 
 void ContactForceCorrector::calculate_wall()
 {
+    if (!fix_ms_)
+        return;
     
     // fill data structure
     calculate_contacts_wall();
@@ -200,7 +210,7 @@ void ContactForceCorrector::allocate_pair()
                  nbody_max_*sizeof(int *),"ContactForceCorrector:ncontacts");
     }
 
-    max_n_ibody_contact_.setAll(0);
+    max_n_ibody_contact_->setAll(0);
 
     for(int i = 0; i < nall; i++)
     {
@@ -244,17 +254,18 @@ void ContactForceCorrector::allocate_pair()
         }
 
         if(contact_body_ids.size() > 0)
-            max_n_ibody_contact_(ibody) += contact_body_ids.size();
+            (*max_n_ibody_contact_)(ibody) += contact_body_ids.size();
     }
 
     for(int ibody = 0; ibody < nbody; ibody++)
     {
         
-        jbodytags_[ibody] = jbodytags_page_->get(max_n_ibody_contact_(ibody));
-        ncontacts_[ibody] = ncontacts_page_->get(max_n_ibody_contact_(ibody));
+        const int max_contact = (*max_n_ibody_contact_)(ibody);
+        jbodytags_[ibody] = jbodytags_page_->get(max_contact);
+        ncontacts_[ibody] = ncontacts_page_->get(max_contact);
 
-        vectorInitializeN(jbodytags_[ibody],max_n_ibody_contact_(ibody),-1);
-        vectorInitializeN(ncontacts_[ibody],max_n_ibody_contact_(ibody),0);
+        vectorInitializeN(jbodytags_[ibody],max_contact,-1);
+        vectorInitializeN(ncontacts_[ibody],max_contact,0);
     }
 }
 
@@ -265,7 +276,7 @@ void ContactForceCorrector::calculate_contacts_pair()
     int nall = atom->nlocal + atom->nghost;
     int n_atom_contacts,ibody,i_body_tag,j_atom_tag,j,j_body_tag;
 
-    n_ibody_contact_.setAll(0);
+    n_ibody_contact_->setAll(0);
 
     for(int i = 0; i < nall; i++)
     {
@@ -297,7 +308,7 @@ void ContactForceCorrector::calculate_contacts_pair()
                 int ibody_contact = 0;
                 bool new_in_list = true;
 
-                while(ibody_contact < n_ibody_contact_(ibody))
+                while(ibody_contact < (*n_ibody_contact_)(ibody))
                 {
                     if(j_body_tag == jbodytags_[ibody][ibody_contact])
                     {
@@ -312,7 +323,7 @@ void ContactForceCorrector::calculate_contacts_pair()
                 {
                     jbodytags_[ibody][ibody_contact] = j_body_tag;
                     
-                    n_ibody_contact_(ibody)++;
+                    (*n_ibody_contact_)(ibody)++;
                 }
 
                 ncontacts_[ibody][ibody_contact]++;
@@ -328,7 +339,7 @@ void ContactForceCorrector::calculate_contacts_wall()
     int nall = atom->nlocal + atom->nghost;
     int n_wall_contacts,ibody,i_body_tag;
 
-    n_ibody_contact_.setAll(0);
+    n_ibody_contact_->setAll(0);
 
     for(int i = 0; i < nall; i++)
     {
@@ -342,7 +353,7 @@ void ContactForceCorrector::calculate_contacts_wall()
         ibody = multisphere_->map(i_body_tag);
 
         if(ibody > -1)
-            n_ibody_contact_(ibody) += n_wall_contacts;
+            (*n_ibody_contact_)(ibody) += n_wall_contacts;
     }
 
 }

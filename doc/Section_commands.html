@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>4. Commands &mdash; LIGGGHTS v3.X documentation</title>
+  <title>4. Commands &mdash; LIGGGHTS v4.X documentation</title>
   
 
   
@@ -25,23 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/>
-        <link rel="next" title="5. Contact models" href="Section_gran_models.html"/>
-        <link rel="prev" title="3. Input Script" href="Section_input_script.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="next" title="5. Contact models" href="Section_gran_models.html" />
+    <link rel="prev" title="3. Input Script" href="Section_input_script.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -63,7 +57,7 @@
             
             
               <div class="version">
-                v3.X
+                v4.X
               </div>
             
           
@@ -88,9 +82,51 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#what-is-liggghts-r-inl">1.1. What is LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-public-vs-liggghts-premium">1.2. LIGGGHTS-PUBLIC VS. LIGGGHTS-PREMIUM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#history">1.3. History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-features">1.4. LIGGGHTS(R)-INL features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-general-features">1.5. LIGGGHTS(R)-INL General features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-liggghts-public-features">1.6. LIGGGHTS(R)-INL Model features: LIGGGHTS-PUBLIC features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-additional-features-for-liggghts-r-inl">1.7. LIGGGHTS(R)-INL Model features: Additional features for LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#open-source-distribution">1.8. Open source distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#acknowledgments-and-citations">1.9. Acknowledgments and citations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#how-to-obtain-liggghts-r-inl">2.1. How to obtain LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl">2.2. Making LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#read-this-first">2.2.1. <strong>Read this first:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#steps-to-build-a-liggghts-r-inl-executable">2.2.2. <strong>Steps to build a LIGGGHTS(R)-INL executable:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#advanced-building-using-custom-makefiles">2.2.3. <strong>Advanced building using custom makefiles</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#errors-that-can-occur-when-making-liggghts-r-inl">2.2.4. <strong>Errors that can occur when making LIGGGHTS(R)-INL:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-build-tips">2.2.5. <strong>Additional build tips:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-a-mac">2.2.6. <strong>Building for a Mac:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-windows">2.2.7. <strong>Building for Windows:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl-with-optional-packages">2.3. Making LIGGGHTS(R)-INL with optional packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-via-the-make-py-script">2.4. Building LIGGGHTS(R)-INL via the Make.py script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-as-a-library">2.5. Building LIGGGHTS(R)-INL as a library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#static-library">2.5.1. <strong>Static library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#shared-library">2.5.2. <strong>Shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-requirement-for-using-a-shared-library">2.5.3. <strong>Additional requirement for using a shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#calling-the-liggghts-r-inl-library">2.5.4. <strong>Calling the LIGGGHTS(R)-INL library:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#running-liggghts-r-inl">2.6. Running LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#command-line-options">2.7. Command-line options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#liggghts-r-inl-screen-output">2.8. LIGGGHTS(R)-INL screen output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#liggghts-r-inl-input-script">3.1. LIGGGHTS(R)-INL input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#parsing-rules">3.2. Parsing rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#input-script-structure">3.3. Input script structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#an-example-input-script">3.4. An example input script</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">4. Commands</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#list-of-all-commands">4.1. List of all commands</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bond-style-potentials">4.2. bond_style potentials</a></li>
@@ -100,13 +136,81 @@
 <li class="toctree-l2"><a class="reference internal" href="#pair-style-potentials">4.6. pair_style potentials</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#cohesion-commands">5.1. cohesion commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#model-commands">5.2. model commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#rolling-friction-commands">5.3. rolling_friction commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#surface-commands">5.4. surface commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#tangential-commands">5.5. tangential commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_mesh_modules.html#module-commands">6.1. module commands</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#restarting-a-simulation">8.1. Restarting a simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#d-simulations">8.2. 2d simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#running-multiple-simulations-from-one-input-script">8.3. Running multiple simulations from one input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#granular-models">8.4. Granular models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#coupling-liggghts-r-inl-to-other-codes">8.5. Coupling LIGGGHTS(R)-INL to other codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#visualizing-liggghts-r-inl-snapshots">8.6. Visualizing LIGGGHTS(R)-INL snapshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#triclinic-non-orthogonal-simulation-boxes">8.7. Triclinic (non-orthogonal) simulation boxes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#output-from-liggghts-r-inl-thermo-dumps-computes-fixes-variables">8.8. Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#global-per-atom-local-data">8.8.1. Global/per-atom/local data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#scalar-vector-array-data">8.8.2. Scalar/vector/array data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#thermodynamic-output">8.8.3. Thermodynamic output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#dump-file-output">8.8.4. Dump file output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-write-output-files">8.8.5. Fixes that write output files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-process-output-quantities">8.8.6. Computes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-process-output-quantities">8.8.7. Fixes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-generate-values-to-output">8.8.8. Computes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-generate-values-to-output">8.8.9. Fixes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#variables-that-generate-values-to-output">8.8.10. Variables that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#summary-table-of-output-options-and-data-flow-between-commands">8.8.11. Summary table of output options and data flow between commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#walls">8.9. Walls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#library-interface-to-liggghts-r-inl">8.10. Library interface to LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#atom-styles">9.1. Atom styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#compute-styles">9.2. Compute styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-styles">9.3. Dump styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-custom-output-options">9.4. Dump custom output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#fix-styles">9.5. Fix styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#input-script-commands">9.6. Input script commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#pairwise-potentials">9.7. Pairwise potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#region-styles">9.8. Region styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#thermodynamic-output-options">9.9. Thermodynamic output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#variable-options">9.10. Variable options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#submitting-new-features-for-inclusion-in-liggghts-r-inl">9.11. Submitting new features for inclusion in LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#building-liggghts-r-inl-as-a-shared-library">10.1. Building LIGGGHTS(R)-INL as a shared library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#installing-the-python-wrapper-into-python">10.2. Installing the Python wrapper into Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#extending-python-with-mpi-to-run-in-parallel">10.3. Extending Python with MPI to run in parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#testing-the-python-liggghts-r-inl-interface">10.4. Testing the Python-LIGGGHTS(R)-INL interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-serial">10.4.1. <strong>Test LIGGGHTS(R)-INL and Python in serial:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-parallel">10.4.2. <strong>Test LIGGGHTS(R)-INL and Python in parallel:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#running-python-scripts">10.4.3. <strong>Running Python scripts:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#using-liggghts-r-inl-from-python">10.5. Using LIGGGHTS(R)-INL from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#example-python-scripts-that-use-liggghts-r-inl">10.6. Example Python scripts that use LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#common-problems">11.1. Common problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#reporting-bugs">11.2. Reporting bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error-warning-messages">11.3. Error &amp; warning messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error">11.4. Errors:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#warnings">11.5. Warnings:</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -118,7 +222,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="Manual.html">LIGGGHTS</a>
@@ -128,7 +232,9 @@
 
       
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -210,12 +316,11 @@ default build.  These dependencies are listed as Restrictions
 in the command&#8217;s documentation.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="17%" />
-<col width="17%" />
-<col width="16%" />
-<col width="17%" />
-<col width="16%" />
-<col width="17%" />
+<col width="22%" />
+<col width="19%" />
+<col width="20%" />
+<col width="19%" />
+<col width="20%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="atom_modify.html"><em>atom_modify</em></a></td>
@@ -223,59 +328,62 @@ in the command&#8217;s documentation.</p>
 <td><a class="reference internal" href="balance.html"><em>balance</em></a></td>
 <td><a class="reference internal" href="bond_coeff.html"><em>bond_coeff</em></a></td>
 <td><a class="reference internal" href="bond_style.html"><em>bond_style</em></a></td>
-<td><a class="reference internal" href="boundary.html"><em>boundary</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="box.html"><em>box</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="boundary.html"><em>boundary</em></a></td>
+<td><a class="reference internal" href="box.html"><em>box</em></a></td>
 <td><a class="reference internal" href="change_box.html"><em>change_box</em></a></td>
 <td><a class="reference internal" href="clear.html"><em>clear</em></a></td>
 <td><a class="reference internal" href="coarsegraining.html"><em>coarsegraining</em></a></td>
-<td><a class="reference internal" href="communicate.html"><em>communicate</em></a></td>
-<td><a class="reference internal" href="compute.html"><em>compute</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="compute_modify.html"><em>compute_modify</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="communicate.html"><em>communicate</em></a></td>
+<td><a class="reference internal" href="compute.html"><em>compute</em></a></td>
+<td><a class="reference internal" href="compute_modify.html"><em>compute_modify</em></a></td>
 <td><a class="reference internal" href="create_atoms.html"><em>create_atoms</em></a></td>
 <td><a class="reference internal" href="create_box.html"><em>create_box</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="create_particles.html"><em>create_particles</em></a></td>
 <td><a class="reference internal" href="delete_atoms.html"><em>delete_atoms</em></a></td>
 <td><a class="reference internal" href="delete_bonds.html"><em>delete_bonds</em></a></td>
 <td><a class="reference internal" href="dielectric.html"><em>dielectric</em></a></td>
+<td><a class="reference internal" href="dimension.html"><em>dimension</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="dimension.html"><em>dimension</em></a></td>
-<td><a class="reference internal" href="displace_atoms.html"><em>displace_atoms</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="displace_atoms.html"><em>displace_atoms</em></a></td>
 <td><a class="reference internal" href="dump.html"><em>dump</em></a></td>
 <td><a class="reference internal" href="dump_modify.html"><em>dump_modify</em></a></td>
 <td><a class="reference internal" href="echo.html"><em>echo</em></a></td>
 <td><a class="reference internal" href="fix.html"><em>fix</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_modify.html"><em>fix_modify</em></a></td>
 <td><a class="reference internal" href="group.html"><em>group</em></a></td>
 <td><a class="reference internal" href="if.html"><em>if</em></a></td>
 <td><a class="reference internal" href="include.html"><em>include</em></a></td>
 <td><a class="reference internal" href="info.html"><em>info</em></a></td>
-<td><a class="reference internal" href="jump.html"><em>jump</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="label.html"><em>label</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="jump.html"><em>jump</em></a></td>
+<td><a class="reference internal" href="label.html"><em>label</em></a></td>
 <td><a class="reference internal" href="lattice.html"><em>lattice</em></a></td>
 <td><a class="reference internal" href="log.html"><em>log</em></a></td>
 <td><a class="reference internal" href="mass.html"><em>mass</em></a></td>
-<td><a class="reference internal" href="neigh_modify.html"><em>neigh_modify</em></a></td>
-<td><a class="reference internal" href="neigh_modify.html"><em>neigh_settings</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="neighbor.html"><em>neighbor</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="neigh_modify.html"><em>neigh_modify</em></a></td>
+<td><a class="reference internal" href="neigh_modify.html"><em>neigh_settings</em></a></td>
+<td><a class="reference internal" href="neighbor.html"><em>neighbor</em></a></td>
 <td><a class="reference internal" href="neighbor.html"><em>neighbor_skin</em></a></td>
 <td><a class="reference internal" href="newton.html"><em>newton</em></a></td>
-<td><a class="reference internal" href="next.html"><em>next</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="next.html"><em>next</em></a></td>
 <td><a class="reference internal" href="orient.html"><em>orient</em></a></td>
 <td><a class="reference internal" href="origin.html"><em>origin</em></a></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="pair_coeff.html"><em>pair_coeff</em></a></td>
+<td><a class="reference internal" href="pair_coeff.html"><em>pair_coeff</em></a></td>
 <td><a class="reference internal" href="pair_style.html"><em>pair_style</em></a></td>
-<td><a class="reference internal" href="partition.html"><em>partition</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="partition.html"><em>partition</em></a></td>
 <td><a class="reference internal" href="print.html"><em>print</em></a></td>
 <td><a class="reference internal" href="processors.html"><em>processors</em></a></td>
 <td><a class="reference internal" href="quit.html"><em>quit</em></a></td>
+<td><a class="reference internal" href="read_data.html"><em>read_data</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="read_data.html"><em>read_data</em></a></td>
-<td><a class="reference internal" href="read_dump.html"><em>read_dump</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="read_dump.html"><em>read_dump</em></a></td>
 <td><a class="reference internal" href="read_restart.html"><em>read_restart</em></a></td>
 <td><a class="reference internal" href="region.html"><em>region</em></a></td>
 <td><a class="reference internal" href="replicate.html"><em>replicate</em></a></td>
@@ -286,27 +394,23 @@ in the command&#8217;s documentation.</p>
 <td><a class="reference internal" href="run.html"><em>run</em></a></td>
 <td><a class="reference internal" href="run_style.html"><em>run_style</em></a></td>
 <td><a class="reference internal" href="set.html"><em>set</em></a></td>
-<td><a class="reference internal" href="shell.html"><em>shell</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="thermo.html"><em>thermo</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="shell.html"><em>shell</em></a></td>
+<td><a class="reference internal" href="thermo.html"><em>thermo</em></a></td>
 <td><a class="reference internal" href="thermo_modify.html"><em>thermo_modify</em></a></td>
 <td><a class="reference internal" href="thermo_style.html"><em>thermo_style</em></a></td>
 <td><a class="reference internal" href="timestep.html"><em>timestep</em></a></td>
-<td><a class="reference internal" href="uncompute.html"><em>uncompute</em></a></td>
-<td><a class="reference internal" href="undump.html"><em>undump</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="unfix.html"><em>unfix</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="uncompute.html"><em>uncompute</em></a></td>
+<td><a class="reference internal" href="undump.html"><em>undump</em></a></td>
+<td><a class="reference internal" href="unfix.html"><em>unfix</em></a></td>
 <td><a class="reference internal" href="units.html"><em>units</em></a></td>
 <td><a class="reference internal" href="variable.html"><em>variable</em></a></td>
-<td><a class="reference internal" href="velocity.html"><em>velocity</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="velocity.html"><em>velocity</em></a></td>
 <td><a class="reference internal" href="write_data.html"><em>write_data</em></a></td>
 <td><a class="reference internal" href="write_dump.html"><em>write_dump</em></a></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="write_restart.html"><em>write_restart</em></a></td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td><a class="reference internal" href="write_restart.html"><em>write_restart</em></a></td>
 <td>&nbsp;</td>
 </tr>
 </tbody>
@@ -337,74 +441,76 @@ potentials.  Click on the style itself for a full description:</p>
 each style or click on the style itself for a full description:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="29%" />
-<col width="21%" />
-<col width="25%" />
-<col width="25%" />
+<col width="31%" />
+<col width="32%" />
+<col width="37%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="compute_atom_molecule.html"><em>atom/molecule</em></a></td>
 <td><a class="reference internal" href="compute_bond_counter.html"><em>bond/counter</em></a></td>
 <td><a class="reference internal" href="compute_bond_local.html"><em>bond/local</em></a></td>
-<td><a class="reference internal" href="compute_centro_atom.html"><em>centro/atom</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_cluster_atom.html"><em>cluster/atom</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="compute_centro_atom.html"><em>centro/atom</em></a></td>
+<td><a class="reference internal" href="compute_cluster_atom.html"><em>cluster/atom</em></a></td>
 <td><a class="reference internal" href="compute_cna_atom.html"><em>cna/atom</em></a></td>
-<td><a class="reference internal" href="compute_com.html"><em>com</em></a></td>
-<td><a class="reference internal" href="compute_com_molecule.html"><em>com/molecule</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="compute_contact_atom.html"><em>contact/atom</em></a></td>
-<td><a class="reference internal" href="compute_contact_atom.html"><em>contact/atom/gran</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_com.html"><em>com</em></a></td>
+<td><a class="reference internal" href="compute_com_molecule.html"><em>com/molecule</em></a></td>
+<td><a class="reference internal" href="compute_contact_atom.html"><em>contact/atom</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="compute_contact_atom.html"><em>contact/atom/gran</em></a></td>
 <td><a class="reference internal" href="compute_coord_atom.html"><em>coord/atom</em></a></td>
 <td><a class="reference internal" href="compute_coord_gran.html"><em>coord/gran</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_crosssection.html"><em>crosssection</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_crosssection.html"><em>crosssection</em></a></td>
 <td><a class="reference internal" href="compute_displace_atom.html"><em>displace/atom</em></a></td>
 <td><a class="reference internal" href="compute_erotate.html"><em>erotate</em></a></td>
-<td><a class="reference internal" href="compute_erotate_asphere.html"><em>erotate/asphere</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="compute_erotate_multisphere.html"><em>erotate/multisphere</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="compute_erotate_asphere.html"><em>erotate/asphere</em></a></td>
+<td><a class="reference internal" href="compute_erotate_multisphere.html"><em>erotate/multisphere</em></a></td>
 <td><a class="reference internal" href="compute_erotate_sphere.html"><em>erotate/sphere</em></a></td>
-<td><a class="reference internal" href="compute_erotate_sphere_atom.html"><em>erotate/sphere/atom</em></a></td>
-<td><a class="reference internal" href="compute_erotate_superquadric.html"><em>erotate/superquadric</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_group_group.html"><em>group/group</em></a></td>
-<td><a class="reference internal" href="compute_gyration.html"><em>gyration</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_erotate_sphere_atom.html"><em>erotate/sphere/atom</em></a></td>
+<td><a class="reference internal" href="compute_erotate_superquadric.html"><em>erotate/superquadric</em></a></td>
+<td><a class="reference internal" href="compute_group_group.html"><em>group/group</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="compute_gyration.html"><em>gyration</em></a></td>
 <td><a class="reference internal" href="compute_gyration_molecule.html"><em>gyration/molecule</em></a></td>
 <td><a class="reference internal" href="compute_inertia_molecule.html"><em>inertia/molecule</em></a></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="compute_ke.html"><em>ke</em></a></td>
 <td><a class="reference internal" href="compute_ke_atom.html"><em>ke/atom</em></a></td>
 <td><a class="reference internal" href="compute_ke_multisphere.html"><em>ke/multisphere</em></a></td>
-<td><a class="reference internal" href="compute_msd.html"><em>msd</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_msd_molecule.html"><em>msd/molecule</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="compute_msd.html"><em>msd</em></a></td>
+<td><a class="reference internal" href="compute_msd_molecule.html"><em>msd/molecule</em></a></td>
 <td><a class="reference internal" href="compute_msd_nongauss.html"><em>msd/nongauss</em></a></td>
-<td><a class="reference internal" href="compute_rigid.html"><em>multisphere</em></a></td>
-<td><a class="reference internal" href="compute_rigid.html"><em>multisphere/single</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="compute_nparticles_tracer_region.html"><em>nparticles/tracer/region</em></a></td>
-<td><a class="reference internal" href="compute_pair_gran_local.html"><em>pair/gran/local</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_rigid.html"><em>multisphere</em></a></td>
+<td><a class="reference internal" href="compute_rigid.html"><em>multisphere/single</em></a></td>
+<td><a class="reference internal" href="compute_nparticles_tracer_region.html"><em>nparticles/tracer/region</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="compute_pair_gran_local.html"><em>pair/gran/local</em></a></td>
 <td><a class="reference internal" href="compute_pe.html"><em>pe</em></a></td>
 <td><a class="reference internal" href="compute_pe_atom.html"><em>pe/atom</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_pressure.html"><em>pressure</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_pressure.html"><em>pressure</em></a></td>
 <td><a class="reference internal" href="compute_property_atom.html"><em>property/atom</em></a></td>
 <td><a class="reference internal" href="compute_property_local.html"><em>property/local</em></a></td>
-<td><a class="reference internal" href="compute_property_molecule.html"><em>property/molecule</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="compute_rdf.html"><em>rdf</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="compute_property_molecule.html"><em>property/molecule</em></a></td>
+<td><a class="reference internal" href="compute_rdf.html"><em>rdf</em></a></td>
 <td><a class="reference internal" href="compute_reduce.html"><em>reduce</em></a></td>
-<td><a class="reference internal" href="compute_reduce.html"><em>reduce/region</em></a></td>
-<td><a class="reference internal" href="compute_rigid.html"><em>rigid</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="compute_slice.html"><em>slice</em></a></td>
-<td><a class="reference internal" href="compute_stress_atom.html"><em>stress/atom</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="compute_reduce.html"><em>reduce/region</em></a></td>
+<td><a class="reference internal" href="compute_rigid.html"><em>rigid</em></a></td>
+<td><a class="reference internal" href="compute_slice.html"><em>slice</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="compute_stress_atom.html"><em>stress/atom</em></a></td>
 <td><a class="reference internal" href="compute_surface.html"><em>surface</em></a></td>
 <td><a class="reference internal" href="compute_voronoi_atom.html"><em>voronoi/atom</em></a></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="compute_pair_gran_local.html"><em>wall/gran/local</em></a></td>
-<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
@@ -417,16 +523,18 @@ each style or click on the style itself for a full description:</p>
 of each style or click on the style itself for a full description:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="27%" />
-<col width="20%" />
-<col width="33%" />
-<col width="20%" />
+<col width="34%" />
+<col width="25%" />
+<col width="41%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="dump_custom_vtk.html"><em>custom/vtk</em></a></td>
 <td><a class="reference internal" href="dump_image.html"><em>image</em></a></td>
 <td><a class="reference internal" href="dump_local_gran_vtk.html"><em>local/gran/vtk</em></a></td>
-<td><a class="reference internal" href="dump_image.html"><em>movie</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="dump_image.html"><em>movie</em></a></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 </tbody>
 </table>
@@ -437,124 +545,132 @@ of each style or click on the style itself for a full description:</p>
 of each style or click on the style itself for a full description:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="25%" />
-<col width="23%" />
-<col width="26%" />
-<col width="27%" />
+<col width="32%" />
+<col width="34%" />
+<col width="34%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="fix_adapt.html"><em>adapt</em></a></td>
 <td><a class="reference internal" href="fix_addforce.html"><em>addforce</em></a></td>
 <td><a class="reference internal" href="fix_ave_atom.html"><em>ave/atom</em></a></td>
-<td><a class="reference internal" href="fix_ave_correlate.html"><em>ave/correlate</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_ave_euler.html"><em>ave/euler</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_ave_correlate.html"><em>ave/correlate</em></a></td>
+<td><a class="reference internal" href="fix_ave_euler.html"><em>ave/euler</em></a></td>
 <td><a class="reference internal" href="fix_ave_histo.html"><em>ave/histo</em></a></td>
-<td><a class="reference internal" href="fix_ave_spatial.html"><em>ave/spatial</em></a></td>
-<td><a class="reference internal" href="fix_ave_time.html"><em>ave/time</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_aveforce.html"><em>aveforce</em></a></td>
-<td><a class="reference internal" href="fix_balance.html"><em>balance</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_ave_spatial.html"><em>ave/spatial</em></a></td>
+<td><a class="reference internal" href="fix_ave_time.html"><em>ave/time</em></a></td>
+<td><a class="reference internal" href="fix_aveforce.html"><em>aveforce</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_balance.html"><em>balance</em></a></td>
 <td><a class="reference internal" href="fix_bond_break.html"><em>bond/break</em></a></td>
 <td><a class="reference internal" href="fix_bond_create.html"><em>bond/create</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_box_relax.html"><em>box/relax</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_box_relax.html"><em>box/relax</em></a></td>
 <td><a class="reference internal" href="fix_buoyancy.html"><em>buoyancy</em></a></td>
 <td><a class="reference internal" href="fix_check_timestep_gran.html"><em>check/timestep/gran</em></a></td>
-<td><a class="reference internal" href="fix_continuum_weighted.html"><em>continuum/weighted</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_couple_cfd.html"><em>couple/cfd</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_continuum_weighted.html"><em>continuum/weighted</em></a></td>
+<td><a class="reference internal" href="fix_couple_cfd.html"><em>couple/cfd</em></a></td>
 <td><a class="reference internal" href="fix_deform.html"><em>deform</em></a></td>
-<td><a class="reference internal" href="fix_drag.html"><em>drag</em></a></td>
-<td><a class="reference internal" href="fix_dragforce.html"><em>dragforce</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_dt_reset.html"><em>dt/reset</em></a></td>
-<td><a class="reference internal" href="fix_efield.html"><em>efield</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_drag.html"><em>drag</em></a></td>
+<td><a class="reference internal" href="fix_dragforce.html"><em>dragforce</em></a></td>
+<td><a class="reference internal" href="fix_dt_reset.html"><em>dt/reset</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_efield.html"><em>efield</em></a></td>
 <td><a class="reference internal" href="fix_enforce2d.html"><em>enforce2d</em></a></td>
 <td><a class="reference internal" href="fix_external.html"><em>external</em></a></td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="fix_freeze.html"><em>freeze</em></a></td>
 <td><a class="reference internal" href="fix_gravity.html"><em>gravity</em></a></td>
 <td><a class="reference internal" href="fix_heat_gran_conduction.html"><em>heat/gran</em></a></td>
-<td><a class="reference internal" href="fix_heat_gran_conduction.html"><em>heat/gran/conduction</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_insert_fragments.html"><em>insert/fragments</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_heat_gran_conduction.html"><em>heat/gran/conduction</em></a></td>
+<td><a class="reference internal" href="fix_insert_fragments.html"><em>insert/fragments</em></a></td>
 <td><a class="reference internal" href="fix_insert_pack.html"><em>insert/pack</em></a></td>
-<td><a class="reference internal" href="fix_insert_rate_region.html"><em>insert/rate/region</em></a></td>
-<td><a class="reference internal" href="fix_insert_stream.html"><em>insert/stream</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_lineforce.html"><em>lineforce</em></a></td>
-<td><a class="reference internal" href="fix_massflow_mesh.html"><em>massflow/mesh</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_insert_rate_region.html"><em>insert/rate/region</em></a></td>
+<td><a class="reference internal" href="fix_insert_stream.html"><em>insert/stream</em></a></td>
+<td><a class="reference internal" href="fix_lineforce.html"><em>lineforce</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_massflow_mesh.html"><em>massflow/mesh</em></a></td>
 <td><a class="reference internal" href="fix_massflow_mesh_sieve.html"><em>massflow/mesh/sieve</em></a></td>
 <td><a class="reference internal" href="fix_mesh_surface.html"><em>mesh/surface</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_mesh_surface.html"><em>mesh/surface/planar</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_mesh_surface.html"><em>mesh/surface/planar</em></a></td>
 <td><a class="reference internal" href="fix_momentum.html"><em>momentum</em></a></td>
 <td><a class="reference internal" href="fix_move.html"><em>move</em></a></td>
-<td><a class="reference internal" href="fix_move_mesh.html"><em>move/mesh</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_multicontact_halfspace.html"><em>multicontact/halfspace</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_move_mesh.html"><em>move/mesh</em></a></td>
+<td><a class="reference internal" href="fix_multicontact_halfspace.html"><em>multicontact/halfspace</em></a></td>
 <td><a class="reference internal" href="fix_multisphere.html"><em>multisphere</em></a></td>
-<td><a class="reference internal" href="fix_multisphere_advanced.html"><em>multisphere/advanced</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_multisphere_advanced.html"><em>multisphere/advanced</em></a></td>
 <td><a class="reference internal" href="fix_multisphere_break.html"><em>multisphere/break</em></a></td>
+<td><a class="reference internal" href="fix_nve.html"><em>nve</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_nve.html"><em>nve</em></a></td>
-<td><a class="reference internal" href="fix_nve_asphere.html"><em>nve/asphere</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_nve_asphere.html"><em>nve/asphere</em></a></td>
 <td><a class="reference internal" href="fix_nve_asphere_noforce.html"><em>nve/asphere/noforce</em></a></td>
-<td><a class="reference internal" href="fix_nve_limit.html"><em>nve/limit</em></a></td>
+<td><a class="reference internal" href="fix_nve_cfd_cn.html"><em>nve/cfd_cn</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_nve_line.html"><em>nve/line</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_nve_limit.html"><em>nve/limit</em></a></td>
+<td><a class="reference internal" href="fix_nve_line.html"><em>nve/line</em></a></td>
 <td><a class="reference internal" href="fix_nve_noforce.html"><em>nve/noforce</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="fix_nve_nonspherical.html"><em>nve/nonspherical</em></a></td>
 <td><a class="reference internal" href="fix_nve_sphere.html"><em>nve/sphere</em></a></td>
 <td><a class="reference internal" href="fix_nve_sphere_limit.html"><em>nve/sphere/limit</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_nve_superquadric.html"><em>nve/superquadric</em></a></td>
-<td><a class="reference internal" href="fix_particledistribution_discrete.html"><em>particledistribution/discrete</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_particledistribution_discrete.html"><em>particledistribution/discrete</em></a></td>
 <td><a class="reference internal" href="fix_particledistribution_discrete.html"><em>particledistribution/discrete/massbased</em></a></td>
 <td><a class="reference internal" href="fix_particledistribution_discrete.html"><em>particledistribution/discrete/numberbased</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_particletemplate_multiplespheres.html"><em>particletemplate/multiplespheres</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_particletemplate_multiplespheres.html"><em>particletemplate/multiplespheres</em></a></td>
 <td><a class="reference internal" href="fix_particletemplate_multisphere.html"><em>particletemplate/multisphere</em></a></td>
 <td><a class="reference internal" href="fix_particletemplate_sphere.html"><em>particletemplate/sphere</em></a></td>
-<td><a class="reference internal" href="fix_particletemplate_superquadric.html"><em>particletemplate/superquadric</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_planeforce.html"><em>planeforce</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_particletemplate_superquadric.html"><em>particletemplate/superquadric</em></a></td>
+<td><a class="reference internal" href="fix_planeforce.html"><em>planeforce</em></a></td>
 <td><a class="reference internal" href="fix_poems.html"><em>poems</em></a></td>
-<td><a class="reference internal" href="fix_print.html"><em>print</em></a></td>
-<td><a class="reference internal" href="fix_property.html"><em>property/atom</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_property_atom_region_tracer_time.html"><em>property/atom/regiontracer/time</em></a></td>
-<td><a class="reference internal" href="fix_property_atom_tracer.html"><em>property/atom/tracer</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_print.html"><em>print</em></a></td>
+<td><a class="reference internal" href="fix_property.html"><em>property/atom</em></a></td>
+<td><a class="reference internal" href="fix_property_atom_region_tracer_time.html"><em>property/atom/regiontracer/time</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_property_atom_tracer.html"><em>property/atom/tracer</em></a></td>
 <td><a class="reference internal" href="fix_property_atom_tracer_stream.html"><em>property/atom/tracer/stream</em></a></td>
 <td><a class="reference internal" href="fix_property.html"><em>property/global</em></a></td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="fix_rigid.html"><em>rigid</em></a></td>
 <td><a class="reference internal" href="fix_rigid.html"><em>rigid/nph</em></a></td>
 <td><a class="reference internal" href="fix_rigid.html"><em>rigid/npt</em></a></td>
-<td><a class="reference internal" href="fix_rigid.html"><em>rigid/nve</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_rigid.html"><em>rigid/nvt</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_rigid.html"><em>rigid/nve</em></a></td>
+<td><a class="reference internal" href="fix_rigid.html"><em>rigid/nvt</em></a></td>
 <td><a class="reference internal" href="fix_rigid.html"><em>rigid/small</em></a></td>
-<td><a class="reference internal" href="fix_set_vel.html"><em>set/vel</em></a></td>
-<td><a class="reference internal" href="fix_setforce.html"><em>setforce</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_sph_density_continuity.html"><em>sph/density/continuity</em></a></td>
-<td><a class="reference internal" href="fix_sph_density_corr.html"><em>sph/density/corr</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_set_vel.html"><em>set/vel</em></a></td>
+<td><a class="reference internal" href="fix_setforce.html"><em>setforce</em></a></td>
+<td><a class="reference internal" href="fix_sph_density_continuity.html"><em>sph/density/continuity</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_sph_density_corr.html"><em>sph/density/corr</em></a></td>
 <td><a class="reference internal" href="fix_sph_density_summation.html"><em>sph/density/summation</em></a></td>
 <td><a class="reference internal" href="fix_sph_pressure.html"><em>sph/pressure</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_spring.html"><em>spring</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_spring.html"><em>spring</em></a></td>
 <td><a class="reference internal" href="fix_spring_rg.html"><em>spring/rg</em></a></td>
 <td><a class="reference internal" href="fix_spring_self.html"><em>spring/self</em></a></td>
-<td><a class="reference internal" href="fix_store_force.html"><em>store/force</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="fix_store_state.html"><em>store/state</em></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="fix_store_force.html"><em>store/force</em></a></td>
+<td><a class="reference internal" href="fix_store_state.html"><em>store/state</em></a></td>
 <td><a class="reference internal" href="fix_viscous.html"><em>viscous</em></a></td>
-<td><a class="reference internal" href="fix_wall_gran.html"><em>wall/gran</em></a></td>
-<td><a class="reference internal" href="fix_wall_reflect.html"><em>wall/reflect</em></a></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="fix_wall_region.html"><em>wall/region</em></a></td>
-<td><a class="reference internal" href="fix_wall_region_sph.html"><em>wall/region/sph</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="fix_wall_gran.html"><em>wall/gran</em></a></td>
+<td><a class="reference internal" href="fix_wall_reflect.html"><em>wall/reflect</em></a></td>
+<td><a class="reference internal" href="fix_wall_region.html"><em>wall/region</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="fix_wall_region_sph.html"><em>wall/region/sph</em></a></td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
@@ -567,20 +683,21 @@ of each style or click on the style itself for a full description:</p>
 potentials.  Click on the style itself for a full description:</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="18%" />
-<col width="17%" />
-<col width="39%" />
-<col width="25%" />
+<col width="51%" />
+<col width="23%" />
+<col width="26%" />
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="pair_gran.html"><em>bubble</em></a></td>
 <td><a class="reference internal" href="pair_gran.html"><em>gran</em></a></td>
 <td><a class="reference internal" href="pair_hybrid.html"><em>hybrid</em></a></td>
-<td><a class="reference internal" href="pair_hybrid.html"><em>hybrid/overlay</em></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="pair_none.html"><em>none</em></a></td>
+<tr class="row-even"><td><a class="reference internal" href="pair_hybrid.html"><em>hybrid/overlay</em></a></td>
+<td><a class="reference internal" href="pair_none.html"><em>none</em></a></td>
 <td><a class="reference internal" href="pair_soft.html"><em>soft</em></a></td>
-<td><a class="reference internal" href="pair_sph_artvisc_tenscorr.html"><em>sph/artVisc/tensCorr</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="pair_sph_artvisc_tenscorr.html"><em>sph/artVisc/tensCorr</em></a></td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 </tbody>
@@ -590,9 +707,7 @@ potentials.  Click on the style itself for a full description:</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -614,7 +729,7 @@ potentials.  Click on the style itself for a full description:</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -632,7 +747,7 @@ potentials.  Click on the style itself for a full description:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v3.X',
+            VERSION:'v4.X',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -651,14 +766,13 @@ potentials.  Click on the style itself for a full description:</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

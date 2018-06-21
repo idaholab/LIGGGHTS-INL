@@ -26,7 +26,7 @@ END_RST -->
 1.2 "LIGGGHTS(R)-INL features"_#intro_2
 1.3 "Open source distribution"_#intro_3
 1.4 "Acknowledgments and citations"_#intro_4 :all(b)
-<!--END_HTML_ONLY -->
+<!-- END_HTML_ONLY -->
 
 :line
 :line
@@ -51,7 +51,7 @@ LAMMPS is a classical molecular dynamics simulator. It is widely
 used in the field of Molecular Dynamics. Thanks to physical and
 algorithmic analogies, LAMMPS offers basic functionalities for
 DEM simulations. LIGGGHTS (R) aims to improve those capability with
-the goal to apply it to industrial applications. LIGGGHTS® is currently
+the goal to apply it to industrial applications. LIGGGHTS(R)-INL is currently
 used by a variety of research institutions world-wide. A number of Blue
 Chip companies in the fields of chemical, consumer goods, pharmaceutical,
 agricultural engineering, food production, steel production, mining,

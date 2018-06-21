@@ -56,6 +56,7 @@
 #include "memory.h"
 #include "error.h"
 #include "fix_particledistribution_discrete.h"
+#include "fix_template_multiplespheres.h"
 #include "fix_template_sphere.h"
 #include "vector_liggghts.h"
 #include "mpi_liggghts.h"
@@ -140,6 +141,43 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
         error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'check_dist_from_subdomain_border'");
       iarg += 2;
       hasargs = true;
+    } else if (strcmp(arg[iarg],"fiber_insert") == 0) {
+      if (iarg+2 > narg) error->fix_error(FLERR,this,"");
+      if(strcmp(arg[iarg+1],"yes") == 0)
+        fiber_insert_ = true;
+      else if(strcmp(arg[iarg+1],"no") == 0)
+        fiber_insert_= false;
+      else
+        error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'fiber_insert'");
+      iarg += 2;
+      hasargs = true;
+      check_fiber_insertion();
+    }  else if (strcmp(arg[iarg],"reduce_dist_from_subdomain_border_to_particle_radius") == 0) {
+      if (iarg+2 > narg) error->fix_error(FLERR,this,"");
+
+      check_dist_from_subdomain_border_ = true;
+      reduce_dist_from_subdomain_border_dims_ = 0;
+
+      bool found = false;
+      if(strstr(arg[iarg+1],"x"))
+      {
+            reduce_dist_from_subdomain_border_dims_ |= 1;
+            found = true;
+      }
+      if(strstr(arg[iarg+1],"y"))
+      {
+            reduce_dist_from_subdomain_border_dims_ |= 2;
+            found = true;
+      }
+      if(strstr(arg[iarg+1],"z"))
+      {
+            reduce_dist_from_subdomain_border_dims_ |= 4;
+            found = true;
+      }
+      if(!found)
+            error->fix_error(FLERR,this,"expecting a combination of 'x', 'y', 'z'  after 'reduce_dist_from_subdomain_border_to_particle_radius'");
+      iarg += 2;
+      hasargs = true;
     } else if(strcmp(style,"insert/pack") == 0)
         error->fix_error(FLERR,this,"unknown keyword");
   }
@@ -154,6 +192,47 @@ FixInsertPack::FixInsertPack(LAMMPS *lmp, int narg, char **arg) :
 FixInsertPack::~FixInsertPack()
 {
     if(idregion) delete []idregion;
+}
+
+/* ---------------------------------------------------------------------- */
+
+void FixInsertPack::check_fiber_insertion()
+{
+    FixParticledistributionDiscrete* distr = get_distribution();
+    int ntemp = distr->n_particletemplates();
+    int orientation = -1;
+
+    for(int itemp = 0; itemp < ntemp; itemp++)
+    {
+        FixTemplateMultiplespheres *temp = dynamic_cast<FixTemplateMultiplespheres*>(distr->get_template(itemp));
+        if(0 == temp)
+            error->fix_error(FLERR,this,"fiber_insert expects all particletemplates in distribution to be of type multiplespheres");
+
+        if(0 == itemp)
+            orientation = temp->get_orientation();
+
+        if(3 == orientation || orientation != temp->get_orientation())
+            error->fix_error(FLERR,this,"fiber_insert expects all multiplespheres templates in distribution to be linear fibers of same orientation (either x, y, or z)");
+    }
+
+    check_dist_from_subdomain_border_ = true;
+    reduce_dist_from_subdomain_border_dims_ = 0;
+
+    if(0 == orientation)
+    {
+        reduce_dist_from_subdomain_border_dims_ |= 2;
+        reduce_dist_from_subdomain_border_dims_ |= 4;
+    }
+    if(1 == orientation)
+    {
+        reduce_dist_from_subdomain_border_dims_ |= 1;
+        reduce_dist_from_subdomain_border_dims_ |= 4;
+    }
+    if(2 == orientation)
+    {
+        reduce_dist_from_subdomain_border_dims_ |= 1;
+        reduce_dist_from_subdomain_border_dims_ |= 2;
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -173,6 +252,9 @@ void FixInsertPack::init_defaults()
       insertion_ratio = 0.;
 
       check_dist_from_subdomain_border_ = true;
+      reduce_dist_from_subdomain_border_dims_ = 0;
+
+      fiber_insert_ = false;
 
       warn_region = true;
 }
@@ -366,6 +448,7 @@ double FixInsertPack::insertion_fraction()
 
 inline int FixInsertPack::is_nearby(int i)
 {
+
     double pos[3], rad, cut;
 
     vectorCopy3D(atom->x[i],pos);
@@ -373,8 +456,8 @@ inline int FixInsertPack::is_nearby(int i)
 
     // choose right distance depending on all_in_flag
 
-    if(all_in_flag) cut = maxrad;
-    else cut = rad + maxrad;
+    if(all_in_flag) cut = maxrad_simulation;
+    else cut = rad + maxrad_simulation;
 
     if(ins_region->match_expandby_cut(pos,cut)) return 1;
     return 0;
@@ -386,8 +469,8 @@ BoundingBox FixInsertPack::getBoundingBox() {
   BoundingBox bb(ins_region->extent_xlo, ins_region->extent_xhi,
                  ins_region->extent_ylo, ins_region->extent_yhi,
                  ins_region->extent_zlo, ins_region->extent_zhi);
-
-  double extend = 2*maxrad /*cut*/ + this->extend_cut_ghost(); 
+  
+  double extend = 2*maxrad_simulation /*cut*/ + 2.*fix_distribution->max_r_bound(); 
   bb.shrinkToSubbox(domain->sublo, domain->subhi);
   bb.extendByDelta(extend);
   return bb;
@@ -462,12 +545,22 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
     else
     {
         
+        double check_subdomain_distances[3];
+
         while(ntry < maxtry && ninserted_this_local < ninsert_this_local)
         {
             
             pti = fix_distribution->pti_list[ninserted_this_local];
             double rbound = pti->r_bound_ins;
 
+            vectorInitialize3D(check_subdomain_distances,rbound);
+            if(reduce_dist_from_subdomain_border_dims_ & 1)
+                check_subdomain_distances[0] = pti->radius_ins_max;
+            if(reduce_dist_from_subdomain_border_dims_ & 2)
+                check_subdomain_distances[1] = pti->radius_ins_max;
+            if(reduce_dist_from_subdomain_border_dims_ & 4)
+                check_subdomain_distances[2] = pti->radius_ins_max;
+            
             if(screen && print_stats_during_flag && (ninsert_this_local >= 10) && (0 == ninserted_this_local % (ninsert_this_local/10)) )
                 fprintf(screen,"insertion: proc %d at %d %%\n",comm->me,10*ninserted_this_local/(ninsert_this_local/10));
 
@@ -483,7 +576,7 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
 
                 }
                 
-                while((check_dist_from_subdomain_border_) && (ntry < maxtry && domain->dist_subbox_borders(pos) < rbound));
+                while((check_dist_from_subdomain_border_) && (ntry < maxtry && !domain->check_dist_subbox_borders(pos,check_subdomain_distances)));
 
                 if(ntry == maxtry) break;
 
@@ -513,9 +606,9 @@ void FixInsertPack::x_v_omega(int ninsert_this_local,int &ninserted_this_local, 
 
 /* ---------------------------------------------------------------------- */
 
-void FixInsertPack::restart(char *buf)
+void FixInsertPack::restart(char *buf, const Version & ver)
 {
-    FixInsert::restart(buf);
+    FixInsert::restart(buf,ver);
 
     ins_region->reset_random(seed + SEED_OFFSET);
 }

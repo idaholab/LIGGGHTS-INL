@@ -57,26 +57,30 @@
 #include <vtkXMLPRectilinearGridWriter.h>
 #include <vtkXMLImageDataWriter.h>
 #include <vtkXMLPImageDataWriter.h>
+#include <vtkXMLMultiBlockDataWriter.h>
+#include <vtkXMLPMultiBlockDataWriter.h>
 #include <sstream>
 
 namespace LAMMPS_NS
 {
 
 DumpVTK::DumpVTK(LAMMPS *lmp) :
+    vtk_file_format_(VTK_FILE_FORMATS::VTK_INVALID),
     lmp_(lmp),
     vtk_compressor_(VTK_COMP_NONE),
-    binary_(false)
+    binary_(true)
 {
     filesuffixes[0] = (char*) ".vtk";
     filesuffixes[1] = (char*) ".vtp";
     filesuffixes[2] = (char*) ".vtu";
     filesuffixes[3] = (char*) ".vti";
     filesuffixes[4] = (char*) ".vtr";
-    filesuffixes[5] = (char*) ".vtm";
+    filesuffixes[5] = (char*) "    "; // for vtm we assume parallel by default
     filesuffixes[6] = (char*) ".pvtp";
     filesuffixes[7] = (char*) ".pvtu";
     filesuffixes[8] = (char*) ".pvti";
     filesuffixes[9] = (char*) ".pvtr";
+    filesuffixes[10] = (char*) ".vtm";
 }
 
 int DumpVTK::modify_param(int narg, char **arg)
@@ -92,8 +96,7 @@ int DumpVTK::modify_param(int narg, char **arg)
             lmp_->error->all(FLERR,"Illegal dump_modify command [binary]");
         return 2;
     }
-
-    if (strcmp(arg[0],"compressor") == 0)
+    else if (strcmp(arg[0],"compressor") == 0)
     {
         if (narg < 2)
             lmp_->error->all(FLERR,"Illegal dump_modify command [compressor]");
@@ -117,6 +120,23 @@ int DumpVTK::modify_param(int narg, char **arg)
             lmp_->error->warning(FLERR, "Vtk dump will switch to binary writing as compressor is used");
             binary_ = true;
         }
+        return 2;
+    }
+    else if (strcmp(arg[0], "parallel") == 0)
+    {
+        if (narg < 2)
+            lmp_->error->all(FLERR,"Illegal dump_modify command [parallel]");
+        bool parallel = true;
+        if (strcmp(arg[1],"yes") == 0)
+            parallel = true;
+        else if (strcmp(arg[1],"no") == 0)
+            parallel = false;
+        else
+            lmp_->error->all(FLERR,"Illegal dump_modify command [parallel]");
+        if (parallel)
+        {
+        }
+        else
         return 2;
     }
 
@@ -157,9 +177,9 @@ void DumpVTK::setVtkWriterOptions(vtkSmartPointer<vtkXMLWriter> writer)
     }
 }
 
-void DumpVTK::write_vtp(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename)
+void DumpVTK::write_vtp(vtkSmartPointer<vtkDataObject> data, const char * const filename)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::PVTP)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::PVTP)
     {
         vtkSmartPointer<vtkXMLPPolyDataWriter> pwriter = vtkSmartPointer<vtkXMLPPolyDataWriter>::New();
         pwriter->SetFileName(filename);
@@ -177,7 +197,7 @@ void DumpVTK::write_vtp(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         pwriter->SetEndPiece(lmp_->comm->me);
         pwriter->Write();
     }
-    else if (vtk_file_format == VTK_FILE_FORMATS::VTP)
+    else if (vtk_file_format_ == VTK_FILE_FORMATS::VTP)
     {
         vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
 
@@ -196,9 +216,9 @@ void DumpVTK::write_vtp(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vtu(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename)
+void DumpVTK::write_vtu(vtkSmartPointer<vtkDataObject> data, const char * const filename)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::PVTU)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::PVTU)
     {
         vtkSmartPointer<vtkXMLPUnstructuredGridWriter> pwriter = vtkSmartPointer<vtkXMLPUnstructuredGridWriter>::New();
         pwriter->SetFileName(filename);
@@ -216,7 +236,7 @@ void DumpVTK::write_vtu(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         pwriter->SetEndPiece(lmp_->comm->me);
         pwriter->Write();
     }
-    else if (vtk_file_format == VTK_FILE_FORMATS::VTU)
+    else if (vtk_file_format_ == VTK_FILE_FORMATS::VTU)
     {
         vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 
@@ -235,9 +255,9 @@ void DumpVTK::write_vtu(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const int vtk_file_format, const char * const filename)
+void DumpVTK::write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const char * const filename)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::PVTI)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::PVTI)
     {
         vtkSmartPointer<vtkXMLPImageDataWriter> pwriter = vtkSmartPointer<vtkXMLPImageDataWriter>::New();
         pwriter->SetFileName(filename);
@@ -252,7 +272,7 @@ void DumpVTK::write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const int vtk_
         pwriter->SetWriteSummaryFile(lmp_->comm->me == 0 ? 1 : 0);
         pwriter->Write();
     }
-    else if (vtk_file_format == VTK_FILE_FORMATS::VTI)
+    else if (vtk_file_format_ == VTK_FILE_FORMATS::VTI)
     {
         vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
 
@@ -267,9 +287,9 @@ void DumpVTK::write_vti(vtkSmartPointer<vtkAlgorithmOutput> data, const int vtk_
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vtr(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename)
+void DumpVTK::write_vtr(vtkSmartPointer<vtkDataObject> data, const char * const filename)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::PVTR)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::PVTR)
     {
         vtkSmartPointer<vtkXMLPRectilinearGridWriter> pwriter = vtkSmartPointer<vtkXMLPRectilinearGridWriter>::New();
         pwriter->SetFileName(filename);
@@ -287,7 +307,7 @@ void DumpVTK::write_vtr(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         pwriter->SetEndPiece(lmp_->comm->me);
         pwriter->Write();
     }
-    else if (vtk_file_format == VTK_FILE_FORMATS::VTR)
+    else if (vtk_file_format_ == VTK_FILE_FORMATS::VTR)
     {
         vtkSmartPointer<vtkXMLRectilinearGridWriter> writer = vtkSmartPointer<vtkXMLRectilinearGridWriter>::New();
 
@@ -306,9 +326,50 @@ void DumpVTK::write_vtr(vtkSmartPointer<vtkDataObject> data, const int vtk_file_
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vtk_unstructured_grid(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label)
+void DumpVTK::write_vtm(vtkSmartPointer<vtkDataObject> data, const char * const filename)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::VTK)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::PVTM)
+    {
+        vtkSmartPointer<vtkXMLPMultiBlockDataWriter> pwriter = vtkSmartPointer<vtkXMLPMultiBlockDataWriter>::New();
+        pwriter->SetFileName(filename);
+
+        setVtkWriterOptions(vtkXMLWriter::SafeDownCast(pwriter));
+
+        #if VTK_MAJOR_VERSION <= 5
+        pwriter->SetInputConnection(data->GetProducerPort());
+        #else
+        pwriter->SetInputData(data);
+        #endif
+
+        #if VTK_MAJOR_VERSION > 6 || (VTK_MAJOR_VERSION == 6 && VTK_MINOR_VERSION > 2)
+        pwriter->SetNumberOfPieces(lmp_->comm->nprocs);
+        #endif
+        if (lmp_->comm->me == 0)
+            pwriter->SetWriteMetaFile(1);
+        pwriter->Write();
+    }
+    else if (vtk_file_format_ == VTK_FILE_FORMATS::VTM)
+    {
+        vtkSmartPointer<vtkXMLMultiBlockDataWriter> writer = vtkSmartPointer<vtkXMLMultiBlockDataWriter>::New();
+
+        setVtkWriterOptions(vtkXMLWriter::SafeDownCast(writer));
+
+        #if VTK_MAJOR_VERSION <= 5
+        writer->SetInputConnection(data->GetProducerPort());
+        #else
+        writer->SetInputData(data);
+        #endif
+
+        writer->SetFileName(filename);
+        writer->Write();
+    }
+    else
+        lmp_->error->all(FLERR, "Internal error");
+}
+
+void DumpVTK::write_vtk_unstructured_grid(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label)
+{
+    if (vtk_file_format_ == VTK_FILE_FORMATS::VTK)
     {
         vtkSmartPointer<vtkUnstructuredGridWriter> writer = vtkSmartPointer<vtkUnstructuredGridWriter>::New();
 
@@ -331,9 +392,9 @@ void DumpVTK::write_vtk_unstructured_grid(vtkSmartPointer<vtkDataObject> data, c
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vtk_rectilinear_grid(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label)
+void DumpVTK::write_vtk_rectilinear_grid(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::VTK)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::VTK)
     {
         vtkSmartPointer<vtkRectilinearGridWriter> writer = vtkSmartPointer<vtkRectilinearGridWriter>::New();
 
@@ -356,9 +417,9 @@ void DumpVTK::write_vtk_rectilinear_grid(vtkSmartPointer<vtkDataObject> data, co
         lmp_->error->all(FLERR, "Internal error");
 }
 
-void DumpVTK::write_vtk_poly(vtkSmartPointer<vtkDataObject> data, const int vtk_file_format, const char * const filename, char * const label)
+void DumpVTK::write_vtk_poly(vtkSmartPointer<vtkDataObject> data, const char * const filename, char * const label)
 {
-    if (vtk_file_format == VTK_FILE_FORMATS::VTK)
+    if (vtk_file_format_ == VTK_FILE_FORMATS::VTK)
     {
         vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
 
@@ -431,15 +492,15 @@ void DumpVTK::setFileCurrent(char * &filecurrent, char * const filename, const i
     }
 }
 
-int DumpVTK::identify_file_type(char * const filename, std::list<int> &allowed_extensions, char * const style, int &multiproc, int &nclusterprocs, int &filewriter, int &fileproc, MPI_Comm &world, MPI_Comm &clustercomm)
+void DumpVTK::identify_file_type(char * const filename, std::list<int> &allowed_extensions, char * const style, int &multiproc, int &nclusterprocs, int &filewriter, int &fileproc, MPI_Comm &world, MPI_Comm &clustercomm)
 {
     // ensure no old % format is used
     // this is set in dump.cpp
     if (multiproc)
-        type_error("It is no longer allowed to enable parallel writing by setting the \% character, please see the documentation for help.", style, allowed_extensions);
+        type_error("It is no longer allowed to enable parallel writing by setting the %% character, please see the documentation for help.", style, allowed_extensions);
     // find last dot
     char *suffix = strrchr(filename, '.');
-    if (strlen(suffix) == 5)
+    if (strlen(suffix) == 5 || (strlen(suffix)==4 && strcmp(suffix, ".vtm") == 0))
     {
         multiproc = 1;
         nclusterprocs = 1;
@@ -450,7 +511,10 @@ int DumpVTK::identify_file_type(char * const filename, std::list<int> &allowed_e
         for (; it != allowed_extensions.end(); it++)
         {
             if (*it >= VTK_FILE_FORMATS::vtk_serial_file_types && strcmp(suffix, filesuffixes[*it]) == 0)
-                return *it;
+            {
+                vtk_file_format_ = *it;
+                return;
+            }
         }
         type_error("Could not find allowed filetype for parallel writing.", style, allowed_extensions);
     }
@@ -460,13 +524,15 @@ int DumpVTK::identify_file_type(char * const filename, std::list<int> &allowed_e
         for (; it != allowed_extensions.end(); it++)
         {
             if (*it < VTK_FILE_FORMATS::vtk_serial_file_types && strcmp(suffix, filesuffixes[*it]) == 0)
-                return *it;
+            {
+                vtk_file_format_ = *it;
+                return;
+            }
         }
         type_error("Could not find allowed filetype for serial writing.", style, allowed_extensions);
     }
     else
         type_error("Could not find allowed filetype for writing of VTK file.", style, allowed_extensions);
-    return -1;
 }
 
 void DumpVTK::type_error(std::string msg, char * const style, std::list<int> &allowed_extensions)

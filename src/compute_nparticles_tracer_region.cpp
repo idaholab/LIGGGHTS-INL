@@ -141,7 +141,6 @@ ComputeNparticlesTracerRegion::ComputeNparticlesTracerRegion(LAMMPS *lmp, int &i
     tempflag = 1;
 
     vector = new double[size_vector];
-
 }
 
 /* ---------------------------------------------------------------------- */
@@ -169,6 +168,9 @@ void ComputeNparticlesTracerRegion::init()
     fix_tracer_ = dynamic_cast<FixPropertyAtomTracer*>(fix_ppa);
     if(!fix_tracer_)
         error->compute_error(FLERR,this,"need a tracer fix of type fix property/atom/tracer");
+
+    if (modify->n_fixes_style("multisphere") > 0)
+        error->warning(FLERR, "Compute nparticles/tracer/region will return wrong masses for multisphere particles (multiplied by number of particles of the multisphere) if all of the multisphere passes through the region. If only parts of the multisphere pass through the region the result will be undefined");
 }
 
 /* ---------------------------------------------------------------------- */

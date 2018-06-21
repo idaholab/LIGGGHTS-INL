@@ -2,7 +2,7 @@
 atom_style	granular
 boundary	m m m
 newton		off
-atom_modify	sort 0 0
+atom_modify	sort 0 0 map array
 
 communicate	single vel yes
 units		si

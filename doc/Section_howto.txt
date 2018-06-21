@@ -1,4 +1,4 @@
-"Previous Section"_Section_packages.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_modify.html :c
+"Previous Section"_Section_packages.html - "LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc - "Next Section"_Section_gran_howto.html :c
 
 :link(liws,http://www.cfdem.com)
 :link(ld,Manual.html)
@@ -29,7 +29,7 @@ END_RST -->
 8.8 "Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)"_#howto_8
 8.9 "Walls"_#howto_9
 8.10 "Library interface to LIGGGHTS(R)-INL"_#howto_10 :all(b)
-<!--END_HTML_ONLY -->
+<!-- END_HTML_ONLY -->
 
 The example input scripts included in the LIGGGHTS(R)-INL distribution and
 highlighted in "Section_example"_Section_example.html also show how to

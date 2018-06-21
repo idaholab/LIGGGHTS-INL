@@ -32,12 +32,19 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
+
+    Christoph Kloss (JKU Linz)
+    Christoph Kloss (DCS Computing GmbH, Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
+
     (if no contributing author is listed, this file has been contributed
     by the core developer)
 
     Copyright 2012-     DCS Computing GmbH, Linz
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
+
+#if defined(LAMMPS_VTK)
 
 #ifdef DUMP_CLASS
 
@@ -49,45 +56,37 @@ DumpStyle(decomposition/vtk,DumpDecompositionVTK)
 #define LMP_DUMP_DECOMPOSITION_VTK_H
 
 #include "dump.h"
+#include "dump_vtk.h"
 
-namespace LAMMPS_NS {
+namespace LAMMPS_NS
+{
 
-class DumpDecompositionVTK : public Dump {
- public:
-  DumpDecompositionVTK(LAMMPS *, int, char**);
-  ~DumpDecompositionVTK();
-  void init_style();
+class DumpDecompositionVTK : public Dump, public DumpVTK
+{
+public:
+    DumpDecompositionVTK(LAMMPS *, int, char**);
+    ~DumpDecompositionVTK();
+    void init_style();
 
- private:
-  int len[3];
-  double *xdata, *xdata_all;
-  double *ydata, *ydata_all;
-  double *zdata, *zdata_all;
+private:
+    int modify_param(int, char **);
+    void write_header(bigint);
+    int count();
+    void pack(int *);
+    void write_data(int, double *);
 
-  int lasttimestep;
+    double *xdata;
+    double *ydata;
+    double *zdata;
+    int *all_nlocal_;
 
-  int modify_param(int, char **);
-  void write_header(bigint);
-  int count();
-  void pack(int *);
-  void write_data(int, double *);
-
-  typedef void (DumpDecompositionVTK::*FnPtrHeader)(bigint);
-  FnPtrHeader header_choice;           // ptr to write header functions
-  void header_item(bigint);
-  void footer_item();
-
-  typedef void (DumpDecompositionVTK::*FnPtrPack)();
-  FnPtrPack pack_choice;               // ptr to pack functions
-  void pack_item();
-
-  typedef void (DumpDecompositionVTK::*FnPtrData)(int, double *);
-  FnPtrData write_choice;              // ptr to write data functions
-  void write_item(int, double *);
-
+    int lasttimestep;
+    char *filecurrent;
 };
 
 }
 
 #endif
 #endif
+
+#endif // LAMMPS_VTK

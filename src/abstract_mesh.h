@@ -104,6 +104,7 @@ namespace LAMMPS_NS
         virtual void storeNodePosOrig(int ilo, int ihi) = 0;
 
         virtual void initialSetup() = 0;
+        virtual void deleteUnowned() = 0;
         virtual void pbcExchangeBorders(int setupFlag) = 0;
         virtual void clearReverse() = 0;
         virtual void forwardComm(std::list<std::string> * properties = NULL) = 0;
@@ -111,14 +112,20 @@ namespace LAMMPS_NS
         virtual void reverseComm(std::list<std::string> * properties = NULL) = 0;
         virtual void reverseComm(std::string) = 0;
 
-        virtual void writeRestart(FILE *fp) = 0;
-        virtual void restart(double *list) = 0;
+        // serial (old) amd parallel (new) write/read implementation
+        virtual void write_restart_serial(FILE *fp) const = 0;
+        virtual void restart_serial(double *list) = 0;
+        virtual void write_restart_parallel(FILE *fp) const = 0;
+        virtual void restart_parallel(double *list) = 0;
 
         virtual bool allNodesInsideSimulationBox() = 0;
 
         virtual int numNodes() = 0;
 
         virtual class CustomValueTracker& prop() = 0;
+
+        virtual void set_type(const int type) = 0;
+        virtual bool doParallelization() const = 0;
 
         /*
         virtual ContainerBase* container(double type,int lenVec) = 0;
@@ -139,9 +146,9 @@ namespace LAMMPS_NS
 
         // virtual functions for size
         // parallelism implemented in derived class
-        virtual int sizeLocal() = 0;
-        virtual int sizeGhost() = 0;
-        virtual int sizeGlobal() = 0;
+        virtual int sizeLocal() const = 0;
+        virtual int sizeGhost() const = 0;
+        virtual int sizeGlobal() const = 0;
 
         virtual ~AbstractMesh()
         {}

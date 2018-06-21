@@ -40,12 +40,15 @@
 ------------------------------------------------------------------------- */
 
 #include "tri_mesh.h"
+#include "comm_tiled.h"
 
 /* ----------------------------------------------------------------------
    constructor, destructor
 ------------------------------------------------------------------------- */
 
-TriMesh::TriMesh(LAMMPS *lmp) : SurfaceMeshBase(lmp)
+TriMesh::TriMesh(LAMMPS *lmp) :
+    SurfaceMeshBase(lmp),
+    weightedWallFormulation_(false)
 {
 }
 

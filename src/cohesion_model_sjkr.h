@@ -72,16 +72,12 @@ namespace ContactModels {
         settings.registerOnOff("tangential_reduce",tangentialReduce_,false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry)
     {
         registry.registerProperty("cohEnergyDens", &MODEL_PARAMS::createCohesionEnergyDensity);
         registry.connect("cohEnergyDens", cohEnergyDens,"cohesion_model sjkr");
-
-        // error checks on coarsegraining
-        if(force->cg_active())
-            error->cg(FLERR,"cohesion model sjkr");
     }
 
     void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
@@ -101,12 +97,33 @@ namespace ContactModels {
 
       if(sidata.contact_flags) *sidata.contact_flags |= CONTACT_COHESION_MODEL;
 
+      #ifdef NONSPHERICAL_ACTIVE_FLAG
+      double torque_i[3] = {0., 0., 0.};
+      double Fn_i[3] = { Fn_coh * sidata.en[0], Fn_coh * sidata.en[1], Fn_coh * sidata.en[2]};
+      if (sidata.is_non_spherical)
+      {
+            double xci[3];
+            vectorSubtract3D(sidata.contact_point, atom->x[sidata.i], xci);
+            vectorCross3D(xci, Fn_i, torque_i);
+      }
+      #endif
+
       // apply normal force
       if(sidata.is_wall) {
         const double Fn_ = Fn_coh * sidata.area_ratio;
         i_forces.delta_F[0] += Fn_ * sidata.en[0];
         i_forces.delta_F[1] += Fn_ * sidata.en[1];
         i_forces.delta_F[2] += Fn_ * sidata.en[2];
+
+        #ifdef NONSPHERICAL_ACTIVE_FLAG
+        if(sidata.is_non_spherical)
+        {
+            //for non-spherical particles normal force can produce torque!
+            i_forces.delta_torque[0] += sidata.area_ratio*torque_i[0];
+            i_forces.delta_torque[1] += sidata.area_ratio*torque_i[1];
+            i_forces.delta_torque[2] += sidata.area_ratio*torque_i[2];
+        }
+        #endif
       } else {
         const double fx = Fn_coh * sidata.en[0];
         const double fy = Fn_coh * sidata.en[1];
@@ -119,10 +136,28 @@ namespace ContactModels {
         j_forces.delta_F[0] -= fx;
         j_forces.delta_F[1] -= fy;
         j_forces.delta_F[2] -= fz;
+
+        #ifdef NONSPHERICAL_ACTIVE_FLAG
+        if(sidata.is_non_spherical)
+        {
+            //for non-spherical particles normal force can produce torque!
+            double xcj[3], torque_j[3];
+            vectorSubtract3D(sidata.contact_point, atom->x[sidata.j], xcj);
+            vectorCross3D(Fn_i, xcj, torque_j);
+
+            i_forces.delta_torque[0] += torque_i[0];
+            i_forces.delta_torque[1] += torque_i[1];
+            i_forces.delta_torque[2] += torque_i[2];
+
+            j_forces.delta_torque[0] += torque_j[0];
+            j_forces.delta_torque[1] += torque_j[1];
+            j_forces.delta_torque[2] += torque_j[2];
+        }
+        #endif
       }
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
+    void endSurfacesIntersect(SurfacesIntersectData &sidata, ForceData&, ForceData&) {}
     void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
 

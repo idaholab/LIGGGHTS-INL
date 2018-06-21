@@ -79,7 +79,7 @@ namespace ContactModels
        settings.registerOnOff("torsionTorque", torsion_torque, false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
     {}
 
     void connectToProperties(PropertyRegistry & registry) {
@@ -175,7 +175,7 @@ namespace ContactModels
     int history_offset;
     bool torsion_torque;
 
-    inline void calcRollTorque(double (&r_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
+    void calcRollTorque(double (&r_torque)[3],const SurfacesIntersectData & sidata,double reff,double wr1,double wr2,double wr3,double r_inertia) {
 
       double wr_tot[3], dr_torque[3];
 

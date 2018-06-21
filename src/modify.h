@@ -57,6 +57,7 @@
 #include "fix.h"
 #include <map>
 #include <string>
+#include <vector>
 
 namespace LAMMPS_NS {
 
@@ -66,7 +67,7 @@ class Modify : protected Pointers {
   int nfix,maxfix;
   int n_pre_initial_integrate, n_initial_integrate,n_post_integrate,n_pre_exchange,n_pre_neighbor;
   int n_pre_force,n_post_force;
-  int n_iterate_implicitly, n_pre_final_integrate; 
+  int n_iterate_implicitly, n_pre_final_integrate;
   int n_final_integrate,n_end_of_step,n_thermo_energy;
   int n_initial_integrate_respa,n_post_integrate_respa;
   int n_pre_force_respa,n_post_force_respa,n_final_integrate_respa;
@@ -76,6 +77,8 @@ class Modify : protected Pointers {
   int restart_pbc_any;       // 1 if any fix sets restart_pbc
   int nfix_restart_global;   // stored fix global info from restart file
   int nfix_restart_peratom;  // stored fix peratom info from restart file
+  int nfix_restart_pb;       // stored fix parallel base info from restart file
+  Version restart_version;
 
   class Fix **fix;           // list of fixes
   int *fmask;                // bit mask for when each fix is applied
@@ -102,7 +105,7 @@ class Modify : protected Pointers {
   virtual void post_force(int);
   virtual void pre_final_integrate();
   virtual void final_integrate();
-  virtual bool iterate_implicitly();  
+  virtual bool iterate_implicitly();
   virtual void end_of_step();
   virtual double thermo_energy();
   virtual void post_run();
@@ -129,9 +132,10 @@ class Modify : protected Pointers {
   double max_alpha(double *);
   int min_dof();
 
+  void init_fixes();
   void add_fix(int, char **, char *suffix = NULL);
   void modify_fix(int, char **);
-  void delete_fix(const char *,bool unfixflag = false); 
+  void delete_fix(const char *,bool unfixflag = false);
   int find_fix(const char *);
 
   class FixPropertyGlobal* add_fix_property_global(int narg,char **arg,const char *);
@@ -144,33 +148,35 @@ class Modify : protected Pointers {
   class Fix* find_fix_style(const char *style, int rank);
   class Fix* find_fix_style_strict(const char *style, int rank);
   class Compute* find_compute_style_strict(const char *style, int rank);
-  int n_fixes_style(const char *style); 
-  int n_computes_style(const char *style); 
-  int n_fixes_style_strict(const char *style); 
+  int n_fixes_style(const char *style);
+  int n_computes_style(const char *style);
+  int n_fixes_style_strict(const char *style);
   int n_fixes_property_atom();
   class FixPropertyAtom* find_fix_property_atom(int rank);
   int n_fixes_property_atom_not_internal();
   int dump_size_fixes_property_atom_not_internal();
   class FixPropertyAtom* find_fix_property_atom_not_internal(int rank);
-  bool i_am_first_of_style(class Fix *fix_to_check); 
-  int index_first_fix_of_style(const char *style); 
-  int index_last_fix_of_style(const char *style); 
+  bool i_am_first_of_style(class Fix *fix_to_check);
+  int index_first_fix_of_style(const char *style);
+  int index_last_fix_of_style(const char *style);
   int my_index(class Fix *fixptr);
-  int index_first_fix_with_function(const int FUNCTION, bool integrate=false); 
-  class FixScalarTransportEquation* find_fix_scalar_transport_equation(const char *equation_id); 
-  class FixScalarTransportEquation* find_fix_scalar_transport_equation_strict(const char *equation_id); 
-  void box_extent(double &xlo,double &xhi,double &ylo,double &yhi,double &zlo,double &zhi); 
+  int index_first_fix_with_function(const int FUNCTION, bool integrate=false);
+  class FixScalarTransportEquation* find_fix_scalar_transport_equation(const char *equation_id);
+  class FixScalarTransportEquation* find_fix_scalar_transport_equation_strict(const char *equation_id);
+  void box_extent(double &xlo,double &xhi,double &ylo,double &yhi,double &zlo,double &zhi);
 
   void add_compute(int, char **, char *suffix = NULL);
   void modify_compute(int, char **);
-  void delete_compute(const char *,bool uncomputeflag = false); 
+  void delete_compute(const char *,bool uncomputeflag = false);
   int find_compute(const char *);
   void clearstep_compute();
   void addstep_compute(bigint);
   void addstep_compute_all(bigint);
 
   void write_restart(FILE *);
-  int read_restart(FILE *);
+  int read_restart(FILE *, const Version &ver);
+  void write_restart_pb(FILE *,bool multiproc);
+  void read_restart_pb(FILE *, const int nprocs);
   void restart_deallocate();
 
   bigint memory_usage();
@@ -180,7 +186,10 @@ class Modify : protected Pointers {
   bool have_restart_data_style(const char* _style);
   int n_restart_data_global_style(const char* _style);
   char* id_restart_data_global_style(const char* _style,int _rank);
-  void max_min_rad(double &maxrad,double &minrad); 
+
+  void max_min_rad(double &maxrad,double &minrad);
+  double get_max_radius(const bool include_atoms = true, double *const min_rad_per_type = NULL);
+  double get_min_radius(const bool include_atoms = true, double *const min_rad_per_type = NULL);
 
   void forceMeshExchange();
 
@@ -194,7 +203,7 @@ class Modify : protected Pointers {
   int *list_pre_initial_integrate, *list_initial_integrate,*list_post_integrate;
   int *list_pre_exchange,*list_pre_neighbor;
   int *list_pre_force,*list_post_force;
-  int *list_iterate_implicitly, *list_pre_final_integrate; 
+  int *list_iterate_implicitly, *list_pre_final_integrate;
   int *list_final_integrate,*list_end_of_step,*list_thermo_energy;
   int *list_initial_integrate_respa,*list_post_integrate_respa;
   int *list_pre_force_respa,*list_post_force_respa;
@@ -215,6 +224,10 @@ class Modify : protected Pointers {
   char **id_restart_peratom;          // stored fix peratom info
   char **style_restart_peratom;       // from read-in restart file
   int *index_restart_peratom;
+
+  std::vector<std::string> id_restart_pb;               // stored fix parallelbase info
+  std::vector<std::string> style_restart_pb;            // from read-in restart file
+  std::vector< std::vector<double> > state_restart_pb;  // use modern c++ to reallocate arrays
 
   int index_permanent;        // fix/compute index returned to library call
 

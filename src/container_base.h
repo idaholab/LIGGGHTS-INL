@@ -47,17 +47,11 @@
 #include <string>
 #include <list>
 #include <string.h>
+#include "parallel_base.h"
+#include "domain.h"
 
 namespace LAMMPS_NS
 {
-  // buffer operation types (for push and pop)
-
-  enum{ OPERATION_COMM_EXCHANGE,
-        OPERATION_COMM_BORDERS,
-        OPERATION_COMM_FORWARD,
-        OPERATION_COMM_REVERSE,
-        OPERATION_RESTART,
-        OPERATION_UNDEFINED};
 
   /* ----------------------------------------------------------------------
    definition of reference frames and comm types
@@ -139,24 +133,24 @@ namespace LAMMPS_NS
           void setContainerStatistics(const double _weighting_factor, class ContainerBase *_cb_stat, class ContainerBase * const _cb_scale,
                                       class ContainerBase * const _cb_scale_avg = 0, const bool _enable_favre = false);
 
-          inline const char* id()
+          inline const char* id() const
           {return id_; }
 
           inline void setDoNotReset(bool _doNotReset)
           { doNotReset_ = _doNotReset; }
 
-          inline bool doNotReset()
+          inline bool doNotReset() const
           { return doNotReset_; }
 
           inline void setWrapPeriodic(bool wrap)
           { wrapPeriodic_ = wrap; }
 
-          inline bool wrapPeriodic()
+          inline bool wrapPeriodic() const
           { return wrapPeriodic_; }
 
           inline void id(char *_id);
-          inline bool matches_id(const char *_id);
-          inline bool matches_any_id(std::list<std::string> * ids);
+          inline bool matches_id(const char *_id) const;
+          inline bool matches_any_id(std::list<std::string> * ids) const;
 
           virtual bool isDoubleData() = 0;
           virtual bool isIntData() = 0;
@@ -196,7 +190,7 @@ namespace LAMMPS_NS
           virtual void setToDefault(int n) = 0;
           virtual void setAllToZero() = 0;
 
-          inline bool useDefault()
+          inline bool useDefault() const
           { return useDefault_ ; }
 
           inline int getStatLevel() const
@@ -221,23 +215,23 @@ namespace LAMMPS_NS
           virtual int popFromBuffer(double *buf,int operation,
                             bool scale=false,bool translate=false, bool rotate=false) = 0;
           virtual int pushToBuffer(double *buf,int operation,
-                            bool scale=false,bool translate=false, bool rotate=false) = 0;
+                            bool scale=false,bool translate=false, bool rotate=false) const = 0;
 
           virtual int elemListBufSize(int n, int operation = OPERATION_UNDEFINED,
-                            bool scale=false,bool translate=false, bool rotate=false) = 0;
-          virtual int pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, double *dlo, double *dhi,
-                           bool scale=false,bool translate=false, bool rotate=false) = 0;
+                            bool scale=false,bool translate=false, bool rotate=false) const = 0;
+          virtual int pushElemListToBuffer(const int n, const int *const list, double *const buf, const int operation, const int pbc_flag, const int *const pbc, Domain *const domain,
+                           const bool scale=false, const bool translate=false, const bool rotate=false) const = 0;
           virtual int popElemListFromBuffer(int first, int n, double *buf, int operation,
                            bool scale=false,bool translate=false, bool rotate=false) = 0;
           virtual int pushElemListToBufferReverse(int first, int n, double *buf, int operation,
-                           bool scale=false,bool translate=false, bool rotate=false) = 0;
-          virtual int popElemListFromBufferReverse(int n, int *list, double *buf, int operation,
+                           bool scale=false,bool translate=false, bool rotate=false) const = 0;
+          virtual int popElemListFromBufferReverse(int n, const int *const list, double *buf, int operation,
                            bool scale=false,bool translate=false, bool rotate=false) = 0;
 
           virtual int elemBufSize(int operation = OPERATION_UNDEFINED,
-                            bool scale=false,bool translate=false, bool rotate=false) = 0;
+                            bool scale=false,bool translate=false, bool rotate=false) const = 0;
           virtual int pushElemToBuffer(int n, double *buf,int operation,
-                            bool scale=false,bool translate=false, bool rotate=false) = 0;
+                            bool scale=false,bool translate=false, bool rotate=false) const = 0;
           virtual int popElemFromBuffer(double *buf,int operation,
                             bool scale=false,bool translate=false, bool rotate=false) = 0;
 

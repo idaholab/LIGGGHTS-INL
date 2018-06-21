@@ -58,6 +58,8 @@ class BoundingBox
 
     BoundingBox();
     BoundingBox(double xLo, double xHi, double yLo, double yHi, double zLo, double zHi);
+    BoundingBox(BoundingBox const &orig);
+
     virtual ~BoundingBox();
 
     void reset();

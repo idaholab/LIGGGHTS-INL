@@ -52,17 +52,17 @@
 #ifndef LMP_INPUT_H
 #define LMP_INPUT_H
 
-#include <stdio.h>
 #include "pointers.h"
+#include <cstdio>
 #include <map>
 #include <string>
+#include <list>
 
 namespace LAMMPS_NS {
 
 class Input : protected Pointers {
 
  friend class Info;
- friend class LAMMPS;
 
  public:
   int narg;                    // # of command args
@@ -77,8 +77,13 @@ class Input : protected Pointers {
   void substitute(char *&, char *&, int &, int &, int);
                                  // substitute for variables in a string
 
-  bool seed_check_throw_error()  
-  { return seed_check_error; }
+  void executed_run()
+  { last_command_was_run = true; }
+
+  bool get_last_command_was_run()
+  { return last_command_was_run_2; } 
+
+  void add_and_validate_seed(int &seed);
 
  protected: 
   int me;                      // proc ID
@@ -95,9 +100,10 @@ class Input : protected Pointers {
   int ifthenelse_flag;         // 1 if executing commands inside an if-then-else
 
   FILE **infiles;              // list of open input files
-  FILE *nonlammps_file;        
+  FILE *nonlammps_file;
 
-  bool seed_check_error;       
+  bool last_command_was_run;   
+  bool last_command_was_run_2; 
 
   typedef void (*CommandCreator)(LAMMPS *, int, char **);
   std::map<std::string,CommandCreator> *command_map;
@@ -117,6 +123,7 @@ class Input : protected Pointers {
   void jump();
   void label();
   void log();
+  void warn();
   void next_command();
   void partition();
   void print();
@@ -133,6 +140,7 @@ class Input : protected Pointers {
   void boundary();
   void box();
   void communicate();
+  void comm_style();
   void compute();
   void compute_modify();
   void dielectric();
@@ -154,6 +162,7 @@ class Input : protected Pointers {
   void min_modify();
   void min_style();
   void modify_timing();
+  void set_wall_clock_time();
   void neighbor_command();
   void newton();
   void package();
@@ -166,7 +175,7 @@ class Input : protected Pointers {
   void reset_timestep();
   void restart();
   void run_style();
-  void soft_particles(); 
+  void soft_particles();
   void hard_particles();
   void write_restart_on_signal();
   void special_bonds();
@@ -180,6 +189,9 @@ class Input : protected Pointers {
   void undump();
   void unfix();
   void units();
+
+private:
+    std::list<int> random_seeds;
 };
 
 }

@@ -151,11 +151,11 @@ int Factory::getSurfaceModelId(const std::string & name) {
   return surface_models[name];
 }
 
-int64_t Factory::select(int & narg, char ** & args,Custom_contact_models ccm) {
-  return instance().select_model(narg, args,ccm);
+int64_t Factory::select(int & narg, char ** & args, const LAMMPS_NS::LAMMPS *lmp) {
+  return instance().select_model(narg, args, lmp);
 }
 
-int64_t Factory::select_model(int & narg, char ** & args, Custom_contact_models ccm)
+int64_t Factory::select_model(int & narg, char ** & args, const LAMMPS_NS::LAMMPS *lmp)
 {
     // this method will consume arguments to determine which granular contact model is active
 
@@ -165,6 +165,20 @@ int64_t Factory::select_model(int & narg, char ** & args, Custom_contact_models 
     int cohesion = COHESION_OFF;
     int rolling = ROLLING_OFF;
     int surface = SURFACE_DEFAULT;
+    // change default values for other atom styles (only if not hybrid!)
+    if (strcmp(lmp->atom->atom_style,"hybrid") != 0)
+    {
+#ifdef SUPERQUADRIC_ACTIVE_FLAG
+        if (lmp->atom->superquadric_flag)
+            surface = SURFACE_SUPERQUADRIC;
+#endif
+#ifdef CONVEX_ACTIVE_FLAG
+        if (lmp->atom->shapetype_flag)
+            surface = SURFACE_CONVEX_HULL_MANIFOLD;
+#endif
+    }
+
+    Custom_contact_models ccm = lmp->force->custom_contact_models;
 
     // select normal model
     if (narg > 1 && strcmp(args[0], "model") == 0)
@@ -264,6 +278,12 @@ int64_t Factory::select_model(int & narg, char ** & args, Custom_contact_models 
         if(narg > 2)
             args = &args[2];
         narg -= 2;
+    }
+    // in case of hybrid atom style is used and the surface model wasn't changed raise a warning
+    else if (strcmp(lmp->atom->atom_style,"hybrid") == 0 && surface == SURFACE_DEFAULT)
+    {
+        lmp->error->warningAll(FLERR,"You are using atom-style hybrid. The default surface model is designed for sphere-sphere contacts.\n"
+                                     "Please use an appropiate model if you using different particle shapes.");
     }
 
     if((model != -1 && tangential != -1 && cohesion != -1 && rolling != -1 && surface != -1) &&

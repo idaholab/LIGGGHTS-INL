@@ -73,6 +73,7 @@ namespace LAMMPS_NS {
         // per-sphere radius, position
         // if atom_type_vector exists, each sphere has different type
         double *radius_ins;
+        double radius_ins_max;
         double **x_ins;
         bool atom_type_vector_flag;
         int *atom_type_vector;

@@ -71,15 +71,13 @@ public:
         fix_ptr(ptr),
         offset(i)
     { }
-    const char get_type()
+    char get_type()
     { return type; }
-    void* const get_ptr()
-    { return fix_ptr; }
-    const int get_offset()
+    int get_offset()
     { return offset; }
 
-    const int get_npartners(const int i);
-    double * const get_data_ptr(const int i, const int j);
+    int get_npartners(const int i);
+    double * get_data_ptr(const int i, const int j);
     void compute_surfPos(const int i, const int jj, const double * const* x, const double * const data_ptr, double * const surfPos_ij, double * const surfPos_ji, const double F_eps);
     double get_fn(const double * const data_ptr);
     void save_contact_property_atom(const int i, const int jj, const int * const tag, const double * const surfPos_ij, const double * const surfPos_ji, FixContactPropertyAtom *cpa);

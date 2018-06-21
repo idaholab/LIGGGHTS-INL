@@ -121,26 +121,31 @@ inline int Domain::is_in_extended_subdomain(double* pos)
 
 /* ----------------------------------------------------------------------
    check distance from borders of subbox
+   returns true if point is inside subbox, within borders for each dim as defined by check_subdomain_distances
 ------------------------------------------------------------------------- */
 
-inline double Domain::dist_subbox_borders(double* pos) 
+inline bool Domain::check_dist_subbox_borders(double* pos,double *check_subdomain_distances) 
 {
     if(is_wedge)
-        return dist_subbox_borders_wedge(pos);
+        
+        error->one(FLERR,"fct not implemented for wedge");
+        //return dist_subbox_borders_wedge(pos);
 
-    double deltalo[3], deltahi[3], dlo, dhi;
+    double deltalo[3], deltahi[3];
 
     vectorSubtract3D(sublo,pos,deltalo);
     vectorSubtract3D(subhi,pos,deltahi);
+
     vectorAbs3D(deltalo);
     vectorAbs3D(deltahi);
 
-    dlo = vectorMin3D(deltalo);
-    dhi = vectorMin3D(deltahi);
+    for(int idim = 0; idim < 3; idim++)
+    {
+        if(deltalo[idim] < check_subdomain_distances[idim] || deltahi[idim] < check_subdomain_distances[idim])
+            return false;
+    }
 
-    if(dlo < dhi)
-        return dlo;
-    return dhi;
+    return true;
 }
 
 /* ----------------------------------------------------------------------

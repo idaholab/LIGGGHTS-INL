@@ -28,7 +28,7 @@ keyword = {pos} or {vel} or {id} or {force} or {torque} or {history} or {contact
   {torque} = torque divided by particle diameter (3 values)
   {history} = contact history (# depends on pair style, e.g. 3 shear history values)
   {contactArea} = area of the contact (1 value)
-  {contactPoint} = contact point (3 value)
+  {contactPoint} = contact point (3 value, pairwise interactions only)
   {delta} = overlap of the contact (1 value)
   {heatFlux} = conductive heat flux of the contact (1 value)
   {ms_id} = multisphere IDs of clumps where of particles in contact belong to (in case of wall, second value will be -1) (2 values) :pre
@@ -56,7 +56,7 @@ force cutoff distance for that interaction, as defined by the
 commands.
 
 IMPORTANT NOTE: For accessing particle-wall contact data, only mesh
-walls (see "fix mesh"_fix_mesh.html) can be used.
+walls (see "fix mesh/surface"_fix_mesh_surface.html) can be used.
 For computing particle-wall (compute wall/gran/local), the code will
 automatically look for a "fix wall/gran"_fix_wall_gran.html command
 that uses mesh walls. The order of the meshes in the fix wall/gran
@@ -65,9 +65,10 @@ reflects the order of the triangles in the STL/VTK file read via the
 dedicated fix mesh command. For how to output the trangle id,
 see "dump mesh/gran/VTK command"dump.html.
 
-The output {pos} is the particle positions (6 values) in distance
-"units"_units.html. Keyword {vel} will do the same for velocities.
-For computing pairwise data, the output {id} will
+The output {pos} (6 values in distance "units"_units.html) is the particle
+positions for pairwise interactions or particle position and the contact
+point in case of particle-wall interactions. Keyword {vel} will do the
+same for velocities. For computing pairwise data, the output {id} will
 be the two particle IDs (using this option requires to use an atom
 map) and a flag that is 1 for interaction over a periodic boundary
 and 0 otherwise. For computing particle-wall data, the output {id}
@@ -87,7 +88,7 @@ in distance^2 "units"_units.html. Note that {contactArea} is based on
 an analytic geometric calculation of sphere-sphere or sphere-plane intersection
 rather than a calculation based on mechanics. This is to ensure that
 {contactArea} works with all types of contact models. The {contactPoint} output
-will store the point at which contact forces are computed.
+will store the point at which contact forces between two particles are computed.
 
 The output {delta} will output the
 overlap (sum of radii - distance between particle centers) in distance

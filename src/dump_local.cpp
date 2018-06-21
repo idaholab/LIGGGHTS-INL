@@ -195,11 +195,15 @@ void DumpLocal::init_style()
   // find current ptr for each compute,fix,variable
   // check that fix frequency is acceptable
 
+  const bigint nextCall = ((update->ntimestep+nevery-1)/nevery)*nevery; // ceil to next nevery
+
   int icompute;
   for (int i = 0; i < ncompute; i++) {
     icompute = modify->find_compute(id_compute[i]);
     if (icompute < 0) error->all(FLERR,"Could not find dump local compute ID");
     compute[i] = modify->compute[icompute];
+    if (compute[i]->timeflag)
+        compute[i]->registerNextCall(nextCall); //this dump will need this compute
   }
 
   int ifix;
@@ -337,6 +341,11 @@ int DumpLocal::convert_string(int n, double *mybuf)
 void DumpLocal::write_data(int n, double *mybuf)
 {
   (this->*write_choice)(n,mybuf);
+
+    for (int i = 0; i < ncompute; i++)
+      if (compute[i]->timeflag)
+          compute[i]->registerNextCall(update->ntimestep+nevery); //this dump will need this compute
+
 }
 
 /* ---------------------------------------------------------------------- */

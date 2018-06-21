@@ -63,9 +63,6 @@ using namespace LAMMPS_NS;
 using namespace FixConst;
 using MODIFIED_ANDREW_AUX::Circle;
 
-#define EPSILON 1.0e-7
-#define BIG 1000000.
-
 //#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 // identifier for variable set point
@@ -325,16 +322,8 @@ void MeshModuleStressServo::init()
     }
 
     // controller parameters
-    double r_min,r;
-    const int nlocal = atom->nlocal;
     const double rPaMax = getMaxRad();
-
-    r = r_min = BIG;
-    for (int i = 0; i < nlocal; ++i) {
-        r = atom->radius[i];
-        r_min = MIN(r_min,r);
-    }
-    MPI_Min_Scalar(r_min,world);
+    const double r_min = atom->get_properties()->min_radius();
     vel_min_ = ratio_*r_min/dtv_;
     
     // set pointers for controller
@@ -396,8 +385,6 @@ void MeshModuleStressServo::initial_integrate(int vflag)
 {
     UNUSED(vflag);
 
-    double dX[3],dx[3];
-
     // only if the wall should move
     if (int_flag_) {
 
@@ -405,7 +392,7 @@ void MeshModuleStressServo::initial_integrate(int vflag)
             case FORCE:
 
                 // update xcm by full step
-
+                double dX[3],dx[3];
                 dx[0] = dtv_ * vcm_(0)[0];
                 dx[1] = dtv_ * vcm_(0)[1];
                 dx[2] = dtv_ * vcm_(0)[2];
@@ -447,8 +434,6 @@ void MeshModuleStressServo::final_integrate()
     // double area = mod_andrew_->area();
     mod_andrew_->area();
 
-    double dfdt;
-
     // only if the wall should move
     if (int_flag_) {
 
@@ -477,7 +462,7 @@ void MeshModuleStressServo::final_integrate()
             const double err_high = 1.0;
             const double ctrl_scale = 0.1;
 
-            int totNumContacts = fix_mesh->meshNeighlist()->getTotalNumContacts();
+            const int totNumContacts = fix_mesh->meshNeighlist()->getTotalNumContacts();
             
             if (totNumContacts == 0) {
                 // cruise mode
@@ -493,7 +478,7 @@ void MeshModuleStressServo::final_integrate()
             }
 
             vectorScalarMult3D(axis_,-ctrl_kp*err_,ctrl_op_);
-
+            
         } else {
 
             // simple PID-controller
@@ -505,7 +490,7 @@ void MeshModuleStressServo::final_integrate()
             // derivative term
             // force used instead of the error in order to avoid signal spikes in case of change of the set point
             // de()/dt = - dforce()/dt for constant set point
-            dfdt = -( pv_mag_ - old_pv_mag_)/dtv_;
+            const double dfdt = -( pv_mag_ - old_pv_mag_)/dtv_;
 
             // vel points opposite to force vector
             const double ctrl_op_mag = -ctrl_op_max_ * (err_ * kp_ + sum_err_ * ki_ + dfdt * kd_) * sp_mag_inv_;
@@ -611,8 +596,7 @@ void MeshModuleStressServo::reset_dt()
     detected contacts are registered to contribute to the area of the servo
 ------------------------------------------------------------------------- */
 
-void MeshModuleStressServo::add_particle_contribution(int ip, double *frc,
-                                                                                                                    double *delta, int iTri, double *v_wall)
+void MeshModuleStressServo::add_particle_contribution(int ip, double *frc, double *delta, int iTri, double *v_wall, double *contact_history)
 {
     //double *x = atom->x[ip];
     //double r = atom->radius[ip];

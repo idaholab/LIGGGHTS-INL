@@ -169,4 +169,4 @@ namespace LAMMPS_NS {
     fix_hdtorque_->do_reverse_comm();
   }
 
-}; /* LAMMPS_NS */
+} /* LAMMPS_NS */

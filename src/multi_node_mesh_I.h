@@ -856,11 +856,12 @@
     for(int i = 0; i < nlocal; i++)
         vectorAdd3D(_com,center_(i),_com);
 
-    vectorScalarDiv3D(_com,static_cast<double>(nlocal));
+    if (nlocal > 0)
+        vectorScalarDiv3D(_com,static_cast<double>(nlocal));
 
     //printVec3D(this->screen,"_com on one proc",_com);
 
-    if(1 < nprocs)
+    if(nprocs > 1)
     {
         double result[4];
         vectorCopy3D(_com,result);

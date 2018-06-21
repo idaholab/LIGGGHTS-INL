@@ -49,7 +49,6 @@
 #include "fix_wall_gran.h"
 #include "fix_contact_property_atom_wall.h"
 #include "contact_interface.h"
-#include "compute_pair_gran_local.h"
 #include "tri_mesh.h"
 #include "settings.h"
 #include <string.h>
@@ -57,7 +56,9 @@
 #include <stdlib.h>
 #include "contact_models.h"
 #include "granular_wall.h"
-#include "fix_calculate_energy_wall.h"
+#include "fix_calculate_energy_wall_dissipated.h"
+
+#include <vector>
 
 #ifdef SUPERQUADRIC_ACTIVE_FLAG
   #include "math_const.h"
@@ -72,15 +73,14 @@ class Granular : private Pointers, public IGranularWall {
   ContactModel cmodel;
   FixWallGran * parent;
   int dissipation_offset_;
-  FixCalculateWallEnergy *fix_dissipated_energy_;
+    std::vector<FixCalculateWallEnergyDissipated*> fix_dissipated_energy_;
 
 public:
   Granular(LAMMPS * lmp, FixWallGran * parent, const int64_t hash) :
     Pointers(lmp),
     cmodel(lmp, parent,true /*is_wall*/, hash),
     parent(parent),
-    dissipation_offset_(-1),
-    fix_dissipated_energy_(NULL)
+    dissipation_offset_(-1)
   {
   }
 
@@ -89,6 +89,22 @@ public:
   }
 
   virtual void init_granular() {
+    dissipation_offset_ = get_history_offset("dissipation_force");
+
+    for(;;)
+    {
+        static int rank = 0;
+        FixCalculateWallEnergyDissipated *fixtmp
+            = static_cast<FixCalculateWallEnergyDissipated*>(modify->find_fix_style("calculate/wall_dissipated_energy", rank++));
+        if(fixtmp)
+            fix_dissipated_energy_.push_back(fixtmp);
+        else
+            break;
+    }
+
+    if (dissipation_offset_ >= 0 && fix_dissipated_energy_.empty())
+      error->one(FLERR, "Could not find fix calculate/wall_dissipated_energy");
+
     cmodel.connectToProperties(force->registry);
 
 #ifdef LIGGGHTS_DEBUG
@@ -121,11 +137,6 @@ public:
       fprintf(logfile, "==== WALL %s SETTINGS ====\n", parent->id);
     }
 #endif
-
-    dissipation_offset_ = get_history_offset("dissipation_force");
-    fix_dissipated_energy_ = static_cast<FixCalculateWallEnergy*>(modify->find_fix_style("calculate/wall_dissipated_energy", 0));
-    if (dissipation_offset_ >= 0 && !fix_dissipated_energy_)
-        error->one(FLERR, "Could not find fix calculate/wall_dissipated_energy");
 
     if(!success) {
       error->fix_error(FLERR, parent, settings.error_message.c_str());
@@ -205,19 +216,6 @@ public:
     if(wg->store_force() || fix_mesh)
         vectorCopy3D(f,force_old);
 
-    // add to cwl
-    if(wg->compute_wall_gran_local() && wg->addflag())
-    {
-      double contactPoint[3];
-      vectorSubtract3D(x,sidata.delta,contactPoint);
-      #ifdef SUPERQUADRIC_ACTIVE_FLAG
-        if(atom->superquadric_flag) {
-          vectorCopy3D(sidata.contact_point, contactPoint);
-        }
-      #endif
-      wg->compute_wall_gran_local()->add_wall_1(iMesh,mesh->id(iTri),ip,contactPoint,vwall);
-    }
-
     #ifdef SUPERQUADRIC_ACTIVE_FLAG
         double enx, eny, enz;
         if(atom->superquadric_flag) {
@@ -260,16 +258,30 @@ public:
         sidata.en[2] = enz;
     }
 
-    double delta[3];
+    double delta[3] = {0,0,0};
+    double en0[3] = {0,0,0};
     if (dissipation_offset_ >= 0 && sidata.computeflag && sidata.shearupdate)
     {
-        sidata.fix_mesh->triMesh()->get_global_vel(delta);
-        vectorScalarMult3D(delta, update->dt);
-        // displacement force from the previous time step
         double * const diss_force = &sidata.contact_history[dissipation_offset_];
-        // in the scalar product with the current mesh delta
+
+        // total energy
+        vectorCopy3D(sidata.v_j,delta);
+        vectorScalarMult3D(delta, update->dt);
         const double dissipated_energy = vectorDot3D(delta, diss_force)*0.5;
-        fix_dissipated_energy_->dissipate_energy(dissipated_energy, true);
+
+        // normal component
+        vectorCopy3D(sidata.en,en0);
+        vectorNormalize3D(en0);
+        double const dissipated_energy_normal
+            = 0.5*update->dt*vectorDot3D(en0,sidata.v_j)*vectorDot3D(en0,diss_force);
+
+        double const dissipated_energy_tangential = dissipated_energy - dissipated_energy_normal;
+
+        for(unsigned int i=0;i<fix_dissipated_energy_.size();i++)
+        {
+            fix_dissipated_energy_[i]->dissipate_energy(dissipated_energy_normal, true, sidata.i);
+            fix_dissipated_energy_[i]->dissipate_energy_tangential(dissipated_energy_tangential, true, sidata.i);
+        }
         // reset the dissipation force
         diss_force[0] = 0.0;
         diss_force[1] = 0.0;
@@ -295,10 +307,21 @@ public:
     {
         // new displacement force from this time step
         double * const diss_force = &sidata.contact_history[dissipation_offset_];
-        // in the scalar product with the mesh displacement from earlier on
+
+        // total energy
         const double dissipated_energy = vectorDot3D(delta, diss_force)*0.5;
-        //printf("pdis %e %e\n", update->get_cur_time(), dissipated_energy);
-        fix_dissipated_energy_->dissipate_energy(dissipated_energy, false);
+
+        // normal component
+        double const dissipated_energy_normal
+            = 0.5*update->dt*vectorDot3D(en0,sidata.v_j)*vectorDot3D(en0,diss_force);
+
+        double const dissipated_energy_tangential = dissipated_energy - dissipated_energy_normal;
+
+        for(unsigned int i=0;i<fix_dissipated_energy_.size();i++)
+        {
+            fix_dissipated_energy_[i]->dissipate_energy(dissipated_energy_normal, true, sidata.i);
+            fix_dissipated_energy_[i]->dissipate_energy_tangential(dissipated_energy_tangential, true, sidata.i);
+        }
     }
 
     if(sidata.computeflag)
@@ -322,25 +345,6 @@ public:
     if (wg->store_force_contact_stress())
       wg->add_contactforce_stress_wall(ip, i_forces, sidata.delta, vwall, mesh?mesh->id(iTri):0);
 
-    if(wg->compute_wall_gran_local() && wg->addflag())
-    {
-          const double fx = i_forces.delta_F[0];
-          const double fy = i_forces.delta_F[1];
-          const double fz = i_forces.delta_F[2];
-          const double tor1 = i_forces.delta_torque[0]*sidata.area_ratio;
-          const double tor2 = i_forces.delta_torque[1]*sidata.area_ratio;
-          const double tor3 = i_forces.delta_torque[2]*sidata.area_ratio;
-          double normal[3];
-          vectorCopy3D(sidata.en, normal);
-          vectorNegate3D(normal);
-          wg->compute_wall_gran_local()->add_wall_2(sidata.i,fx,fy,fz,tor1,tor2,tor3,sidata.contact_history,sidata.rsq, normal);
-    }
-
-    // add heat flux
-    
-    if(wg->heattransfer_flag())
-       wg->addHeatFlux(mesh,ip,sidata.radi,sidata.deltan,1.);
-
     // if force should be stored or evaluated
     if(sidata.has_force_update && (wg->store_force() || fix_mesh) )
     {
@@ -355,9 +359,16 @@ public:
             delta[0] = -sidata.delta[0];
             delta[1] = -sidata.delta[1];
             delta[2] = -sidata.delta[2];
-            fix_mesh->add_particle_contribution (ip,f_pw,delta,iTri,vwall);
+            fix_mesh->add_particle_contribution (ip,f_pw,delta,iTri,vwall,sidata.contact_history);
+
+            wg->call_post_force_callback(sidata,i_forces,j_forces);
         }
     }
+
+    // add heat flux
+    
+    if(wg->heattransfer_flag())
+       wg->addHeatFlux(mesh,sidata,ip,sidata.radi,sidata.deltan,1.);
   }
 
   int get_history_offset(const std::string hname)

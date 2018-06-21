@@ -1,0 +1,115 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+create_particles command :h3
+
+[Syntax:]
+
+create_particles template-ID style args keyword values ... :pre
+
+template-ID = ID of a fix of type particletemplate/* :ulb,l
+style = {single} :l
+  {single} args = x y z
+    x,y,z = coordinates of a single atom (distance units) :pre
+zero or more keyword/value pairs may be appended :l
+keyword = {units} or {velocity} or {omega} or {orientation} or {rotate} :l
+  {units} value = {lattice} or {box}
+    {lattice} = the geometry is defined in lattice units
+    {box} = the geometry is defined in simulation box units
+  {velocity} values = vx vy vz
+    vx, vy, vz = x-, y- and z-component of velocity (velocity units)
+  {omega} values = omegax omegay omegaz
+    omegax, omegay, omegaz = x-, y- and z-component of angular velocity (1/ time units)
+  {orientation} values = q1 q2 q3 q4
+    q1, q2, q3, q4 = quaternion values for desired orientation
+  {rotate} values = axis ax ay az angle ang
+    axis = obligatory keyword
+    ax, ay, az = axis vector for rotation (length units)
+    angle = obligatory keyword
+    ang = rotation angle (degrees) :pre
+:ule
+
+[Examples:]
+
+create_particles pts single 0 0 5 velocity 0 0 -1 :pre
+
+[Description:]
+
+This command creates a single particle as an alternative to reading in their 
+coordinates explicitly via a "read_data"_read_data.html or
+"read_restart"_read_restart.html command.  A simulation box must
+already exist, which is typically created via the
+"create_box"_create_box.html command. In case of units = lattice, a
+lattice must also be defined using the "lattice"_lattice.html command.
+
+The kind of particles is defined by the fix particletemplate/* given by 
+{template-ID} (e.g. "sphere"_fix_particletemplate_sphere.html ). Unless 
+otherwise specified per-atom properties are initialized with their default 
+settings.
+
+For the {single} style, a single atom is added to the system at the
+specified coordinates. This can be useful for debugging purposes or
+to create a tiny system with a handful of particles at specified
+positions.
+
+The {units} keyword determines the meaning of the distance units used
+to specify the coordinates of the one atom created by the {single}
+style.  A {box} value selects standard distance units as defined by
+the "units"_units.html command, e.g. Angstroms for units = real or
+metal.  A {lattice} value means the distance units are in lattice
+spacings.
+
+The {velocity} keyword allows to set the initial velocity of the particle. 
+Similarly, the {omega} keyword sets the initial angular velocity of the inserted
+particles.
+
+The {orientation} keyword is one way to set the particles orientation in space.
+Obviously, this keyword makes only sense for particle templates that track the
+particles orientation like "superquadric"_fix_particletemplate_superquadric.txt .
+For everybody not familiar with quaternions the keyword {rotate} is an 
+alternative. It allows to define particle orientation by providing axis and
+angle. Further it is possible to do several rotations consecutively.
+
+Note that this command adds atoms to those that already exist.  By
+using the create_particles command multiple times, multiple sets of atoms
+can be added to the simulation.  For example, interleaving
+create_particles with "lattice"_lattice.html commands specifying different
+orientations, grain boundaries can be created.  By using the
+create_particles command in conjunction with the
+"delete_atoms"_delete_atoms.html command, reasonably complex
+geometries can be created.  The create_particles command can also be used
+to add atoms to a system previously read in from a data or restart
+file.  In all these cases, care should be taken to insure that new
+atoms do not overlap existing atoms inappropriately.  The
+"delete_atoms"_delete_atoms.html command can be used to handle
+overlaps.
+
+Atom IDs are assigned to created atoms in the following way.  The
+collection of created atoms are assigned consecutive IDs that start
+immediately following the largest atom ID existing before the
+create_particles command was invoked.  When a simulation is performed on
+different numbers of processors, there is no guarantee a particular
+created atom will be assigned the same ID.
+
+The "set"_set.html command can be used to override many of the
+default settings.
+
+[Restrictions:]
+
+An "atom_style"_atom_style.html must be previously defined to use this
+command.
+
+[Related commands:]
+
+"lattice"_lattice.html, "create_box"_create_box.html,
+"read_data"_read_data.html, "read_restart"_read_restart.html
+
+[Default:]
+
+{units} = box, {velocity} = 0. 0. 0., {omega} = 0. 0. 0.,
+{orientation} = 1. 0. 0. 0.

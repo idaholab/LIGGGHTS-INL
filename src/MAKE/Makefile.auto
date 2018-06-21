@@ -206,10 +206,10 @@ BUILD_LIBRARIES ?= "NONE"
 # Default variables
 ifeq ($(MINGW), 0)
     # for Linux
-    MPI_CCFLAGS_USR ?=-funroll-loops -fstrict-aliasing -Wall -Wno-unused-result
+    MPI_CCFLAGS_USR ?=-funroll-loops -fstrict-aliasing -Wall
     MPI_LDFLAGS_USR ?=-lstdc++
     MPI_DEPFLAGS_USR ?=-M
-    CCFLAGS_USR ?=-funroll-loops -fstrict-aliasing -Wall -Wno-unused-result
+    CCFLAGS_USR ?=-funroll-loops -fstrict-aliasing -Wall
     LDFLAGS_USR ?=-lstdc++
     DEPFLAGS_USR ?=-M
     ARCHIVE_USR ?= ar
@@ -441,6 +441,9 @@ ifeq ($(USE_MPI), "ON")
     endif
     # We assume that the compiler supports #pragma message
     TMP := $(shell $(ECHO) '\#include <mpi.h> \n \#if defined(MPICH) \n \#pragma message "MPICH" \n \#elif defined(OPEN_MPI) \n \#pragma message "OpenMPI" \n \#else \n \#pragma message "Unknown" \n \#endif' > $(TMPFILE) && $(MPICXX) $(OPT_LVL) $(PROF_FLAG) $(TMP_INC) -xc++ -E $(TMPFILE) 2> /dev/null | grep pragma | grep -m 1 message || echo -1)
+    ifeq ($(AUTO_DEBUG),1)
+        $(shell $(ECHO) "MPI identifcation test result: $(TMP)" >> $(AUTO_LOG_FILE))
+    endif
     # See if compilation has worked out
     ifeq ($(TMP), -1)
         # Maybe it failed because of the optimization as -Og is not known
@@ -458,19 +461,16 @@ ifeq ($(USE_MPI), "ON")
     endif
     MPI_TYPE := $(patsubst "%",%,$(word $(words $(TMP)), $(TMP)))
     ifeq ($(MPI_TYPE), MPICH)
-        ifneq ($(origin MPI_ADDLIBS), undefined)
-            MPI_ADDLIBS += -lmpich -lmpichcxx
-        else
-            ifneq ($(origin MPI_ADDLIBS_USR), undefined)
-                MPI_ADDLIBS_USR += -lmpich -lmpichcxx
-            else
-                MPI_ADDLIBS = -lmpich -lmpichcxx
+        ifeq ($(origin MPI_ADDLIBS), undefined)
+            ifeq ($(origin MPI_ADDLIBS_USR), undefined)
+                # no libraries added here (like -lmpich because it should be in the wrapper anyways)
+                MPI_ADDLIBS = 
             endif
         endif
         TMP := $(shell $(MPICXX) -show)
         ifneq ($(word 1,$(TMP)), $(CXX))
-            $(info Warning: MPICXX compiler is $(word 1,$(TMP)) but $(CXX). Thus, setting the MPICH cxx compiler to $(CXX).)
-            MPICXX := $(MPICXX) -cxx $(CXX)
+            $(info Warning: MPICXX compiler is $(word 1,$(TMP)) but CXX=$(CXX). Thus, setting the MPICH cxx compiler to $(CXX).)
+            MPICXX := $(MPICXX) -cxx=$(CXX)
         endif
     else
         ifeq ($(MPI_TYPE), OpenMPI)
@@ -494,7 +494,10 @@ ifeq ($(USE_MPI), "ON")
     MPI_CCFLAGS += $(OPT_LVL) $(PROF_FLAG)
     MPI_LDFLAGS += $(OPT_LVL) $(PROF_FLAG)
     # Linking test
-    TMP := $(shell $(ECHO) 'int main(){}' > $(TMPFILE) && $(MPICXX) -xc++ $(MPI_LDFLAGS) -L$(MPI_LIB) $(MPI_ADDLIBS) -o /dev/null $(TMPFILE) 2> /dev/null && echo 0 || echo -1)
+    ifeq ($(AUTO_DEBUG),1)
+        $(shell $(ECHO) "MPI compile test with command: $(MPICXX) -xc++ $(MPI_LDFLAGS) -L$(MPI_LIB) $(MPI_ADDLIBS) -o /dev/null $(TMPFILE)" >> $(AUTO_LOG_FILE))
+    endif
+    TMP := $(shell $(ECHO) 'int main(){}' > $(TMPFILE) && $(MPICXX) -xc++ $(MPI_LDFLAGS) -L$(MPI_LIB) $(MPI_ADDLIBS) -o /dev/null $(TMPFILE) 2>> $(AUTO_LOG_FILE) && echo 0 || echo -1)
     ifeq ($(TMP), -1)
         $(error 'Could not compile and link a simple MPI example. Test was done with MPI_LIB=$(MPI_LIB)')
     endif
@@ -585,10 +588,18 @@ ifeq ($(TMP),0)
     CCFLAGS += -std=c++17
 else
     TMP := $(shell $(ECHO) 'int main(){}' > $(TMPFILE) && $(CXX) $(EXTRA_INC) $(EXTRA_LIB) $(EXTRA_ADDLIBS) -xc++ $(LDFLAGS) $(CCFLAGS) -std=c++11 -o /dev/null $(TMPFILE) 2> /dev/null && echo 0 || echo -1)
+    ifeq ($(AUTO_DEBUG),1)
+        $(shell $(ECHO) "#cmd for c++11 check: $(CXX) $(EXTRA_INC) $(EXTRA_LIB) $(EXTRA_ADDLIBS) -xc++ $(LDFLAGS) $(CCFLAGS) -std=c++11 -o /dev/null $(TMPFILE) 2> /dev/null" >> $(AUTO_LOG_FILE))
+        $(shell $(CXX) $(EXTRA_INC) $(EXTRA_LIB) $(EXTRA_ADDLIBS) -xc++ $(LDFLAGS) $(CCFLAGS) -std=c++11 -o /dev/null $(TMPFILE) &>> $(AUTO_LOG_FILE))
+        $(shell $(ECHO) '#tmp: $(TMP)' >> $(AUTO_LOG_FILE))
+    endif
     ifeq ($(TMP),0)
         CXXVERSION = 11
         CCFLAGS += -std=c++11
     endif
+endif
+ifeq ($(AUTO_DEBUG),1)
+    $(shell $(ECHO) '#cxxversion $(CXXVERSION)' >> $(AUTO_LOG_FILE))
 endif
 
 # Check for special functions support
@@ -752,6 +763,9 @@ ifeq ($(USE_VTK), "ON")
             ifeq ($(AUTOINSTALL_VTK), "ON")
                 # Check if sources provide the convex surface model
                 $(info 'Could not compile VTK example. As AUTOINSTALL_VTK is set to "ON". VTK will now be automatically downloaded to $(LIB_PATH)')
+                ifeq (, $(shell which cmake))
+                    $(error 'Could not find cmake. Please ensure that it is in your PATH environment variable otherwise installing VTK automatically will not be possible')
+                endif
                 # Check if $(LIB_PATH)/vtk/src folder is available
                 TMP := $(shell ls "$(LIB_PATH)/vtk/src" 2> /dev/null && echo 0 || echo -1)
                 # If not download vtk
@@ -846,7 +860,7 @@ ifeq ($(USE_VTK), "ON")
         ifeq ($(VTK_MAJOR_VERSION),5)
             VTK_APPENDIX = $(strip $(call FILTER,libvtkCommon, $(VTK_LIB)))
         else
-            ifneq (,$(filter $(VTK_MAJOR_VERSION),6 7 8))
+            ifneq (,$(filter $(VTK_MAJOR_VERSION),6 7 8 9))
                 VTK_APPENDIX = $(strip $(call FILTER,libvtkParallelMPI, $(VTK_LIB)))
             else
                 $(error 'Unsupported VTK version $(VTK_VERSION)')
@@ -909,6 +923,7 @@ ifeq ($(USE_VTK), "ON")
         # in this case we need to disable c++11 or c++17
         CCFLAGS_STD = -std=c++11 -std=c++17
         CCFLAGS := $(filter-out $(CCFLAGS_STD),$(CCFLAGS))
+        $(info "Warning VTK 5 disables c++11/17 standard")
     else
         VTK_APPENDIX := -$(VTK_APPENDIX)
         VTK_LIB_SET = 0
@@ -973,6 +988,7 @@ ifeq ($(USE_VTK), "ON")
                 # in this case we need to disable c++11 or c++17
                 CCFLAGS_STD = -std=c++11 -std=c++17
                 CCFLAGS := $(filter-out $(CCFLAGS_STD),$(CCFLAGS))
+                $(info "Warning VTK < 6.2 disables c++11/17 standard")
             endif
             ifeq ($(VTK_LIB_SET), 0)
                 VTK_LIB := -L$(dir $(shell find $(VTK_BASE_PATH)/lib* -name 'libvtkParallelMPI$(VTK_APPENDIX).so' 2> /dev/null | tail -n 1))
@@ -981,7 +997,7 @@ ifeq ($(USE_VTK), "ON")
                 endif
             endif
         endif
-        ifneq (, $(filter $(VTK_MAJOR_VERSION),7 8))
+        ifneq (, $(filter $(VTK_MAJOR_VERSION),7 8 9))
             VTKSET = 1
             VTK_ADDLIBS +=  -lvtkCommonCore$(VTK_APPENDIX) \
                             -lvtkIOCore$(VTK_APPENDIX) \
@@ -1008,7 +1024,7 @@ ifeq ($(USE_VTK), "ON")
                     VTK_LIB =
                 endif
             endif
-            ifeq ($(VTK_MAJOR_VERSION),8)
+            ifeq (, $(filter $(VTK_MAJOR_VERSION),8 9))
                 ifeq (, $(filter $(CXXVERSION),11 17))
                     $(error VTK version $(VTK_VERSION) requires support for -std=c++11 or -std=c++17 in the compiler flags)
                 endif
@@ -1024,7 +1040,8 @@ ifeq ($(USE_VTK), "ON")
     ifeq ($(AUTO_DEBUG),1)
         $(shell $(ECHO) "#vtk_addlibs: $(VTK_ADDLIBS)" >> $(AUTO_LOG_FILE))
         $(shell $(ECHO) "#vtk_rpath: $(VTK_RPATH)" >> $(AUTO_LOG_FILE))
-        $(shell $(ECHO) "#vtk compile test:" >> $(AUTO_LOG_FILE))
+        $(shell $(ECHO) "#vtk compile command: $(CXX) $(VTK_RPATH) $(EXTRA_LIB) $(VTK_LIB) $(VTK_INC) $(EXTRA_ADDLIBS) $(VTK_ADDLIBS) $(CCFLAGS) -xc++ -o /dev/null $(TMPFILE)" >> $(AUTO_LOG_FILE))
+        $(shell $(ECHO) "#vtk compile output:" >> $(AUTO_LOG_FILE))
         TMP := $(shell $(ECHO) "\#include <vtkVersion.h> \n int main(){}" > $(TMPFILE) && $(CXX) $(VTK_RPATH) $(EXTRA_LIB) $(VTK_LIB) $(VTK_INC) $(EXTRA_ADDLIBS) $(VTK_ADDLIBS) $(CCFLAGS) -xc++ -o /dev/null $(TMPFILE) &>> $(AUTO_LOG_FILE))
     endif
     TMP := $(shell $(ECHO) '\#include <vtkVersion.h> \n int main(){}' > $(TMPFILE) && $(CXX) $(VTK_RPATH) $(EXTRA_LIB) $(VTK_LIB) $(VTK_INC) $(EXTRA_ADDLIBS) $(VTK_ADDLIBS) $(CCFLAGS) -xc++ -o /dev/null $(TMPFILE) 2> /dev/null && echo 0 || echo -1)
@@ -1168,10 +1185,10 @@ ifeq ($(USE_CONVEX), "ON")
             endif
             # At this stage we now have libccd downloaded. Next we need to compile it
             OBJDIR := $(PWD)
-            TMP := $(shell $(ECHO) '\#!/bin/bash \n cd "$(OBJDIR)/$(LIB_PATH)/libccd/src" \n make PREFIX="$(PWD)/../../" USE_DOUBLE=yes &> /dev/null' > $(TMPFILE))
+            TMP := $(shell $(ECHO) '\#!/bin/bash \n cd "$(OBJDIR)/$(LIB_PATH)/libccd/src" \n CC="gcc -fPIC" make PREFIX="$(PWD)/../../" USE_DOUBLE=yes &> /dev/null' > $(TMPFILE))
             TMP := $(shell bash $(TMPFILE) && echo 0 || echo -1)
             ifeq ($(TMP), -1)
-                $(error 'Compilation of libccd failed. Please install it manually')
+                $(error 'Compilation of libccd failed. Please install it manually. The bash script used to build libccd can be found here: $(TMPFILE)')
             endif
         else
             $(error 'Could not compile and link Convex (libccd) example with CONVEX_INC="$(CONVEX_INC)", CONVEX_LIB="$(CONVEX_LIB)" and CONVEX_ADDLIBS="$(CONVEX_ADDLIBS)". AUTOINSTALL_CONVEX is not set to "ON" and thus we cannot continue.')
@@ -1317,6 +1334,9 @@ EXTRA_ADDLIBS += $(PKG_ADDLIBS) $(PKG_SYSADDLIBS)
 # tr replaces the \n from the grep output to ,
 # sed removes the last , that is followed by EOL
 EXTRA_RPATH = -Wl,$(shell $(ECHO) $(EXTRA_LIB) | grep -oe '\-L[^ ]*' | sed 's/-L/-rpath,/g' | tr '\n' ',' | sed 's/,$$//')
+ifeq ($(EXTRA_RPATH),-Wl,)
+    EXTRA_RPATH=
+endif
 
 # Path to src files
 
@@ -1365,17 +1385,50 @@ $(shell $(ECHO) '    CCFLAGS = $(CCFLAGS)' >> $(OPTIONS_FILE))
 $(shell $(ECHO) '    DEPFLAGS = $(DEPFLAGS)' >> $(OPTIONS_FILE))
 $(shell $(ECHO) 'endif' >> $(OPTIONS_FILE))
 
+# Write those variable also to stdout
+$(info )
+$(info *********************************************************************)
+$(info Summary of make auto configuration:)
+$(info )
+$(info CXX = $(CXX))
+$(info LINK = $(LINK))
+$(info ARCHIVE = $(ARCHIVE))
+$(info DEPFLAGS = $(DEPFLAGS))
+$(info CCFLAGS = $(CCFLAGS))
+$(info SHFLAGS = $(SHFLAGS))
+$(info ARFLAGS = $(ARFLAGS))
+$(info SHLIBFLAGS = $(SHLIBFLAGS))
+$(info LDFLAGS = $(LDFLAGS))
+$(info EXTRA_INC = $(EXTRA_INC))
+$(info EXTRA_PATH = $(EXTRA_PATH))
+$(info EXTRA_ADDLIBS = $(EXTRA_ADDLIBS))
+$(info EXTRA_RPATH = $(EXTRA_RPATH))
+$(info TARGET = $(TARGET))
+$(info SHLIBEXE = $(SHLIBEXE))
+$(info LIBEXE = $(LIBEXE))
+$(info EXE = $(EXE))
+$(info *********************************************************************)
+$(info )
+
+PRE=@
+ifeq ($(AUTO_DEBUG),1)
+    PRE=
+endif
+
 $(TARGET):	$(OBJ) $(LIBTARGETS)
-	$(LINK) $(LDFLAGS) $(OBJ) $(EXTRA_PATH) $(EXTRA_RPATH) $(EXTRA_LIB) $(EXTRA_ADDLIBS) -o $(EXE)
+	@echo "Linking $(TARGET)"
+	$(PRE)$(LINK) $(LDFLAGS) $(OBJ) $(EXTRA_PATH) $(EXTRA_RPATH) $(EXTRA_LIB) $(EXTRA_ADDLIBS) -o $(EXE)
 	$(SIZE) $(EXE)
 
 # Library targets
 
 lib:	$(OBJ)
-	$(ARCHIVE) $(ARFLAGS) $(LIBEXE) $(OBJ)
+	@echo "Linking library: $(LIBEXE)"
+	$(PRE)$(ARCHIVE) $(ARFLAGS) $(LIBEXE) $(OBJ)
 
 shlib:	$(OBJ)
-	$(CXX) $(CCFLAGS) $(SHFLAGS) $(SHLIBFLAGS) $(EXTRA_PATH) -o $(SHLIBEXE) \
+	@echo "Linking shared library: $(SHLIBEXE)"
+	$(PRE)$(CXX) $(CCFLAGS) $(SHFLAGS) $(SHLIBFLAGS) $(EXTRA_PATH) -o $(SHLIBEXE) \
         $(OBJ) $(EXTRA_ADDLIBS) $(EXTRA_RPATH) $(EXTRA_LIB)
 	@rm -rf ../libliggghts.so
 	@ln -s $(notdir $(SHLIBEXE)) ../libliggghts.so
@@ -1383,10 +1436,12 @@ shlib:	$(OBJ)
 # Compilation rules
 
 %.o:%.cpp
-	$(CXX) $(CCFLAGS) $(SHFLAGS) $(EXTRA_PATH) $(EXTRA_INC) -c $<
+	@echo "Compiling $<"
+	$(PRE)$(CXX) $(CCFLAGS) $(SHFLAGS) $(EXTRA_PATH) $(EXTRA_INC) -c $<
 
 %.d:%.cpp
-	$(CXX) $(CCFLAGS) $(EXTRA_INC) $(DEPFLAGS) $< > $@
+	@echo "Creating dependencies for $<"
+	$(PRE)$(CXX) $(CCFLAGS) $(EXTRA_INC) $(DEPFLAGS) $< > $@
 
 # Individual dependencies
 

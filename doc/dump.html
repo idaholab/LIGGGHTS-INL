@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>dump command &mdash; LIGGGHTS v3.X documentation</title>
+  <title>dump command &mdash; LIGGGHTS v4.X documentation</title>
   
 
   
@@ -25,21 +25,15 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="LIGGGHTS v3.X documentation" href="index.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -61,7 +55,7 @@
             
             
               <div class="version">
-                v3.X
+                v4.X
               </div>
             
           
@@ -86,17 +80,135 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_intro.html">1. Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#what-is-liggghts-r-inl">1.1. What is LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-public-vs-liggghts-premium">1.2. LIGGGHTS-PUBLIC VS. LIGGGHTS-PREMIUM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#history">1.3. History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-features">1.4. LIGGGHTS(R)-INL features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-general-features">1.5. LIGGGHTS(R)-INL General features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-liggghts-public-features">1.6. LIGGGHTS(R)-INL Model features: LIGGGHTS-PUBLIC features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#liggghts-r-inl-model-features-additional-features-for-liggghts-r-inl">1.7. LIGGGHTS(R)-INL Model features: Additional features for LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#open-source-distribution">1.8. Open source distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_intro.html#acknowledgments-and-citations">1.9. Acknowledgments and citations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_start.html">2. Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#how-to-obtain-liggghts-r-inl">2.1. How to obtain LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl">2.2. Making LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#read-this-first">2.2.1. <strong>Read this first:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#steps-to-build-a-liggghts-r-inl-executable">2.2.2. <strong>Steps to build a LIGGGHTS(R)-INL executable:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#advanced-building-using-custom-makefiles">2.2.3. <strong>Advanced building using custom makefiles</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#errors-that-can-occur-when-making-liggghts-r-inl">2.2.4. <strong>Errors that can occur when making LIGGGHTS(R)-INL:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-build-tips">2.2.5. <strong>Additional build tips:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-a-mac">2.2.6. <strong>Building for a Mac:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#building-for-windows">2.2.7. <strong>Building for Windows:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#making-liggghts-r-inl-with-optional-packages">2.3. Making LIGGGHTS(R)-INL with optional packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-via-the-make-py-script">2.4. Building LIGGGHTS(R)-INL via the Make.py script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#building-liggghts-r-inl-as-a-library">2.5. Building LIGGGHTS(R)-INL as a library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#static-library">2.5.1. <strong>Static library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#shared-library">2.5.2. <strong>Shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#additional-requirement-for-using-a-shared-library">2.5.3. <strong>Additional requirement for using a shared library:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_start.html#calling-the-liggghts-r-inl-library">2.5.4. <strong>Calling the LIGGGHTS(R)-INL library:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#running-liggghts-r-inl">2.6. Running LIGGGHTS(R)-INL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#command-line-options">2.7. Command-line options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_start.html#liggghts-r-inl-screen-output">2.8. LIGGGHTS(R)-INL screen output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_input_script.html">3. Input Script</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#liggghts-r-inl-input-script">3.1. LIGGGHTS(R)-INL input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#parsing-rules">3.2. Parsing rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#input-script-structure">3.3. Input script structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_input_script.html#an-example-input-script">3.4. An example input script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_commands.html">4. Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#list-of-all-commands">4.1. List of all commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#bond-style-potentials">4.2. bond_style potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#compute-styles">4.3. compute styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#dump-styles">4.4. dump styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#fix-styles">4.5. fix styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_commands.html#pair-style-potentials">4.6. pair_style potentials</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_gran_models.html">5. Contact models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#cohesion-commands">5.1. cohesion commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#model-commands">5.2. model commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#rolling-friction-commands">5.3. rolling_friction commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#surface-commands">5.4. surface commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_gran_models.html#tangential-commands">5.5. tangential commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_mesh_modules.html">6. Mesh modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_mesh_modules.html#module-commands">6.1. module commands</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Section_packages.html">7. Packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Section_howto.html">8. How-to discussions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#restarting-a-simulation">8.1. Restarting a simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#d-simulations">8.2. 2d simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#running-multiple-simulations-from-one-input-script">8.3. Running multiple simulations from one input script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#granular-models">8.4. Granular models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#coupling-liggghts-r-inl-to-other-codes">8.5. Coupling LIGGGHTS(R)-INL to other codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#visualizing-liggghts-r-inl-snapshots">8.6. Visualizing LIGGGHTS(R)-INL snapshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#triclinic-non-orthogonal-simulation-boxes">8.7. Triclinic (non-orthogonal) simulation boxes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#output-from-liggghts-r-inl-thermo-dumps-computes-fixes-variables">8.8. Output from LIGGGHTS(R)-INL (thermo, dumps, computes, fixes, variables)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#global-per-atom-local-data">8.8.1. Global/per-atom/local data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#scalar-vector-array-data">8.8.2. Scalar/vector/array data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#thermodynamic-output">8.8.3. Thermodynamic output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#dump-file-output">8.8.4. Dump file output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-write-output-files">8.8.5. Fixes that write output files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-process-output-quantities">8.8.6. Computes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-process-output-quantities">8.8.7. Fixes that process output quantities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#computes-that-generate-values-to-output">8.8.8. Computes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#fixes-that-generate-values-to-output">8.8.9. Fixes that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#variables-that-generate-values-to-output">8.8.10. Variables that generate values to output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_howto.html#summary-table-of-output-options-and-data-flow-between-commands">8.8.11. Summary table of output options and data flow between commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#walls">8.9. Walls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_howto.html#library-interface-to-liggghts-r-inl">8.10. Library interface to LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_modify.html">9. Modifying &amp; extending LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#atom-styles">9.1. Atom styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#compute-styles">9.2. Compute styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-styles">9.3. Dump styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#dump-custom-output-options">9.4. Dump custom output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#fix-styles">9.5. Fix styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#input-script-commands">9.6. Input script commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#pairwise-potentials">9.7. Pairwise potentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#region-styles">9.8. Region styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#thermodynamic-output-options">9.9. Thermodynamic output options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#variable-options">9.10. Variable options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_modify.html#submitting-new-features-for-inclusion-in-liggghts-r-inl">9.11. Submitting new features for inclusion in LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_python.html">10. Python interface to LIGGGHTS(R)-INL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#building-liggghts-r-inl-as-a-shared-library">10.1. Building LIGGGHTS(R)-INL as a shared library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#installing-the-python-wrapper-into-python">10.2. Installing the Python wrapper into Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#extending-python-with-mpi-to-run-in-parallel">10.3. Extending Python with MPI to run in parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#testing-the-python-liggghts-r-inl-interface">10.4. Testing the Python-LIGGGHTS(R)-INL interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-serial">10.4.1. <strong>Test LIGGGHTS(R)-INL and Python in serial:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#test-liggghts-r-inl-and-python-in-parallel">10.4.2. <strong>Test LIGGGHTS(R)-INL and Python in parallel:</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Section_python.html#running-python-scripts">10.4.3. <strong>Running Python scripts:</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#using-liggghts-r-inl-from-python">10.5. Using LIGGGHTS(R)-INL from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_python.html#example-python-scripts-that-use-liggghts-r-inl">10.6. Example Python scripts that use LIGGGHTS(R)-INL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Section_errors.html">11. Errors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#common-problems">11.1. Common problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#reporting-bugs">11.2. Reporting bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error-warning-messages">11.3. Error &amp; warning messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#error">11.4. Errors:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Section_errors.html#warnings">11.5. Warnings:</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -108,7 +220,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="Manual.html">LIGGGHTS</a>
@@ -118,7 +230,9 @@
 
       
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -265,10 +379,10 @@ v_name = per-atom vector calculated by an atom-style variable with name
 dump 2 subgroup atom 50 dump.run.bin
 dump 4a all custom 100 dump.myforce.* id type x y vx fx
 dump 4b flow custom 100 dump.%.myforce id type c_myF[3] v_ke
-dump dmpMyMesh mesh/vtk 100 mesh*.vtk vel area my_mesh_id
-dump dmpAllMeshes mesh/vtk 100 mesh*.vtk stress wear
-dump dmpMyMeshVTM mesh/vtm 100 mesh*.vtm meshes my_mesh_id mesh_properties vel area
-dump dmpAllMeshesVTM mesh/vtm 100 mesh*.vtm meshes all mesh_properties stress wear
+dump dmpMyMesh all mesh/vtk 100 mesh*.vtk vel area my_mesh_id
+dump dmpAllMeshes all mesh/vtk 100 mesh*.vtk stress wear
+dump dmpMyMeshVTM all mesh/vtm 100 mesh*.vtm meshes my_mesh_id mesh_properties vel area
+dump dmpAllMeshesVTM all mesh/vtm 100 mesh*.vtm meshes all mesh_properties stress wear
 </pre></div>
 </div>
 </div>
@@ -348,7 +462,7 @@ the 3 tilt factors will be included on each of the 3 following lines.
 This bounding box is convenient for many visualization programs.  The
 meaning of the 6 character flags for &#8220;xx yy zz&#8221; is the same as above.</p>
 <p>Note that the first two numbers on each line are now xlo_bound instead
-of xlo, etc, since they repesent a bounding box.  See <span class="xref std std-ref">this section</span> of the doc pages for a geometric
+of xlo, etc, since they repesent a bounding box.  See <a class="reference internal" href="Section_howto.html#howto-7"><span>this section</span></a> of the doc pages for a geometric
 description of triclinic boxes, as defined by LIGGGHTS(R)-INL, simple formulas
 for how the 6 bounding box extents (xlo_bound,xhi_bound,etc) are
 calculated from the triclinic parameters, and how to transform those
@@ -366,8 +480,12 @@ boundaries.  The format can be changed to unscaled coords via the
 added for each atom via dump_modify.</p>
 <p>For style <em>atom/vtk</em>, atom coordinates, velocity, rotational
 velocity, force, atom ID, atom radius and atom type are written to
-VTK files. Note that you have to link against VTK libraries to use
+VTK files.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that you have to link against VTK libraries to use
 this functionality.</p>
+</div>
 <p>Style <em>custom</em> allows you to specify a list of atom attributes to be
 written to the dump file for each atom.  Possible attributes are
 listed above and will appear in the order specified.  You cannot
@@ -397,7 +515,7 @@ from using the (numerical) atom type to an element name (or some
 other label). This will help many visualization programs to guess
 bonds and colors.</p>
 <p>The <em>mesh/stl</em> style dumps active STL geometries defined via
-<code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">mesh</span></code> commands into the specified file.
+<a class="reference internal" href="fix_mesh_surface.html"><em>fix mesh/surface</em></a> commands into the specified file.
 If you do not supply the optional list of mesh IDs, all meshes are dumped,
 irrespective of whether they are used in a <a class="reference internal" href="fix_wall_gran.html"><em>fix wall/gran</em></a>
 command or not. By specifying a list of mesh IDs you can explicitly
@@ -436,14 +554,14 @@ Paraview , www.paraview.org</p>
 commands, you can specify which meshes to dump. If no meshes are specified,
 all meshes used in the simulation are dumped.</p>
 <p>The <em>mesh/vtk</em> or the <em>mesh/vtm</em> (new) style can be used to dump active mesh
-geometries defined via <code class="xref doc docutils literal"><span class="pre">fix</span> <span class="pre">mesh</span></code> commands to a series of VTK
-files. The <em>mesh/vtk</em> style allows the file endings .vtk, .vtp and .pvtp. The
-first two write the data only on one processor, the latter writes several files
-in parallel. The <em>mesh/vtm</em> style currently only allows the .vtm file ending
-and writes in serial only. Different keywords can be used to dump the
-per-triangle averaged stress in normal and shear direction, id, velocity, wear,
-stress components (fx / element area, fy / element area, fz / element area),
-area (area of each element) or the process which owns the element
+geometries defined via <a class="reference internal" href="fix_mesh_surface.html"><em>fix mesh/surface</em></a> commands to a
+series of VTK files. The <em>mesh/vtk</em> style allows the file endings .vtk, .vtp and
+.pvtp. The first two write the data only on one processor, the latter writes
+several files in parallel. The <em>mesh/vtm</em> style currently only allows the .vtm
+file ending and writes in serial only. Different keywords can be used to dump
+the per-triangle averaged stress in normal and shear direction, id, velocity,
+wear, stress components (fx / element area, fy / element area, fz / element
+area), area (area of each element) or the process which owns the element
 (visulatisation of the parallel decomposition) into the specified file using a
 VTK file format. The &#8216;meshes&#8217; keyword (only for <em>mesh/vtm</em>) and the list of
 mesh IDs is optional.  As with the stl style, all active meshes are dumped if
@@ -458,6 +576,11 @@ and finally for <em>original</em> no interpolation will take place and cell and 
 variables are written to cells and points, respectively. Keywords <em>aedges</em> and
 <em>acorners</em> dump the number of active edges/corners per face.  Keyword <em>nneighs</em>
 dumps the number of face neighbors LIGGGHTS(R)-INL has recognized for each face.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that you have to link against VTK libraries to use
+<em>mesh/vtk</em> and <em>mesh/vtm</em>.</p>
+</div>
 <p><em>mesh/vtm</em> is similar to <em>mesh/vtk</em> but only the arguments are different. The
 former requires the use of the keyword <em>meshes</em> which has to be followed either
 by a list of mesh-ids or the keyword &#8216;all&#8217;. The latter will cause all meshes to
@@ -671,7 +794,7 @@ per-atom quantities which could then be output into dump files.</p>
 <div class="section" id="restrictions">
 <h2>Restrictions<a class="headerlink" href="#restrictions" title="Permalink to this headline">¶</a></h2>
 <p>To write gzipped dump files, you must compile LIGGGHTS(R)-INL with the
--DLAMMPS_GZIP option - see the <span class="xref std std-ref">Making LAMMPS</span> section of the documentation.</p>
+-DLAMMPS_GZIP option - see the <a class="reference internal" href="Section_start.html#start-2"><span>Making LAMMPS</span></a> section of the documentation.</p>
 <p>To be able to use <em>atom/vtk</em>, you have to link to VTK libraries,
 please adapt your Makefile accordingly.</p>
 </div>
@@ -688,9 +811,7 @@ please adapt your Makefile accordingly.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -703,7 +824,7 @@ please adapt your Makefile accordingly.</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -721,7 +842,7 @@ please adapt your Makefile accordingly.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'v3.X',
+            VERSION:'v4.X',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -740,14 +861,13 @@ please adapt your Makefile accordingly.</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          
+          SphinxRtdTheme.Navigation.enableSticky();
+          
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

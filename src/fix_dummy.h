@@ -64,7 +64,7 @@ class FixMultisphere : public Fix {
   void set_v_integrate(double *v) {}
   int belongs_to(int i) {return -1;}
 
-  void* extract(const char*& a, int& b, int& c) {return NULL;}
+  void* extract_ms(const char*& a, int& b, int& c) {return NULL;}
 
   inline double extract_ke()
   { return 0.; }

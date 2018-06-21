@@ -53,16 +53,19 @@ FixStyle(wall/gran,FixWallGran)
 #include "fix_mesh_surface.h"
 #include "contact_interface.h"
 #include "granular_wall.h"
-#include <string>
-#include <vector>
 #include "fix_contact_property_atom_wall.h"
 #include "compute_pair_gran_local.h"
+#include "iloopcallbackcaller.h"
+#include "physicsheatconduction.h"
+
+#include <string>
+#include <vector>
 
 namespace LCM = LIGGGHTS::ContactModels;
 
 namespace LAMMPS_NS {
 
-class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
+class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup, public LIGGGHTS::ILoopCallbackCaller {
 
  friend class LIGGGHTS::Walls::IGranularWall;
 
@@ -78,8 +81,8 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   virtual void init();
   virtual void setup(int vflag);
   virtual void post_force(int vflag);
-  virtual void post_force_pgl();
   virtual void post_force_respa(int, int, int);
+  virtual int modify_param(int narg, char **arg);
 
   virtual int min_type();
   virtual int max_type();
@@ -145,12 +148,6 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   inline bool store_force_contact_stress() const
   { return store_force_contact_stress_; }
 
-  inline ComputePairGranLocal * compute_wall_gran_local() const
-  { return cwl_; }
-
-  inline int addflag() const
-  { return addflag_; }
-
   inline int body(int i) const
   { return body_[i]; }
 
@@ -198,17 +195,15 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
 
   class PrimitiveWall* primitiveWall();
 
+  int n_neighs_local() const;
   int n_contacts_all(int &nIntersect);
   int n_contacts_all(int contact_groupbit,int &nIntersect);
   int n_contacts_local(int &nIntersect);
   int n_contacts_local(int contact_groupbit,int &nIntersect);
   int is_moving();
 
-  void register_compute_wall_local(ComputePairGranLocal *,int&);
-  void unregister_compute_wall_local(ComputePairGranLocal *ptr);
-
   void wall_temperature_unique(bool &has_temp,bool &temp_unique, double &temperature_unique);
-  void addHeatFlux(class TriMesh *mesh,int i,const double ri,double rsq,double area_ratio);
+  void addHeatFlux(class TriMesh *mesh, LCM::SurfacesIntersectData & sidata,int i,const double ri,double rsq,double area_ratio);
 
  protected:
 
@@ -216,9 +211,6 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   int atom_type_wall_;
 
   int computeflag_;
-
-  int addflag_;
-  ComputePairGranLocal *cwl_;
 
   double dt_;
   int shearupdate_;
@@ -239,8 +231,6 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   // heat transfer
   void init_heattransfer();
   bool heattransfer_flag_;
-  // model for contact area calculation
-  int area_calculation_mode_;
 
   // mesh and primitive force implementations
   virtual void post_force_mesh(int);
@@ -269,11 +259,7 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   class FixPropertyAtom *fppa_htcw; 
 
   double Temp_wall;
-  double fixed_contact_area_;
   double Q,Q_add;
-
-  const double *th_cond;
-  double const* const* deltan_ratio;
 
   LIGGGHTS::Walls::IGranularWall * impl;
 
@@ -329,6 +315,9 @@ class FixWallGran : public Fix, public LIGGGHTS::IContactHistorySetup {
   double cutneighmax_;
 
   virtual void post_force_wall(int vflag);
+
+private:
+  PhysicsHeatConduction heatPhy;
 };
 
 }

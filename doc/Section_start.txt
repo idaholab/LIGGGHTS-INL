@@ -13,10 +13,10 @@ experienced users.
 
 <!-- RST
 
-.. contents:: 
+.. contents::
 		:local:
 		:depth: 1
-   
+
 END_RST -->
 
 <!-- HTML_ONLY -->
@@ -28,7 +28,7 @@ END_RST -->
 2.6 "Running LIGGGHTS(R)-INL"_#start_6
 2.7 "Command-line options"_#start_7
 2.8 "Screen output"_#start_8 :all(b)
-<!--END_HTML_ONLY -->
+<!-- END_HTML_ONLY -->
 
 :line
 :line
@@ -36,10 +36,20 @@ END_RST -->
 2.1 How to obtain LIGGGHTS(R)-INL :h4,link(start_1)
 
 We recommend to use git to download the LIGGGHTS(R)-INL package. Make sure that the
-{git} command is available on your system. On a Ubuntu/Debian box this can be
+{git} command is available on your system. This can be achieved by:
 achieved by
 
-sudo apt-get install git :pre
+Ubuntu / Debian:
+  sudo apt-get install git
+-----
+Fedora:
+  su -c "dnf install git"
+-----
+CentOS:
+  su -c "yum install git"
+-----
+openSUSE Leaf 15.0:
+  su -c "zypper install git" :pre
 
 NOTE: Users of a LIGGGHTS-PREMIUM version will need to replace the
 LIGGGHTS-PUBLIC strings shown below by their respective version string. This
@@ -134,18 +144,45 @@ installed. A solid basis for several popular operating systems are listed below:
 Ubuntu 16.04LTS:
   sudo apt-get install openmpi-bin libopenmpi-dev libvtk6.2 libvtk6-dev
 -----
-Ubuntu 17.10:
+Ubuntu 17.10, 18.04 (LTS):
   sudo apt-get install openmpi-bin libopenmpi-dev libvtk6.3 libvtk6-dev
 -----
-Fedora 25:
-  su -
-  dnf install openmpi openmpi-devel paraview-openmpi paraview-openmpi-devel gcc-c++
-  exit
+Fedora 25, 26, 27:
+  su -c "dnf install openmpi openmpi-devel paraview-openmpi paraview-openmpi-devel gcc-c++"
   echo "export PATH=$PATH:/usr/lib64/openmpi/bin" >> ~/.bashrc
   echo "export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" >> ~/.bashrc
   echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" >> ~/.bashrc
   echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" >> ~/.bashrc
-  echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" >> ~/.bashrc :pre
+  echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" >> ~/.bashrc
+  . ~/.bashrc
+-----
+CentOS 7:
+  su -c "yum install openmpi openmpi-devel gcc-c++"
+  echo "export PATH=$PATH:/usr/lib64/openmpi/bin" >> ~/.bashrc
+  echo "export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" >> ~/.bashrc
+  echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/openmpi/lib:/usr/lib64/openmpi/lib/paraview" >> ~/.bashrc
+  echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" >> ~/.bashrc
+  echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/openmpi/include/paraview" >> ~/.bashrc
+  . ~/.bashrc
+  # now cd to a folder of your choosing such as
+  cd ~/Downloads
+  mkdir -p cmake
+  cd cmake
+  curl https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz > cmake-3.11.4.tar.gz
+  tar xzf cmake-3.11.4.tar.gz
+  cd cmake-3.11.4
+  ./bootstrap
+  make
+  su -c "make install"
+-----
+openSUSE Leaf 15.0:
+  su -c "zypper install openmpi3 libvtk1 vtk-devel gcc-c++"
+  echo "export PATH=$PATH:/usr/lib64/mpi/gcc/openmpi/bin" >> ~/.bashrc
+  echo "export LIBRARY_PATH=$LIBRARY_PATH:/usr/lib64/mpi/gcc/openmpi/lib:/usr/lib64/mpi/gcc/openmpi/lib/paraview" >> ~/.bashrc
+  echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/mpi/gcc/openmpi/lib:/usr/lib64/mpi/gcc/openmpi/lib/paraview" >> ~/.bashrc
+  echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/lib64/mpi/gcc/openmpi/include/paraview" >> ~/.bashrc
+  echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/lib64/mpi/gcc/openmpi/include/paraview" >> ~/.bashrc
+  . ~/.bashrc :pre
 
 [Step 0]
 
@@ -192,6 +229,12 @@ parameters of the variable called *USE_MPI*. A short description of the
 option follows and the last line actually sets the option to "ON". The
 default *MAKE/Makefile.user* comes with some sensibly set defaults. So you
 might not need to change anything at all.
+
+NOTE: If you are using CentOS you will need to set AUTOINSTALL_VTK to "ON".
+This will attempt to download, compile and install VTK (version 8) in your
+LIGGGHTS(R)-INL {lib} folder. Note that you need to have an up to date version of
+cmake available for this to succeed (see install guide for CentOS above in case
+your package manager provides an old version).
 
 The second part of this file is by default all commented out and deals with
 user and machine specific paths. Say that *USE_VTK* is set to "ON" and your
@@ -265,12 +308,12 @@ create a symbolic link. So after the compilation is complete and your lmp_auto
 executable was created you can run the following command to create a system-wide
 link:
 
-sudo ln -s lmp_auto /usr/local/bin :pre
+sudo ln -s lmp_auto /usr/local/bin/liggghts :pre
 
 Since {sudo} is not available on all systems (e.g. Fedora) you can alternatively
 try:
 
-su -c "ln -s lmp_auto /usr/local/bin" :pre
+su -c "ln -s lmp_auto /usr/local/bin/liggghts" :pre
 
 NOTE: You need administrator access to run the two commands listed above.
 
@@ -339,9 +382,9 @@ installation and scan all in.* files for the used contact models. It will
 also create the file *style_contact_model_autoExamples.whitelist* containing
 the unique used models in the whitelist format.
 
-A third whitelist is automatically created during the compilation and is 
+A third whitelist is automatically created during the compilation and is
 stored in *style_contact_model.whitelist* . If this file exists, the next
-compilation will NOT change this file. You can manually delete it and 
+compilation will NOT change this file. You can manually delete it and
 recreate it with
 
 sh Make.sh models
@@ -868,7 +911,7 @@ LIGGGHTS(R)-INL source files from the SVN or Git repositories, no packages are
 pre-installed.
 
 Packages are included or excluded by typing "make yes-name" or "make
-no-name", where "name" is the name of the package in lower-case. 
+no-name", where "name" is the name of the package in lower-case.
 You can also type "make yes-all"
 or "make no-all" to include/exclude various sets of packages.  Type "make
 package" to see the all of the package-related make options.
@@ -1203,6 +1246,7 @@ typing something like: "lmp_win_mpi -in in.lj". :l,ule
 
 The screen output from LIGGGHTS(R)-INL is described in the next section.  As it
 runs, LIGGGHTS(R)-INL also writes a log.lammps file with the same information.
+Additionally warnings are written to warnings.log by default.
 
 Note that this sequence of commands copies the LIGGGHTS(R)-INL executable
 (lmp_linux) to the directory with the input files.  This may not be
@@ -1241,20 +1285,23 @@ letter abbreviation can be used:
 -i or -in
 -h or -help
 -l or -log
+-w or -warn
 -nc or -nocite
 -p or -partition
 -pl or -plog
+-pw or -pwarn
 -ps or -pscreen
 -r or -restart
 -ro or -reorder
 -sc or -screen
 -sf or -suffix
+-thermo
 -v or -var :ul
 
 For example, lmp_auto might be launched as follows:
 
 mpirun -np 16 lmp_auto -v f tmp.out -l my.log -sc none < in.alloy
-mpirun -np 16 lmp_auto -var f tmp.out -log my.log -screen none < in.alloy :pre
+mpirun -np 16 lmp_auto -var f tmp.out -log my.log -warn warnings.txt -thermo thermo.txt -screen none < in.alloy :pre
 
 Here are the details on the options:
 
@@ -1298,6 +1345,21 @@ specified file is "none", then no log files are created.  Using a
 "log"_log.html command in the input script will override this setting.
 Option -plog will override the name of the partition log files file.N.
 
+-warn file :pre
+
+Specify a warnings file for LIGGGHTS(R)-INL to write runtime warnings to.  In
+one-partition mode, if the switch is not used, LIGGGHTS(R)-INL writes to the file
+warnings.lammps.  If this switch is used, LIGGGHTS(R)-INL writes to the specified
+file.  In multi-partition mode, if the switch is not used, a warnings.lammps
+file is created with hi-level status information.  Each partition also writes
+to a warnings.lammps.N file where N is the partition ID.  If the switch is
+specified in multi-partition mode, the hi-level warnings file is named "file"
+and each partition also writes warnings to a file.N.  For both one-partition
+and multi-partition mode, if the specified file is "none", then no warning
+files are created.  Using a "warn"_warn.html command in the input script will
+override this setting.  Option -pwarn will override the name of the partition
+warning files file.N.
+
 -nocite :pre
 
 Disable writing the log.cite file which is normally written to list
@@ -1332,9 +1394,20 @@ log files are created.  This overrides the filename specified in the
 -log command-line option.  This option is useful when working with
 large numbers of partitions, allowing the partition log files to be
 suppressed (-plog none) or placed in a sub-directory (-plog
-replica_files/log.lammps) If this option is not used the log file for
-partition N is log.lammps.N or whatever is specified by the -log
+replica_files/log.liggghts) If this option is not used the log file for
+partition N is log.liggghts.N or whatever is specified by the -log
 command-line option.
+
+-pwarn file :pre
+
+Specify the base name for the partition warning files, so partition N writes
+warnings to file.N. If file is none, then no partition warning files are
+created.  This overrides the filename specified in the -warn command-line
+option.  This option is useful when working with large numbers of partitions,
+allowing the partition warning files to be suppressed (-pwarn none) or placed
+in a sub-directory (-pwarn replica_files/warn.liggghts) If this option is not
+used the warning file for partition N is warnings.liggghts.N or whatever is
+specified by the -warn command-line option.
 
 -pscreen file :pre
 
@@ -1445,6 +1518,12 @@ writes screen information to a file.N.  For both one-partition and
 multi-partition mode, if the specified file is "none", then no screen
 output is performed. Option -pscreen will override the name of the
 partition screen files file.N.
+
+-thermo file :pre
+
+Writes the "thermodynamic output"_#start_8 specified via the
+"thermo"_thermo.html and "thermo_style"_thermo_style.html commands to
+the specified file.
 
 -var name value1 value2 ... :pre
 

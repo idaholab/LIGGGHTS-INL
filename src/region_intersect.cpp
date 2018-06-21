@@ -84,7 +84,7 @@ RegIntersect::RegIntersect(LAMMPS *lmp, int narg, char **arg) :
 
   Region **regions = domain->regions;
   for (int ilist = 0; ilist < nregion; ilist++)
-    if (regions[list[ilist]]->varshape) varshape = 1;
+    if (regions[list[ilist]]->has_varshape()) varshape = 1;
 
   // extent of intersection of regions
   // has bounding box if interior and any sub-region has bounding box
@@ -283,5 +283,5 @@ void RegIntersect::shape_update()
 {
   Region **regions = domain->regions;
   for (int ilist = 0; ilist < nregion; ilist++)
-    regions[list[ilist]]->shape_update();
+    regions[list[ilist]]->update_region();
 }

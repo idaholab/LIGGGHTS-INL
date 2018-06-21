@@ -92,7 +92,7 @@ namespace ContactModels
       
     }
 
-    inline void registerSettings(Settings & settings)
+    void registerSettings(Settings & settings)
     {
       settings.registerOnOff("viscous", viscous);
       settings.registerOnOff("tangential_damping", tangential_damping, true);
@@ -105,7 +105,7 @@ namespace ContactModels
       settings.registerOnOff("disableNormalWhenBonded", disable_when_bonded_, false);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb)
     {
         if (elasticpotflag_)
         {
@@ -150,7 +150,7 @@ namespace ContactModels
         }
     }
 
-    inline void connectToProperties(PropertyRegistry & registry) {
+    void connectToProperties(PropertyRegistry & registry) {
       registry.registerProperty("Yeff", &MODEL_PARAMS::createYeff);
       registry.registerProperty("Geff", &MODEL_PARAMS::createGeff);
       registry.registerProperty("charVel", &MODEL_PARAMS::createCharacteristicVelocity);
@@ -187,7 +187,7 @@ namespace ContactModels
 
     // effective exponent for stress-strain relationship
     
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
       return 1.;
     }
@@ -200,8 +200,8 @@ namespace ContactModels
             if (scdata.is_wall)
             {
                 // we need to calculate half an integration step which was left over to ensure no energy loss, but only for the elastic energy. The dissipation part is handled in fix_wall_gran_base.h.
-                double delta[3];
-                scdata.fix_mesh->triMesh()->get_global_vel(delta);
+                double delta[3] = {0.,0.,0.};
+                vectorCopy3D(scdata.v_j,delta);
                 vectorScalarMult3D(delta, update->dt);
                 // -= because force is in opposite direction
                 // no *dt as delta is v*dt of the contact position
@@ -211,6 +211,9 @@ namespace ContactModels
                                      // from previous half step
                                      + elastic_energy[10];
                 elastic_energy[10] = 0.0;
+                if (scdata.contact_flags && elastic_energy[0] != 0.)
+                    *scdata.contact_flags |= CONTACT_NORMAL_MODEL;
+
             }
             elastic_energy[1] = 0.0;
             elastic_energy[2] = 0.0;
@@ -224,7 +227,7 @@ namespace ContactModels
         }
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       if (sidata.contact_flags)
         *sidata.contact_flags |= CONTACT_NORMAL_MODEL;
@@ -328,8 +331,8 @@ namespace ContactModels
                 // correct for wall influence
                 if (sidata.is_wall)
                 {
-                    double delta[3];
-                    sidata.fix_mesh->triMesh()->get_global_vel(delta);
+                    double delta[3] = {0.,0.,0.};
+                    vectorCopy3D(sidata.v_j,delta);
                     vectorScalarMult3D(delta, update->dt);
                     // -= because force is in opposite direction
                     // no *dt as delta is v*dt of the contact position
@@ -392,9 +395,9 @@ namespace ContactModels
           #ifdef NONSPHERICAL_ACTIVE_FLAG
                   if(sidata.is_non_spherical) {
                     //for non-spherical particles normal force can produce torque!
-                    i_forces.delta_torque[0] += torque_i[0];
-                    i_forces.delta_torque[1] += torque_i[1];
-                    i_forces.delta_torque[2] += torque_i[2];
+                    i_forces.delta_torque[0] += sidata.area_ratio*torque_i[0];
+                    i_forces.delta_torque[1] += sidata.area_ratio*torque_i[1];
+                    i_forces.delta_torque[2] += sidata.area_ratio*torque_i[2];
                   }
           #endif
         } else {
@@ -437,8 +440,6 @@ namespace ContactModels
 
     void surfacesClose(SurfacesCloseData &scdata, ForceData&, ForceData&)
     {
-        if (scdata.contact_flags)
-            *scdata.contact_flags |= CONTACT_NORMAL_MODEL;
         dissipateElasticPotential(scdata);
     }
 

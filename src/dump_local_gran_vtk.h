@@ -89,8 +89,6 @@ class DumpLocalGranVTK : public Dump, public DumpVTK
   char *label;               // string for dump file header 
   DumpLocalGran *dumpLocalGran; // class that generates the vtk output
 
-  int vtk_file_format;       // which vtk file format to write (vtk, vtp, vtu ...)
-
   // private methods
 
   virtual void init_style();

@@ -150,6 +150,7 @@ class Domain : protected Pointers {
   virtual void pbc();
   void image_check();
   void box_too_small_check();
+  void subbox_too_small_check(double);
   void minimum_image(double &, double &, double &);
   void minimum_image(double *);
   int closest_image(int, int);
@@ -177,6 +178,7 @@ class Domain : protected Pointers {
   void x2lamda(double *, double *, double *, double *);
   void bbox(double *, double *, double *, double *);
   void box_corners();
+  void lamda_box_corners(double *, double *);
 
   // minimum image convention check
   // return 1 if any distance > 1/2 of box size
@@ -192,7 +194,7 @@ class Domain : protected Pointers {
   int is_in_domain(double* pos); 
   int is_in_subdomain(double* pos); 
   int is_in_extended_subdomain(double* pos); 
-  double dist_subbox_borders(double* pos); 
+  bool check_dist_subbox_borders(double* pos, double *check_subdomain_distances); 
   void min_subbox_extent(double &min_extent,int &dim); 
   int is_periodic_ghost(int i); 
   bool is_owned_or_first_ghost(int i); 

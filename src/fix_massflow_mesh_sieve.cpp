@@ -302,5 +302,5 @@ double  FixMassflowMeshSieve::sievePassProbability(double radius)
         return dPass * dPass * PIOVERFOUR / (sieveSpacing_ * sieveSpacing_);
     else
         return 0;
-};
+}
 

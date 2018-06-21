@@ -574,11 +574,11 @@ inline int FixInsertStream::is_nearby(int i)
     double dist_normal = vectorDot3D(pos_rel,normalvec);
 
     // on wrong side of extrusion
-    if(dist_normal > maxrad) return 0;
+    if(dist_normal > maxrad_simulation) return 0;
 
     // on right side of extrusion, but too far away
     // 3*maxrad b/c extrude_length+rad is max extrusion for overlapcheck yes
-    if(dist_normal < -(extrude_length + 3.*maxrad)) return 0;
+    if(dist_normal < -(extrude_length + 3.*maxrad_simulation)) return 0;
 
     // on right side of extrusion, within extrude_length
     // check if projection is on face or not
@@ -596,12 +596,12 @@ inline int FixInsertStream::is_nearby(int i)
 BoundingBox FixInsertStream::getBoundingBox() {
   BoundingBox bb = ins_face->getGlobalBoundingBox();
 
-  const double cut = 3*maxrad;
+  const double cut = 3*maxrad_simulation;
   const double delta = -(extrude_length + 2*cut);
   bb.extrude(delta, normalvec);
   bb.shrinkToSubbox(domain->sublo, domain->subhi);
 
-  const double extend = 3*maxrad /*cut*/ + 2.*fix_distribution->max_r_bound(); 
+  const double extend = 3*maxrad_simulation /*cut*/ + 2.*fix_distribution->max_r_bound(); 
   bb.extendByDelta(extend);
 
   return bb;
@@ -694,7 +694,7 @@ void FixInsertStream::x_v_omega(int ninsert_this_local,int &ninserted_this_local
                 generate_random(pos,rad_to_insert);
                 ntry++;
             }
-                        
+            
             while(ntry < maxtry && (!domain->is_in_subdomain(pos)));
 
             if(ntry < maxtry)
@@ -717,10 +717,14 @@ void FixInsertStream::x_v_omega(int ninsert_this_local,int &ninserted_this_local
     // pti checks against xnear and adds self contributions
     else
     {
+        double check_subdomain_distances[3];
+
         while(ntry < maxtry && ninserted_this_local < ninsert_this_local)
         {
             pti = fix_distribution->pti_list[ninserted_this_local];
             double rad_to_insert = pti->r_bound_ins;
+
+            vectorInitialize3D(check_subdomain_distances,rad_to_insert);
 
             nins = 0;
             while(nins == 0 && ntry < maxtry)
@@ -731,7 +735,7 @@ void FixInsertStream::x_v_omega(int ninsert_this_local,int &ninserted_this_local
                     ntry++;
 
                 }
-                while(ntry < maxtry && ((!domain->is_in_subdomain(pos)) || (domain->dist_subbox_borders(pos) < rad_to_insert)));
+                while(ntry < maxtry && ((!domain->is_in_subdomain(pos)) || (!domain->check_dist_subbox_borders(pos,check_subdomain_distances))));
 
                 if(ntry < maxtry)
                 {

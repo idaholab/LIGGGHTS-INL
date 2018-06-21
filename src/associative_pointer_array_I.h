@@ -449,7 +449,7 @@
   }
 
   template<typename T>
-  int AssociativePointerArray<T>::pushToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate)
+  int AssociativePointerArray<T>::pushToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     int nsend = 0;
     for(int i=0;i<numElem_;i++)
@@ -471,7 +471,7 @@
   ------------------------------------------------------------------------- */
 
   template<typename T>
-  int AssociativePointerArray<T>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate)
+  int AssociativePointerArray<T>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const
   {
     int buf_size = 0;
     for(int i=0;i<numElem_;i++)
@@ -480,13 +480,13 @@
   }
 
   template<typename T>
-  int AssociativePointerArray<T>::pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, std::list<std::string> * properties, double *dlo, double *dhi,bool scale,bool translate, bool rotate)
+  int AssociativePointerArray<T>::pushElemListToBuffer(const int n, const int *const list, double *const buf, const int operation, std::list<std::string> *const properties, const int pbc_flag, const int *const pbc, Domain *const domain, const bool scale, const bool translate, const bool rotate) const
   {
       int nsend = 0;
-      for(int i=0;i<numElem_;i++)
+      for(int i=0; i<numElem_; i++)
       {
           if (!properties || getBasePointerByIndex(i)->matches_any_id(properties))
-              nsend += getBasePointerByIndex(i)->pushElemListToBuffer(n,list, wraplist, &buf[nsend],operation, dlo, dhi, scale,translate,rotate);
+              nsend += getBasePointerByIndex(i)->pushElemListToBuffer(n,list, &buf[nsend], operation, pbc_flag, pbc, domain, scale, translate, rotate);
       }
       return nsend;
   }
@@ -502,7 +502,7 @@
   }
 
   template<typename T>
-  int AssociativePointerArray<T>::pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties,bool scale,bool translate, bool rotate)
+  int AssociativePointerArray<T>::pushElemListToBufferReverse(int first, int n, double *buf, int operation, std::list<std::string> * properties,bool scale,bool translate, bool rotate) const
   {
       int nsend = 0;
       for(int i=0;i<numElem_;i++)
@@ -514,7 +514,7 @@
   }
 
   template<typename T>
-  int AssociativePointerArray<T>::popElemListFromBufferReverse(int n, int *list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int AssociativePointerArray<T>::popElemListFromBufferReverse(int n, const int *const list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
   {
       int nrecv = 0;
       for(int i=0;i<numElem_;i++)
@@ -530,7 +530,7 @@
   ------------------------------------------------------------------------- */
 
   template<typename T>
-  int AssociativePointerArray<T>::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate)
+  int AssociativePointerArray<T>::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate) const
   {
     int buf_size = 0;
     for(int i=0;i<numElem_;i++)
@@ -542,7 +542,7 @@
   }
 
   template<typename T>
-  int AssociativePointerArray<T>::pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate)
+  int AssociativePointerArray<T>::pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     int nsend = 0;
     for(int i=0;i<numElem_;i++)

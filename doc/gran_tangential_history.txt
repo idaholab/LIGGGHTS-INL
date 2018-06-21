@@ -14,7 +14,10 @@ tangential history \[other model_type/model_name pairs as described "here"_pair_
 zero or more keyword/value pairs may be appended to the end (after all models are specified) :l
   {heating_tangential_history} values = 'on' or 'off'
     on = model contributes to surface heating in the frame of "surface sphere/heatable"_gran_surface_sphere_heatable.html
-    off = model does not contributes to surface heating :pre
+    off = model does not contributes to surface heating
+  {torsion} values = 'on' or 'off'
+    on = model calculates friction based on torsion
+    off = model ignores rotation around the contact normal :pre
 
 [Description:]
 
@@ -45,6 +48,17 @@ This model contributes to surface heating in the frame of
 "surface sphere/heatable"_gran_surface_sphere_heatable.html if the 
 appropriate flag is activated (only available in the PREMIUM version).
 
+If the keyword {torsion} is set then the torsion will be calculated using a
+spring and a torque is calculated based on {T_n = k_t * r * omega_n}. The radius
+{r} is taken as the radius of the spherical cap that constitutes the overlap
+region. For non-spherical particles (superquadric, convex) the same radius is
+used assuming the particle to be replaced by its bounding sphere. If the
+"surface model convexhull/manifold"_gran_surface_convexhull.html is used then
+the manifold points are used to estimate this radius. Which allows to
+differentiate between corner and flat face contacts. The torque {T_n} behaves
+identical to the tangential force, i.e. there is an equivalent coulomb criterion
+and a damping contribution if it is not met.
+
 [Coarse-graining information:]
 
 Using "coarsegraining"_coarsegraining.html in
@@ -61,6 +75,4 @@ may not be available in LIGGGHTS(R)-INL.
 
 [Default:]
 
-{heating_tangential_history} = 'off'
-
-
+{heating_tangential_history} = 'off', {torsion} = 'off'

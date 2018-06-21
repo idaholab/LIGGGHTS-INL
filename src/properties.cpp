@@ -137,41 +137,7 @@ int Properties::max_type()
 
 double Properties::min_radius()
 {
-  const double maxtype = max_type();
-  double minRadius = BIG;
-
-  // check local particles
-  for (int i=0;i<atom->nlocal;i++)
-  {
-    const double irad = atom->radius[i];
-    // minimum
-    if (irad < minRadius)
-      minRadius = irad;
-  }
-
-  // check all fixes
-  // such as fix insert, fix change/type, fix wall, fix pour
-  for(int i=0;i<modify->nfix;i++)
-  {
-      // checks
-      Fix *fix = modify->fix[i];
-
-      if(!fix->use_rad_for_cut_neigh_and_ghost())
-          continue;
-
-      // loop over all types since min_rad(int) and max_rad(int) need a type
-      for (int j=1;j<maxtype+1;j++)
-      {
-        const double f_minrad = fix->min_rad(j);
-        if(f_minrad > SMALL &&  f_minrad < minRadius)
-          minRadius = f_minrad;
-      }
-  }
-
-  //Get min/max from other procs
-  double minRadius_all;
-  MPI_Allreduce(&minRadius,&minRadius_all, 1, MPI_DOUBLE, MPI_MIN, world);
-  minRadius = minRadius_all;
+  const double minRadius = modify->get_min_radius();
 
   //error check
   if(minRadius <= SMALL)
@@ -186,41 +152,7 @@ double Properties::min_radius()
 
 double Properties::max_radius()
 {
-  const double maxtype = max_type();
-  double maxRadius = -1.0;
-
-  // check local particles
-  for (int i=0;i<atom->nlocal;i++)
-  {
-    const double irad = atom->radius[i];
-    // maximum
-    if (irad > maxRadius)
-      maxRadius = irad;
-  }
-
-  // check all fixes
-  // such as fix insert, fix change/type, fix wall, fix pour
-  for(int i=0;i<modify->nfix;i++)
-  {
-      // checks
-      Fix *fix = modify->fix[i];
-
-      if(!fix->use_rad_for_cut_neigh_and_ghost())
-          continue;
-
-      // loop over all types since min_rad(int) and max_rad(int) need a type
-      for (int j=1;j<maxtype+1;j++)
-      {
-        const double f_maxrad = fix->max_rad(j);
-        if(f_maxrad > SMALL &&  f_maxrad > maxRadius)
-          maxRadius = f_maxrad;
-      }
-  }
-
-  //Get min/max from other procs
-  double maxRadius_all;
-  MPI_Allreduce(&maxRadius,&maxRadius_all, 1, MPI_DOUBLE, MPI_MAX, world);
-  maxRadius = maxRadius_all;
+  const double maxRadius = modify->get_max_radius();
 
   //error check
   if(maxRadius <= SMALL)
@@ -269,7 +201,7 @@ void* Properties::find_property(const char *name, const char *type, int &len1, i
 
     if(ms_)
     {
-        ptr = ms_->extract(name,len1,len2);
+        ptr = ms_->extract_ms(name,len1,len2);
         if(((strcmp(type,"scalar-multisphere") == 0) && (len2 != 1)) || ((strcmp(type,"vector-multisphere") == 0) && (len2 != 3)))
             return NULL;
         
@@ -312,16 +244,16 @@ void* Properties::find_property(const char *name, const char *type, int &len1, i
     {
        fix = modify->find_fix_property(name,"property/global","scalar",0,0,"cfd coupling",false);
        len1 = len2 = 1;
-       if(fix) return (void*) static_cast<FixPropertyGlobal*>(fix)->values;
+       if(fix) return (void*) static_cast<FixPropertyGlobal*>(fix)->get_values();
     }
     else if(strcmp(type,"vector-global") == 0)
     {
        fix = modify->find_fix_property(name,"property/global","vector",0,0,"cfd coupling",false);
        if(fix)
        {
-           len1 = static_cast<FixPropertyGlobal*>(fix)->nvalues;
+           len1 = static_cast<FixPropertyGlobal*>(fix)->get_nvalues();
            len2 = 1;
-           return (void*) static_cast<FixPropertyGlobal*>(fix)->values;
+           return (void*) static_cast<FixPropertyGlobal*>(fix)->get_values();
        }
     }
     else if(strcmp(type,"matrix-global") == 0)
@@ -331,7 +263,7 @@ void* Properties::find_property(const char *name, const char *type, int &len1, i
        {
            len1  = static_cast<FixPropertyGlobal*>(fix)->size_array_rows;
            len2  = static_cast<FixPropertyGlobal*>(fix)->size_array_cols;
-           return (void*) static_cast<FixPropertyGlobal*>(fix)->array;
+           return (void*) static_cast<FixPropertyGlobal*>(fix)->get_array();
        }
     }
     else if(strcmp(name,"ex") == 0) 

@@ -56,7 +56,10 @@ using namespace FixConst;
 
 /* ---------------------------------------------------------------------- */
 
-FixHeatGran::FixHeatGran(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg){
+FixHeatGran::FixHeatGran(LAMMPS *lmp, int narg, char **arg) :
+    Fix(lmp, narg, arg),
+    ILoopCallbackCaller(lmp)
+{
 
   if ((!atom->radius_flag)||(!atom->rmass_flag)) error->all(FLERR,"Fix heat/gran needs per particle radius and mass");
 
@@ -79,7 +82,13 @@ FixHeatGran::FixHeatGran(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
   scalar_flag = 1; 
   global_freq = 1; 
 
-  cpl = NULL;
+}
+
+/* ---------------------------------------------------------------------- */
+
+FixHeatGran::~FixHeatGran()
+{
+    referenceDeleted();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -222,37 +231,4 @@ void FixHeatGran::initial_integrate(int vflag)
 double FixHeatGran::compute_scalar()
 {
     return fix_ste->compute_scalar();
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixHeatGran::cpl_evaluate(class ComputePairGranLocal * cpl){
-
-  char *mystyle = style;
-  char *emsg = new char[100];
-  sprintf(emsg, "Fix %s does not implement cpl_evaluate().\n", mystyle);
-  error->all(FLERR, emsg);
-
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixHeatGran::register_compute_pair_local(class ComputePairGranLocal *ptr){
-
-  char *mystyle = style;
-  char *emsg = new char[100];
-  sprintf(emsg, "Fix %s does not implement register_compute_pair_local().\n", mystyle);
-  error->all(FLERR, emsg);
-
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixHeatGran::unregister_compute_pair_local(class ComputePairGranLocal *ptr){
-
-  char *mystyle = style;
-  char *emsg = new char[100];
-  sprintf(emsg, "Fix %s does not implement unregister_compute_pair_local().\n", mystyle);
-  error->all(FLERR, emsg);
-
 }

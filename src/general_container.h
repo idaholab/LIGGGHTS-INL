@@ -120,29 +120,29 @@ namespace LAMMPS_NS
           inline int bufSize(int operation = OPERATION_UNDEFINED,
                             bool scale=false,bool translate=false, bool rotate=false) const;
           inline int pushToBuffer(double *buf, int operation = OPERATION_UNDEFINED,
-                           bool scale=false,bool translate=false, bool rotate=false);
+                           bool scale=false,bool translate=false, bool rotate=false) const;
           inline int popFromBuffer(double *buf, int operation = OPERATION_UNDEFINED,
                            bool scale=false,bool translate=false, bool rotate=false);
 
           // push / pop a list elements
           
           inline int elemListBufSize(int n, int operation = OPERATION_UNDEFINED,
-                            bool scale=false,bool translate=false, bool rotate=false);
-          inline int pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, double *dlo, double *dhi,
-                           bool scale=false,bool translate=false, bool rotate=false);
+                            bool scale=false,bool translate=false, bool rotate=false) const;
+          inline int pushElemListToBuffer(const int n, const int *const list, double *const buf, const int operation, const int pbc_flag, const int *const pbc, Domain *const domain,
+                           const bool scale=false, const bool translate=false, const bool rotate=false) const;
           inline int popElemListFromBuffer(int first, int n, double *buf, int operation,
                            bool scale=false,bool translate=false, bool rotate=false);
           inline int pushElemListToBufferReverse(int first, int n, double *buf, int operation,
-                           bool scale=false,bool translate=false, bool rotate=false);
-          inline int popElemListFromBufferReverse(int n, int *list, double *buf, int operation,
+                           bool scale=false,bool translate=false, bool rotate=false) const;
+          inline int popElemListFromBufferReverse(int n, const int *const list, double *buf, int operation,
                            bool scale=false,bool translate=false, bool rotate=false);
 
           // push / pop one single element
           
           inline int elemBufSize(int operation = OPERATION_UNDEFINED,
-                            bool scale=false,bool translate=false, bool rotate=false);
+                            bool scale=false,bool translate=false, bool rotate=false) const;
           inline int pushElemToBuffer(int i, double *buf, int operation,
-                           bool scale=false,bool translate=false, bool rotate=false);
+                           bool scale=false,bool translate=false, bool rotate=false) const;
           inline int popElemFromBuffer(double *buf, int operation,
                            bool scale=false,bool translate=false, bool rotate=false);
 

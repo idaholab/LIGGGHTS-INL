@@ -163,18 +163,23 @@ class Force : protected Pointers {
 
   bool setCG(double cg)
   {
-      bool useTypeSpecific = false;
-      if(coarsegraining_>1.0)
+      typeSpecificCG_ = false;
+      if(coarsegrainingTypeBased_.size()>0.)
       {
         coarsegraining_ = std::max(coarsegraining_,cg); //set maximum we use type-specific CG
-        useTypeSpecific = true;
+        typeSpecificCG_ = true;
       }
       else
         coarsegraining_ = cg;
 
       coarsegrainingTypeBased_.push_back(cg);
 
-      return useTypeSpecific;
+      return typeSpecificCG_;
+  }
+
+  bool typeSpecificCG()
+  {
+      return typeSpecificCG_;
   }
 
   void reportCG()
@@ -203,16 +208,16 @@ class Force : protected Pointers {
     return coarsegraining_;
   }
 
-  //inline double cg() 
+  //inline double cg()
   //{ return coarsegraining_; }
 
-  inline bool cg_active() 
+  inline bool cg_active()
   { return (coarsegraining_ > 1. || coarsegrainingTypeBased_.size() > 0); }
 
-  inline bool error_cg() 
+  inline bool error_cg()
   { return error_coarsegraining_; }
 
-  inline bool warn_cg() 
+  inline bool warn_cg()
   { return warn_coarsegraining_; }
 
   PropertyRegistry registry;
@@ -249,6 +254,7 @@ class Force : protected Pointers {
   std::vector<double> coarsegrainingTypeBased_;
   bool      error_coarsegraining_;
   bool      warn_coarsegraining_;
+  bool      typeSpecificCG_;
 };
 
 }

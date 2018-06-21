@@ -96,7 +96,7 @@
         else { //particle -edge/corner contact
           double closestPoints[3][3];
           double contactPointEdge[3];
-          int iEdge, iCorner;
+          int iEdge, iCorner = -1;
           bool edge_contact = false;
           bool corner_contact = false;
           double f_edge[3];

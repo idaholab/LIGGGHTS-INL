@@ -191,17 +191,17 @@ sed_ex="sed -E" # BSD sed
 sed --version | grep -i gnu > /dev/null 2>&1
 [ $? -eq 0 ] && sed_ex="sed -r" # GNU sed
 
-surface_models=$( grep -s -E '^SURFACE_MODEL' "$ligSrcPath"/surface_model_*.h | $sed_ex 's/.*SURFACE_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/' )
-normal_models=$( grep -s -E '^NORMAL_MODEL' "$ligSrcPath"/normal_model_*.h | $sed_ex 's/.*NORMAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/' )
-tangential_models=$(grep -s -E '^TANGENTIAL_MODEL' "$ligSrcPath"/tangential_model_*.h | $sed_ex 's/.*TANGENTIAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
-cohesion_models=$(grep -s -E '^COHESION_MODEL' "$ligSrcPath"/cohesion_model_*.h | $sed_ex 's/.*COHESION_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
-rolling_models=$(grep -s -E '^ROLLING_MODEL' "$ligSrcPath"/rolling_model_*.h | $sed_ex 's/.*ROLLING_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
+surface_models=$( grep -s -E '^SURFACE_MODEL\(' "$ligSrcPath"/surface_model_*.h | $sed_ex 's/.*SURFACE_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/' )
+normal_models=$( grep -s -E '^NORMAL_MODEL\(' "$ligSrcPath"/normal_model_*.h | $sed_ex 's/.*NORMAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/' )
+tangential_models=$(grep -s -E '^TANGENTIAL_MODEL\(' "$ligSrcPath"/tangential_model_*.h | $sed_ex 's/.*TANGENTIAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
+cohesion_models=$(grep -s -E '^COHESION_MODEL\(' "$ligSrcPath"/cohesion_model_*.h | $sed_ex 's/.*COHESION_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
+rolling_models=$(grep -s -E '^ROLLING_MODEL\(' "$ligSrcPath"/rolling_model_*.h | $sed_ex 's/.*ROLLING_MODEL\((.+),\s*(.+),\s*(.+)\)/\1/')
 
-surface_ident=$(grep -s -E '^SURFACE_MODEL' "$ligSrcPath"/surface_model_*.h | $sed_ex 's/.*SURFACE_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
-normal_ident=$(grep -s -E '^NORMAL_MODEL' "$ligSrcPath"/normal_model_*.h | $sed_ex 's/.*NORMAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
-tangential_ident=$(grep -s -E '^TANGENTIAL_MODEL' "$ligSrcPath"/tangential_model_*.h | $sed_ex 's/.*TANGENTIAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
-cohesion_ident=$(grep -s -E '^COHESION_MODEL' "$ligSrcPath"/cohesion_model_*.h | $sed_ex 's/.*COHESION_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
-rolling_ident=$(grep -s -E '^ROLLING_MODEL' "$ligSrcPath"/rolling_model_*.h | $sed_ex 's/.*ROLLING_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
+surface_ident=$(grep -s -E '^SURFACE_MODEL\(' "$ligSrcPath"/surface_model_*.h | $sed_ex 's/.*SURFACE_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
+normal_ident=$(grep -s -E '^NORMAL_MODEL\(' "$ligSrcPath"/normal_model_*.h | $sed_ex 's/.*NORMAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
+tangential_ident=$(grep -s -E '^TANGENTIAL_MODEL\(' "$ligSrcPath"/tangential_model_*.h | $sed_ex 's/.*TANGENTIAL_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
+cohesion_ident=$(grep -s -E '^COHESION_MODEL\(' "$ligSrcPath"/cohesion_model_*.h | $sed_ex 's/.*COHESION_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
+rolling_ident=$(grep -s -E '^ROLLING_MODEL\(' "$ligSrcPath"/rolling_model_*.h | $sed_ex 's/.*ROLLING_MODEL\((.+),\s*(.+),\s*(.+)\)/\2/')
 
 ## create pseudo arrays for access
 i=0

@@ -94,6 +94,7 @@ Force::Force(LAMMPS *lmp) : Pointers(lmp), registry(lmp)
   coarsegraining_ = 1.0;
   error_coarsegraining_ = true;
   warn_coarsegraining_ = false;
+  typeSpecificCG_ = false;
 
   pair = NULL;
   bond = NULL;
@@ -782,7 +783,7 @@ void Force::bounds(char *str, int nmax, int &nlo, int &nhi, int nmin)
     nhi = atoi(ptr+1);
   }
 
-  if (nlo < nmin || nhi > nmax)
+  if (nlo < nmin || nhi > nmax || nlo > nhi)
     error->all(FLERR,"Numeric index is out of bounds");
 }
 

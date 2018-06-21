@@ -92,6 +92,7 @@ namespace MODEL_PARAMS
     ScalarProperty* createRollingStiffness(PropertyRegistry & registry, const char * caller, bool sanity_checks);
 
     ScalarProperty* createLiquidVolume(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    ScalarProperty* createLiquidVolumeWall(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     ScalarProperty* createLiquidDensity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     ScalarProperty* createSurfaceTension(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     ScalarProperty* createSwitchModel(PropertyRegistry & registry, const char * caller, bool sanity_checks);
@@ -125,6 +126,12 @@ namespace MODEL_PARAMS
     MatrixProperty* createMaxCohesiveStress(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     MatrixProperty* createCohesionStrength(PropertyRegistry & registry, const char * caller, bool sanity_checks);
 
+    // heat transfer
+    VectorProperty* createThermalCunductivity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    VectorProperty* createHeatCapacity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    VectorProperty* createThermalEffusivity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createHeatTransferCoefficient(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+
     // fiber & bond model
     MatrixProperty* createDissipationMatrix(PropertyRegistry & registry, const char * name, const char * caller, bool sanity_checks);
 
@@ -134,6 +141,19 @@ namespace MODEL_PARAMS
     MatrixProperty* createVelocityLimit(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     MatrixProperty* createForceLimit(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     VectorProperty* createAttritionLimit(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+
+    // ViscoBond models
+    VectorProperty* createViscoBondYoungsModulus(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    VectorProperty* createViscoBondPoissonsRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    MatrixProperty* createViscoBondYoungsModulusEff(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    MatrixProperty* createViscoBondShearModulusEff(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    MatrixProperty* createViscoBondNormalDampingRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    MatrixProperty* createViscoBondTangentialDampingRatio(PropertyRegistry &registry, const char *caller, bool sanity_checks);
+    MatrixProperty* createViscoBondMaxDistance(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    VectorProperty* createViscoBondDrift(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createViscoBondDriftEff(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    VectorProperty* createViscoBondElastizity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createViscoBondElastEff(PropertyRegistry & registry, const char * caller, bool sanity_checks);
 }
 
 #endif /* GLOBAL_PROPERTIES_H_ */

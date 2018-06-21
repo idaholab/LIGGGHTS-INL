@@ -168,9 +168,9 @@ namespace LAMMPS_NS
 
         // virtual functions for size
         // parallelism implemented in derived class
-        virtual int sizeLocal() = 0;
-        virtual int sizeGhost() = 0;
-        virtual int sizeGlobal() = 0;
+        virtual int sizeLocal() const = 0;
+        virtual int sizeGhost() const = 0;
+        virtual int sizeGlobal() const = 0;
 
         virtual bool isDeforming()
         { return false; }

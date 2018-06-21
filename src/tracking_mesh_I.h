@@ -36,6 +36,7 @@
     Christoph Kloss (DCS Computing GmbH, Linz)
     Christoph Kloss (JKU Linz)
     Philippe Seil (JKU Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
 
     Copyright 2012-     DCS Computing GmbH, Linz
     Copyright 2009-2012 JKU Linz
@@ -223,7 +224,7 @@
   ------------------------------------------------------------------------- */
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate)
+  int TrackingMesh<NUM_NODES>::elemListBufSize(int n,int operation,bool scale,bool translate,bool rotate) const
   {
     int buf_size = 0;
     buf_size += MultiNodeMeshParallel<NUM_NODES>::elemListBufSize(n,operation,scale,translate,rotate);
@@ -232,38 +233,62 @@
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::pushElemListToBuffer(int n, int *list, int *wraplist, double *buf, int operation, std::list<std::string> * properties, double *dlo, double *dhi, bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::pack_comm(const int operation, const int n, const int *const list, double *const buf, const int pbc_flag, const int *const pbc)
   {
     int nsend = 0;
-    nsend += MultiNodeMeshParallel<NUM_NODES>::pushElemListToBuffer(n,list, wraplist, &buf[nsend],operation, properties, dlo, dhi, scale,translate,rotate);
-    nsend += customValues_.pushElemListToBuffer(n,list, wraplist, &buf[nsend],operation, properties, dlo, dhi, scale,translate,rotate);
+    
+    const bool scale = this->isScaling();
+    const bool translate = this->isTranslating();
+    const bool rotate = this->isRotating();
+
+    // data from mother class
+    nsend += MultiNodeMeshParallel<NUM_NODES>::pack_comm(operation, n, list, buf, pbc_flag, pbc);
+    // custom properties
+    nsend += customValues_.pushElemListToBuffer(n, list, &buf[nsend], operation, this->properties_, pbc_flag, pbc, this->domain, scale, translate, rotate);
     return nsend;
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::popElemListFromBuffer(int first, int n,double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::unpack_comm(const int operation, const int n, const int first, double *const buf)
   {
     int nrecv = 0;
-    nrecv += MultiNodeMeshParallel<NUM_NODES>::popElemListFromBuffer(first,n,&buf[nrecv],operation, properties, scale,translate,rotate);
-    nrecv += customValues_.popElemListFromBuffer(first,n,&buf[nrecv],operation, properties, scale,translate,rotate);
+    
+    const bool scale = this->isScaling();
+    const bool translate = this->isTranslating();
+    const bool rotate = this->isRotating();
+
+    // data to mother class
+    nrecv += MultiNodeMeshParallel<NUM_NODES>::unpack_comm(operation, n, first, buf);
+    // custom properties
+    nrecv += customValues_.popElemListFromBuffer(first, n, &buf[nrecv], operation, this->properties_, scale, translate, rotate);
     return nrecv;
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::pushElemListToBufferReverse(int first, int n,double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::pack_reverse(const int operation, const int n, const int first, double *const buf)
   {
     int nrecv = 0;
-    nrecv += MultiNodeMeshParallel<NUM_NODES>::pushElemListToBufferReverse(first,n,&buf[nrecv],operation, properties, scale,translate,rotate);
-    nrecv += customValues_.pushElemListToBufferReverse(first,n,&buf[nrecv],operation, properties, scale,translate,rotate);
+    
+    const bool scale = this->isScaling();
+    const bool translate = this->isTranslating();
+    const bool rotate = this->isRotating();
+
+    nrecv += MultiNodeMeshParallel<NUM_NODES>::pack_reverse(operation, n, first, buf);
+    nrecv += customValues_.pushElemListToBufferReverse(first, n, &buf[nrecv], OPERATION_COMM_REVERSE, this->properties_, scale, translate, rotate);
     return nrecv;
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::popElemListFromBufferReverse(int n, int *list, double *buf, int operation, std::list<std::string> * properties, bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::unpack_reverse(const int operation, const int n, const int *const list, double *const buf)
   {
     int nsend = 0;
-    nsend += MultiNodeMeshParallel<NUM_NODES>::popElemListFromBufferReverse(n,list,&buf[nsend],operation, properties, scale,translate,rotate);
-    nsend += customValues_.popElemListFromBufferReverse(n,list,&buf[nsend],operation, properties, scale,translate,rotate);
+    
+    const bool scale = this->isScaling();
+    const bool translate = this->isTranslating();
+    const bool rotate = this->isRotating();
+
+    nsend += MultiNodeMeshParallel<NUM_NODES>::unpack_reverse(operation, n, list, buf);
+    nsend += customValues_.popElemListFromBufferReverse(n, list, &buf[nsend], OPERATION_COMM_REVERSE, this->properties_, scale, translate, rotate);
     return nsend;
   }
 
@@ -272,7 +297,7 @@
   ------------------------------------------------------------------------- */
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate)
+  int TrackingMesh<NUM_NODES>::elemBufSize(int operation, std::list<std::string> * properties, bool scale,bool translate,bool rotate) const
   {
     int buf_size = 0;
     buf_size += MultiNodeMeshParallel<NUM_NODES>::elemBufSize(operation, properties, scale,translate,rotate);
@@ -283,7 +308,7 @@
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::pushElemToBuffer(int n, double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     int nsend = 0;
     nsend += MultiNodeMeshParallel<NUM_NODES>::pushElemToBuffer(n,&buf[nsend],operation,scale,translate,rotate);
@@ -306,7 +331,7 @@
   ------------------------------------------------------------------------- */
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::meshPropsBufSize(int operation,bool scale,bool translate,bool rotate)
+  int TrackingMesh<NUM_NODES>::meshPropsBufSize(int operation,bool scale,bool translate,bool rotate) const
   {
     int buf_size = 0;
     buf_size += customValues_.globalPropsBufSize(operation,scale,translate,rotate);
@@ -315,7 +340,7 @@
   }
 
   template<int NUM_NODES>
-  int TrackingMesh<NUM_NODES>::pushMeshPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate)
+  int TrackingMesh<NUM_NODES>::pushMeshPropsToBuffer(double *buf, int operation,bool scale,bool translate, bool rotate) const
   {
     int nsend = 0;
     nsend += customValues_.pushGlobalPropsToBuffer(&buf[nsend],operation,scale,translate,rotate);

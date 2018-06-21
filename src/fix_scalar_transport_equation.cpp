@@ -73,7 +73,9 @@ using namespace FixConst;
 
 /* ---------------------------------------------------------------------- */
 
-FixScalarTransportEquation::FixScalarTransportEquation(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
+FixScalarTransportEquation::FixScalarTransportEquation(LAMMPS *lmp, int narg, char **arg) :
+    Fix(lmp, narg, arg),
+    mixed_capacity_flag(false)
 {
   fix_quantity = fix_flux = fix_source = NULL; fix_capacity = NULL;
   fix_fluidQty_ = fix_transCoeffQty_ = NULL;
@@ -82,10 +84,14 @@ FixScalarTransportEquation::FixScalarTransportEquation(LAMMPS *lmp, int narg, ch
 
   capacity = NULL;
 
+  quantity_max_flag_ = false;
+  quantity_max_ = -1;
+
   int_flag = true;
 
   nevery_  = 1;
   performedIntegrationLastStep_ = true; //ensure flux is reset at the very first time step
+  timescale_ = 1.;
 
   peratom_flag = 1;              
   size_peratom_cols = 0;         
@@ -277,6 +283,7 @@ void FixScalarTransportEquation::post_create()
 {
   const char *fixarg[9];
 
+  fix_quantity=static_cast<FixPropertyAtom*>(modify->find_fix_property(quantity_name,"property/atom","scalar",0,0,style,false));
   if (fix_quantity==NULL) {
     //register Temp as property/atom
     fixarg[0]=quantity_name;
@@ -294,6 +301,7 @@ void FixScalarTransportEquation::post_create()
     fix_quantity=static_cast<FixPropertyAtom*>(modify->find_fix_property(quantity_name,"property/atom","scalar",0,0,style));
   }
 
+  fix_flux=static_cast<FixPropertyAtom*>(modify->find_fix_property(flux_name,"property/atom","scalar",0,0,style,false));
   if (fix_flux==NULL){
     //register heatFlux as property/atom
     fixarg[0]=flux_name;
@@ -309,6 +317,7 @@ void FixScalarTransportEquation::post_create()
     fix_flux=static_cast<FixPropertyAtom*>(modify->find_fix_property(flux_name,"property/atom","scalar",0,0,style));
   }
 
+  fix_source=static_cast<FixPropertyAtom*>(modify->find_fix_property(source_name,"property/atom","scalar",0,0,style,false));
   if (fix_source==NULL){
     //register heatSource as property/atom
     fixarg[0]=source_name;
@@ -343,7 +352,7 @@ void FixScalarTransportEquation::init()
   if (strcmp(update->integrate_style,"respa") == 0)
     nlevels_respa = ((Respa *) update->integrate)->nlevels;
 
-  if(capacity_flag)
+  if(capacity_flag || mixed_capacity_flag)
   {
       int max_type = atom->get_properties()->max_type();
 
@@ -380,8 +389,26 @@ int FixScalarTransportEquation::modify_param(int narg, char **arg)
 
     nevery_ = force->inumeric(FLERR,arg[1]);
     
-    return 1;
+    return 2;
   }
+
+  if (strcmp(arg[0], "timescale") == 0)
+  {
+      if (narg < 2)
+          error->fix_error(FLERR,this,"not enough arguments for fix_modify 'timescale'");
+      timescale_ = force->numeric(FLERR, arg[1]);
+      return 2;
+  }
+
+  if (strcmp(arg[0],"quantity_max") == 0)
+  {
+      if (narg < 2)
+          error->fix_error(FLERR,this,"not enough arguments for fix_modify 'quantity_max'");
+      quantity_max_flag_ = true;
+      quantity_max_ = force->numeric(FLERR,arg[1]);
+      return 2;
+  }
+
   return 0;
 }
 
@@ -424,7 +451,6 @@ void FixScalarTransportEquation::pre_force(int vflag)
 
 void FixScalarTransportEquation::final_integrate()
 {
-
     // skip if integration turned off
     if(!int_flag)
         return;
@@ -448,7 +474,7 @@ void FixScalarTransportEquation::final_integrate()
 /* ---------------------------------------------------------------------- */
 void FixScalarTransportEquation::advanceQtyExplicit()
 {
-    double  dt = update->dt;
+    double  dt = update->dt * timescale_;
     int     nlocal = atom->nlocal;
     double  *rmass = atom->rmass;
     int     *type = atom->type;
@@ -466,7 +492,34 @@ void FixScalarTransportEquation::advanceQtyExplicit()
                                                           + source[i]*double(nevery_) //multiply source to account for missing steps
                                                         ) * dt
                                                       / (rmass[i]*capacity);
+              if (quantity_max_flag_ && quantity[i] > quantity_max_)
+                  quantity[i] = quantity_max_;
            }
+        }
+    }
+    else if (mixed_capacity_flag)
+    {
+//         const double * const density_p = atom->density;
+        const double * const indicator = fix_mixed_indicator_->vector_atom;
+
+        for (int i = 0; i < nlocal; i++)
+        {
+            if (mask[i] & groupbit){
+                double cap_s = fix_capacity->compute_vector(type[i]-1);
+                double cap_l = fix_mixed_capacity_->compute_vector(type[i]-1);
+//                 capacity = (cap_s * density_p[i] + cap_l * mixed_density_ * indicator[i])
+//                          / (1. + indicator[i]);
+                // total mass = rmass[i] = mass_s + liq_content[i] * mass_s
+                const double mass_s = rmass[i] / (1. + indicator[i]);
+                const double mass_l = rmass[i] - mass_s;
+                capacity = (cap_s * mass_s + cap_l * mass_l) / rmass[i];
+
+                if(fabs(capacity) > SMALL) quantity[i] += (
+                                                                flux[i]
+                                                            + source[i]*double(nevery_) //multiply source to account for missing steps
+                                                            ) * dt
+                                                        / (rmass[i]*capacity);
+            }
         }
     }
     else
@@ -478,6 +531,8 @@ void FixScalarTransportEquation::advanceQtyExplicit()
                                   flux[i]
                                 + source[i]*double(nevery_) //multiply source to account for missing steps
                              ) * dt ;
+              if (quantity_max_flag_ && quantity[i] > quantity_max_)
+                  quantity[i] = quantity_max_;
            }
         }
     }
@@ -487,7 +542,7 @@ void FixScalarTransportEquation::advanceQtyExplicit()
 void FixScalarTransportEquation::advanceQtyImplicit()
 {
 
-    double  dt = update->dt;
+    double  dt = update->dt * timescale_;
     int     nlocal = atom->nlocal;
     double  *rmass = atom->rmass;
     int     *type = atom->type;
@@ -517,7 +572,45 @@ void FixScalarTransportEquation::advanceQtyImplicit()
                                          + source[i]*double(nevery_)
                                         )
                                     ) / (1.0 + termMP*crankNicholsonFactor_);
+                    if (quantity_max_flag_ && quantity[i] > quantity_max_)
+                        quantity[i] = quantity_max_;
               }
+           }
+        }
+    }
+    else if(mixed_capacity_flag)
+    {
+//         const double * const density_p = atom->density;
+        const double * const indicator = fix_mixed_indicator_->vector_atom;
+
+        for (int i = 0; i < nlocal; i++)
+        {
+            if (mask[i] & groupbit){
+                double cap_s = fix_capacity->compute_vector(type[i]-1);
+                double cap_l = fix_mixed_capacity_->compute_vector(type[i]-1);
+//                 capacity = (cap_s * density_p[i] + cap_l * mixed_density_ * indicator[i])
+//                          / (1. + indicator[i]);
+                // total mass = rmass[i] = mass_s + liq_content[i] * mass_s
+                const double mass_s = rmass[i] / (1. + indicator[i]);
+                const double mass_l = rmass[i] - mass_s;
+                capacity = (cap_s * mass_s + cap_l * mass_l) / rmass[i];
+
+                if(fabs(capacity) > SMALL)
+                {
+                     double currRadius = radius[i];
+                     double termM  = dt / (rmass[i]*capacity);
+                     double termMP = termM
+                                   * transCoeffQty_[i]
+                                   * currRadius * currRadius * 12.5663706144 ; //surface area
+                     quantity[i]  = (   quantity[i]
+                                      * (1.0 - termMP * OneMinusCN)
+                                      + termMP * fluidQty_[i]
+                                      + termM
+                                      * (  flux[i]
+                                         + source[i]*double(nevery_)
+                                        )
+                                    ) / (1.0 + termMP*crankNicholsonFactor_);
+                }
            }
         }
     }
@@ -539,6 +632,8 @@ void FixScalarTransportEquation::advanceQtyImplicit()
                                          + source[i]*double(nevery_)
                                         )
                                     ) / (1.0 + termMP*crankNicholsonFactor_);
+                      if (quantity_max_flag_ && quantity[i] > quantity_max_)
+                          quantity[i] = quantity_max_;
            }
         }
     }
@@ -576,6 +671,25 @@ double FixScalarTransportEquation::compute_scalar()
            
         }
     }
+    else if(mixed_capacity_flag)
+    {
+//         const double * const density_p = atom->density;
+        const double * const indicator = fix_mixed_indicator_->vector_atom;
+
+        for (int i = 0; i < nlocal; i++)
+        {
+            const double cap_s = fix_capacity->compute_vector(type[i]-1);
+            const double cap_l = fix_mixed_capacity_->compute_vector(type[i]-1);
+//             capacity = (cap_s * density_p[i] + cap_l * mixed_density_ * indicator[i])
+//                      / (1. + indicator[i]);
+            // total mass = rmass[i] = mass_s + liq_content[i] * mass_s
+            const double mass_s = rmass[i] / (1. + indicator[i]);
+            const double mass_l = rmass[i] - mass_s;
+            capacity = (cap_s * mass_s + cap_l * mass_l) / rmass[i];
+
+            quantity_sum += capacity * rmass[i] * quantity[i];
+        }
+    }
     else
     {
         for (int i = 0; i < nlocal; i++)
@@ -595,4 +709,22 @@ bool FixScalarTransportEquation::match_equation_id(const char* id)
 {
     if(strcmp(id,equation_id)) return false;
     return true;
+}
+
+void FixScalarTransportEquation::set_mixed_capacity(
+    class FixPropertyAtom *mixed_cap_indicator,
+    class FixPropertyGlobal *mixed_capacity,
+    double mixed_density)
+{
+    fix_mixed_capacity_  = mixed_capacity;
+    fix_mixed_indicator_ = mixed_cap_indicator;
+    mixed_density_       = mixed_density;
+
+    if (!fix_mixed_indicator_ || !fix_mixed_capacity_ )
+        error->fix_error(FLERR,this,"One of the arguments for mixed capacity is not initialized.");
+    else
+    {
+        mixed_capacity_flag = true;
+        capacity_flag = false;
+    }
 }

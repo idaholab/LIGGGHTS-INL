@@ -88,7 +88,7 @@ int FixNVELine::setmask()
 
 void FixNVELine::init()
 {
-  int i,itype;
+  int i;
 
   // error checks
 
@@ -117,7 +117,7 @@ void FixNVELine::init()
 
 void FixNVELine::initial_integrate(int vflag)
 {
-  double dtfm,dtirotate,delx,dely,length,theta;
+  double dtfm,dtirotate,length,theta;
 
   AtomVecLine::Bonus *bonus = avec->bonus;
   int *line = atom->line;

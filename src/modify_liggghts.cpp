@@ -87,7 +87,7 @@ FixScalarTransportEquation* Modify::find_fix_scalar_transport_equation_strict(co
 {
     
     for(int ifix = 0; ifix < nfix; ifix++)
-      if(strcmp(fix[ifix]->style,"transportequation/scalar") == 0)
+      if(fix[ifix] && (strcmp(fix[ifix]->style,"transportequation/scalar") == 0) )
       {
           FixScalarTransportEquation *fix_ste = static_cast<FixScalarTransportEquation*>(fix[ifix]);
           if(fix_ste->match_equation_id(equation_id)) return fix_ste;
@@ -114,7 +114,7 @@ FixScalarTransportEquation* Modify::find_fix_scalar_transport_equation(const cha
 Fix* Modify::find_fix_style_strict(const char *style, int rank)
 {
     for(int ifix = 0; ifix < nfix; ifix++)
-      if(strcmp(fix[ifix]->style,style) == 0)
+      if(fix[ifix] && (strcmp(fix[ifix]->style,style) == 0) )
       {
           if(rank > 0) rank --;
           else return fix[ifix];
@@ -126,7 +126,7 @@ Fix* Modify::find_fix_style(const char *style, int rank)
 {
     int len = strlen(style);
     for(int ifix = 0; ifix < nfix; ifix++)
-      if(strncmp(fix[ifix]->style,style,len) == 0)
+      if(fix[ifix] && (strncmp(fix[ifix]->style,style,len) == 0) )
       {
           if(rank > 0) rank --;
           else return fix[ifix];
@@ -141,7 +141,7 @@ Fix* Modify::find_fix_style(const char *style, int rank)
 Compute* Modify::find_compute_style_strict(const char *style, int rank)
 {
     for(int icompute = 0; icompute < ncompute; icompute++)
-      if(strcmp(compute[icompute]->style,style) == 0)
+      if(compute[icompute] && (strcmp(compute[icompute]->style,style) == 0) )
       {
           if(rank > 0) rank --;
           else return compute[icompute];
@@ -157,7 +157,7 @@ Fix* Modify::find_fix_id(const char *id)
 {
   int ifix;
   for (ifix = 0; ifix < nfix; ifix++)
-    if (strcmp(id,fix[ifix]->id) == 0) break;
+    if (fix[ifix] && (strcmp(id,fix[ifix]->id) == 0) ) break;
   if (ifix == nfix) return NULL;
   return fix[ifix];
 }
@@ -170,7 +170,7 @@ Compute* Modify::find_compute_id(const char *id)
 {
   int icompute;
   for (icompute = 0; icompute < ncompute; icompute++)
-    if (strcmp(id,compute[icompute]->id) == 0) break;
+    if (compute[icompute] && (strcmp(id,compute[icompute]->id) == 0) ) break;
   if (icompute == ncompute) return NULL;
   return compute[icompute];
 }
@@ -183,7 +183,7 @@ Fix* Modify::find_fix_id_style(const char *id,const char* style)
 {
   int ifix;
   for (ifix = 0; ifix < nfix; ifix++)
-    if (strcmp(id,fix[ifix]->id) == 0 && strncmp(style,fix[ifix]->style,strlen(style)) == 0) break;
+    if (fix[ifix] && (strcmp(id,fix[ifix]->id) == 0) && (strncmp(style,fix[ifix]->style,strlen(style)) == 0) ) break;
   if (ifix == nfix) return NULL;
   return fix[ifix];
 }
@@ -200,7 +200,7 @@ int Modify::n_fixes_style(const char *style)
     len = strlen(style);
 
     for(int ifix = 0; ifix < nfix; ifix++)
-      if(strncmp(fix[ifix]->style,style,len) == 0)
+      if(fix[ifix] && (strncmp(fix[ifix]->style,style,len) == 0) )
           n_fixes++;
 
     return n_fixes;
@@ -214,7 +214,7 @@ int Modify::n_computes_style(const char *style)
     len = strlen(style);
 
     for(int icompute = 0; icompute < ncompute; icompute++)
-      if(strncmp(compute[icompute]->style,style,len) == 0)
+      if(compute[icompute] && (strncmp(compute[icompute]->style,style,len) == 0) )
           n_computes++;
 
     return n_computes;
@@ -225,7 +225,7 @@ int Modify::n_fixes_style_strict(const char *style)
     int n_fixes = 0;
 
     for(int ifix = 0; ifix < nfix; ifix++)
-      if(strcmp(fix[ifix]->style,style) == 0)
+      if(fix[ifix] && (strcmp(fix[ifix]->style,style) == 0) )
           n_fixes++;
 
     return n_fixes;
@@ -305,7 +305,7 @@ bool Modify::i_am_first_of_style(Fix *fix_to_check)
 {
     for(int ifix = 0; ifix < nfix; ifix++)
     {
-        if(strcmp(fix[ifix]->style,fix_to_check->style) == 0)
+        if ( fix[ifix] && (strcmp(fix[ifix]->style,fix_to_check->style) == 0) )
         {
             if(fix_to_check == fix[ifix]) return true;
             return false;
@@ -324,7 +324,7 @@ bool Modify::i_am_first_of_style(Fix *fix_to_check)
 int Modify::index_first_fix_of_style(const char *style)
 {
     for(int ifix = 0; ifix < nfix; ifix++)
-        if(strcmp(fix[ifix]->style,style) == 0)
+        if(fix[ifix] && (strcmp(fix[ifix]->style,style) == 0) )
             return ifix;
 
     return -1;
@@ -335,7 +335,7 @@ int Modify::index_last_fix_of_style(const char *style)
     int idx = -1;
 
     for(int ifix = 0; ifix < nfix; ifix++)
-        if(strcmp(fix[ifix]->style,style) == 0)
+        if(fix[ifix] && (strcmp(fix[ifix]->style,style) == 0) )
             idx = ifix;
 
     return idx;
@@ -365,7 +365,7 @@ int Modify::index_first_fix_with_function(const int FUNCTION, bool integrate)
 {
 
     for(int ifix = 0; ifix < nfix; ifix++)
-      if((!integrate || fix[ifix]->time_integrate) && (fmask[ifix] & FUNCTION))
+      if(fix[ifix] && (!integrate || fix[ifix]->time_integrate) && (fmask[ifix] & FUNCTION))
         return ifix;
 
     return -1;
@@ -397,6 +397,8 @@ Fix* Modify::find_fix_property(const char *varname,const char *style,const char 
 
   for(ifix = 0; ifix < nfix; ifix++)
   {
+      if (!fix[ifix])
+          continue;
       if(strncmp(fix[ifix]->style,"property/atom",13) == 0 && dynamic_cast<FixPropertyAtom*>(fix[ifix]))
          fix_i = static_cast<FixPropertyAtom*>(fix[ifix])->check_fix(varname,svmstyle,len1,len2,caller,errflag);
       else if(strcmp(fix[ifix]->style,"property/global") == 0 && dynamic_cast<FixPropertyGlobal*>(fix[ifix]))
@@ -510,32 +512,125 @@ void Modify::box_extent(double &xlo,double &xhi,double &ylo,double &yhi,double &
    return min particle radius
 ------------------------------------------------------------------------- */
 
+double Modify::get_min_radius(const bool include_atoms, double *const min_rad_per_type)
+{
+    double minrad = 1e99;
+    const int ntypes = atom->ntypes;
+    double min_rad_multiplier = 1.0;
+    if (min_rad_per_type)
+    {
+        for (int j = 1; j <= ntypes; j++)
+            min_rad_per_type[j] = 1e99;
+    }
+
+    for (int i = 0; i < nfix; i++)
+    {
+        if (!fix[i] || !fix[i]->use_rad_for_cut_neigh_and_ghost())
+            continue;
+        min_rad_multiplier = std::min(min_rad_multiplier, fix[i]->get_min_rad_multiplier());
+        for (int j = 1; j <= ntypes; j++)
+        {
+            
+            const double fix_min_rad = fix[i]->min_rad(j);
+            if (fix_min_rad < 1e-99)
+                continue;
+            minrad = std::min(minrad, fix_min_rad);
+            if (min_rad_per_type)
+                min_rad_per_type[j] = std::min(min_rad_per_type[j], fix_min_rad);
+        }
+    }
+    minrad *= min_rad_multiplier;
+    if (min_rad_per_type)
+    {
+        for (int j = 1; j <= ntypes; j++)
+            min_rad_per_type[j] *= min_rad_multiplier;
+    }
+
+    double *const radius = atom->radius;
+    if (include_atoms && radius)
+    {
+        const int nlocal = atom->nlocal;
+        for (int i = 0; i < nlocal; i++)
+        {
+            minrad = std::min(minrad,radius[i]);
+            if (min_rad_per_type)
+            {
+                const int type = atom->type[i];
+                min_rad_per_type[type] = std::min(min_rad_per_type[type], radius[i]);
+            }
+        }
+    }
+
+    MPI_Min_Scalar(minrad, world);
+    if (min_rad_per_type)
+        MPI_Min_Vector(min_rad_per_type, ntypes+1, world);
+
+    return minrad;
+}
+
+/* ----------------------------------------------------------------------
+   return max particle radius
+------------------------------------------------------------------------- */
+
+double Modify::get_max_radius(const bool include_atoms, double *const max_rad_per_type)
+{
+    double maxrad = 0.;
+    const int ntypes = atom->ntypes;
+    double max_rad_multiplier = 1.0;
+    if (max_rad_per_type)
+    {
+        for (int j = 1; j <= ntypes; j++)
+            max_rad_per_type[j] = 0.;
+    }
+
+    for (int i = 0; i < nfix; i++)
+    {
+        
+        if (!fix[i] || !fix[i]->use_rad_for_cut_neigh_and_ghost())
+            continue;
+        max_rad_multiplier = std::max(max_rad_multiplier, fix[i]->get_max_rad_multiplier());
+        for (int j = 1; j <= ntypes; j++)
+        {
+            
+            const double fix_max_rad = fix[i]->max_rad(j);
+            maxrad = std::max(maxrad, fix_max_rad);
+            if (max_rad_per_type)
+                max_rad_per_type[j] = std::max(max_rad_per_type[j], fix_max_rad);
+        }
+    }
+    maxrad *= max_rad_multiplier;
+    if (max_rad_per_type)
+    {
+        for (int j = 1; j <= ntypes; j++)
+            max_rad_per_type[j] *= max_rad_multiplier;
+    }
+
+    double *const radius = atom->radius;
+    if (include_atoms && radius)
+    {
+        const int nlocal = atom->nlocal;
+        for (int i = 0; i < nlocal; i++)
+        {
+            maxrad = std::max(maxrad,radius[i]);
+            if (max_rad_per_type)
+            {
+                const int type = atom->type[i];
+                max_rad_per_type[type] = std::max(max_rad_per_type[type], radius[i]);
+            }
+        }
+    }
+
+    MPI_Max_Scalar(maxrad, world);
+    if (max_rad_per_type)
+        MPI_Max_Vector(max_rad_per_type, ntypes+1, world);
+
+    return maxrad;
+}
+
 void Modify::max_min_rad(double &maxrad,double &minrad)
 {
-    maxrad = 0.;
-    minrad = 1000.;
-    int nlocal = atom->nlocal;
-    double *radius = atom->radius;
-    int ntypes = atom->ntypes;
-
-    for (int i = 0; i < nfix; i++) {
-      for (int j = 1; j <= ntypes; j++) {
-        
-        maxrad = std::max(maxrad,fix[i]->max_rad(j));
-        if(modify->fix[i]->min_rad(j) > 0.)
-            minrad = std::min(minrad,fix[i]->min_rad(j));
-      }
-    }
-
-    if (radius) {
-      for (int i = 0; i < nlocal; i++) {
-        maxrad = std::max(maxrad,radius[i]);
-        minrad = std::min(minrad,radius[i]);
-      }
-    }
-
-    MPI_Min_Scalar(minrad,world);
-    MPI_Max_Scalar(maxrad,world);
+    maxrad = get_max_radius();
+    minrad = get_min_radius();
 }
 
 /* ----------------------------------------------------------------------

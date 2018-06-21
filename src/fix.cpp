@@ -70,7 +70,9 @@ Fix::Fix(LAMMPS *lmp, int narg, char **arg) :
     size_array_rows(0),
     size_array_cols(0),
     global_freq(0),
-    can_create_mesh_(false)
+    can_create_mesh_(false),
+    min_rad_multiplier_(1.0),
+    max_rad_multiplier_(1.0)
 {
   // fix ID, group, and style
   // ID must be all alphanumeric chars or underscores

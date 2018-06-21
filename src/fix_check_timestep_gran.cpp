@@ -123,7 +123,7 @@ FixCheckTimestepGran::FixCheckTimestepGran(LAMMPS *lmp, int narg, char **arg) :
           delete []errmsg;
       }
   }
-
+  if (nevery < 1) error->fix_error(FLERR,this,"'nevery' must be >= 1");
   vector_flag = 1;
   size_vector = 3;
   global_freq = nevery;

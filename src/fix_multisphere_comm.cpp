@@ -82,6 +82,24 @@ void FixMultisphere::forward_comm()
 
 /* ---------------------------------------------------------------------- */
 
+int FixMultisphere::get_comm_size() const
+{
+    if     (fw_comm_flag_ == MS_COMM_FW_BODY)
+        return 1;
+    else if(fw_comm_flag_ == MS_COMM_FW_IMAGE_DISPLACE)
+        return 4;
+    else if(fw_comm_flag_ == MS_COMM_FW_V_OMEGA)
+        return 6;
+    else if(fw_comm_flag_ == MS_COMM_FW_F_TORQUE)
+        return 7;
+    else if(fw_comm_flag_ == MS_COMM_FW_TEMP)
+        return 2;
+    else error->fix_error(FLERR,this,"FixMultisphere::get_comm_size internal error");
+    return 0;
+}
+
+/* ---------------------------------------------------------------------- */
+
 inline int FixMultisphere::pack_comm_body(int n, int *list, double *buf, int pbc_flag, int *pbc)
 {
     //we dont need to account for pbc here
@@ -308,6 +326,24 @@ void FixMultisphere::reverse_comm()
 /* ----------------------------------------------------------------------
    pack reverse comm
 ------------------------------------------------------------------------- */
+
+int FixMultisphere::get_reverse_comm_size() const
+{
+    if     (rev_comm_flag_ == MS_COMM_REV_X_V_OMEGA)
+        return 10+(atom->quaternion?4:0);
+    else if(rev_comm_flag_ == MS_COMM_REV_V_OMEGA)
+        return 7;
+    else if(rev_comm_flag_ == MS_COMM_REV_IMAGE)
+        return 2;
+    else if(rev_comm_flag_ == MS_COMM_REV_DISPLACE)
+        return 4;
+    else if(rev_comm_flag_ == MS_COMM_REV_TEMP)
+        return 2;
+    else error->fix_error(FLERR,this,"FixMultisphere::get_reverse_comm_size internal error");
+    return 0;
+}
+
+/* ---------------------------------------------------------------------- */
 
 int FixMultisphere::pack_reverse_comm(int n, int first, double *buf)
 {

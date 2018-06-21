@@ -68,7 +68,8 @@ fix ins all insert/pack seed 999769 distributiontemplate pdd1 vel constant 0. 0.
 		insert_every 2500 overlapcheck yes maxattempt 10 region bc ntry_mc 10000 volumefraction_region 0.05
 
 #integrator for multisphere rigid bodies
-fix		integr all multisphere
+fix		ms all multisphere
+fix		integr all nve/nonspherical
 
 #output settings, include total thermal energy
 compute		1 all erotate/sphere
@@ -76,7 +77,6 @@ fix		ts all check/timestep/gran 100 0.1 0.1
 thermo_style	custom step atoms ke c_1 f_ts[1] f_ts[2] cpu vol
 thermo		100
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 #compute rigid body properties
 #compute		xcm all rigid frm xcm

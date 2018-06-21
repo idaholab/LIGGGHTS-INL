@@ -113,7 +113,7 @@ void FixContactPropertyAtom::post_create()
     fix_nneighs_full_ = static_cast<FixPropertyAtom*>(modify->find_fix_id("nneighs_full"));
     if (!fix_nneighs_full_)
     {
-        const char **fixarg = new const char*[9];
+        const char *fixarg[9];
         fixarg[0]="nneighs_full";
         fixarg[1]="all";
         fixarg[2]="property/atom";
@@ -125,7 +125,6 @@ void FixContactPropertyAtom::post_create()
         fixarg[8]="0.0";
         modify->add_fix(9,const_cast<char**>(fixarg));
         fix_nneighs_full_ = static_cast<FixPropertyAtom*>(modify->find_fix_id("nneighs_full"));
-        delete []fixarg;
     }
 }
 
@@ -373,6 +372,13 @@ void FixContactPropertyAtom::do_forward_comm()
 
 /* ---------------------------------------------------------------------- */
 
+int FixContactPropertyAtom::get_comm_size() const
+{
+    return -1;
+}
+
+/* ---------------------------------------------------------------------- */
+
 int FixContactPropertyAtom::pack_comm(int n, int *list, double *buf,
                              int pbc_flag, int *pbc)
 {
@@ -390,6 +396,12 @@ int FixContactPropertyAtom::pack_comm(int n, int *list, double *buf,
         }
       }
     }
+    
+    if (m > n*dnum_*20)
+        error->warning(FLERR, "Warning: Contact/property/atom has a lot of data to transfer in forward comm\nOne possible reason can be a mesh which has elements that are significantly smaller than the size of the largest particles.");
+    if (m > n*dnum_*100)
+        error->one(FLERR, "Error: Contact/property/atom has too much data to transfer in forward comm\nOne possible reason can be a mesh which has elements that are significantly smaller than the size of the largest particles.");
+    
     return m;
 }
 

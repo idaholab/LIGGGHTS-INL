@@ -59,15 +59,18 @@ class Timer : protected Pointers {
 
   Timer(class LAMMPS *);
   ~Timer();
-  void init();
+  void init(bool save_cpu = false);
   void stamp();
   void stamp(int);
   void barrier_start(int);
   void barrier_stop(int);
   double elapsed(int);
+  double cpu_elapsed(int);
 
  private:
+  double *cpu_array;
   double previous_time;
+  double previous_cpu_time;
 };
 
 }

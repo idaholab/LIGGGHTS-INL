@@ -66,7 +66,7 @@ using namespace LAMMPS_NS;
 using namespace FixConst;
 using namespace MathConst;
 
-enum{LINEAR,WIGGLE,ROTATE,VARIABLE};
+enum{LINEAR,WIGGLE,RIGGLE,ROTATE,VARIABLE};
 enum{EQUAL,ATOM};
 
 /* ---------------------------------------------------------------------- */
@@ -131,6 +131,26 @@ FixMove::FixMove(LAMMPS *lmp, int narg, char **arg) :
     }
     period = force->numeric(FLERR,arg[7]);
 
+  } else if (strcmp(arg[3],"riggle") == 0) {
+    if (narg < 16) error->all(FLERR,"Illegal fix move command");
+    iarg = 16;
+    mstyle = RIGGLE;
+    if (strcmp(arg[4],"origin") != 0)
+        error->all(FLERR,"Expected keyword 'origin'");
+    point[0] = force->numeric(FLERR,arg[5]);
+    point[1] = force->numeric(FLERR,arg[6]);
+    point[2] = force->numeric(FLERR,arg[7]);
+    if (strcmp(arg[8],"axis") != 0)
+        error->all(FLERR,"Expected keyword 'axis'");
+    axis[0] = force->numeric(FLERR,arg[9]);
+    axis[1] = force->numeric(FLERR,arg[10]);
+    axis[2] = force->numeric(FLERR,arg[11]);
+    if (strcmp(arg[12],"period") != 0)
+        error->all(FLERR,"Expected keyword 'period'");
+    period = force->numeric(FLERR,arg[13]);
+    if (strcmp(arg[14],"amplitude") != 0)
+        error->all(FLERR,"Expected keyword 'amplitude'");
+    amplitude = force->numeric(FLERR,arg[15])*MY_PI/180;
   } else if (strcmp(arg[3],"rotate") == 0) {
     if (narg < 11) error->all(FLERR,"Illegal fix move command");
     iarg = 11;
@@ -207,9 +227,9 @@ FixMove::FixMove(LAMMPS *lmp, int narg, char **arg) :
       error->all(FLERR,"Fix move cannot set linear z motion for 2d problem");
     if (mstyle == WIGGLE && azflag && az != 0.0)
       error->all(FLERR,"Fix move cannot set wiggle z motion for 2d problem");
-    if (mstyle == ROTATE && (axis[0] != 0.0 || axis[1] != 0.0))
+    if ( (mstyle == ROTATE || mstyle == RIGGLE )&& (axis[0] != 0.0 || axis[1] != 0.0))
       error->all(FLERR,
-                 "Fix move cannot rotate aroung non z-axis for 2d problem");
+                 "Fix move cannot rotate around non z-axis for 2d problem");
     if (mstyle == VARIABLE && (zvarstr || vzvarstr))
       error->all(FLERR,
                  "Fix move cannot define z or vz variable for 2d problem");
@@ -222,7 +242,7 @@ FixMove::FixMove(LAMMPS *lmp, int narg, char **arg) :
 
   // setup scaling and apply scaling factors to velocity & amplitude
 
-  if ((mstyle == LINEAR || mstyle == WIGGLE || mstyle == ROTATE) &&
+  if ((mstyle == LINEAR || mstyle == WIGGLE || mstyle == ROTATE || mstyle == RIGGLE) &&
       scaleflag) {
 
     double xscale,yscale,zscale;
@@ -241,7 +261,7 @@ FixMove::FixMove(LAMMPS *lmp, int narg, char **arg) :
       if (axflag) ax *= xscale;
       if (ayflag) ay *= yscale;
       if (azflag) az *= zscale;
-    } else if (mstyle == ROTATE) {
+    } else if (mstyle == ROTATE || mstyle == RIGGLE) {
       point[0] *= xscale;
       point[1] *= yscale;
       point[2] *= zscale;
@@ -250,11 +270,11 @@ FixMove::FixMove(LAMMPS *lmp, int narg, char **arg) :
 
   // set omega_rotate from period
 
-  if (mstyle == WIGGLE || mstyle == ROTATE) omega_rotate = 2.0*MY_PI / period;
+  if (mstyle == WIGGLE || mstyle == ROTATE || mstyle == RIGGLE) omega_rotate = 2.0*MY_PI / period;
 
   // runit = unit vector along rotation axis
 
-  if (mstyle == ROTATE) {
+  if (mstyle == ROTATE || mstyle == RIGGLE) {
     double len = sqrt(axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]);
     if (len == 0.0)
       error->all(FLERR,"Zero length rotation vector with fix move");
@@ -410,15 +430,14 @@ void FixMove::init()
 void FixMove::initial_integrate(int vflag)
 {
   double dtfm;
-  double xold[3],a[3],b[3],c[3],d[3],disp[3];
-  double ddotr,dx=0.0,dy=0.0,dz=0.0;
+  double xold[3];
+  double dx=0.0,dy=0.0,dz=0.0;
 
   double delta = (update->ntimestep - time_origin) * dt;
 
   double **x = atom->x;
   double **v = atom->v;
   double **f = atom->f;
-  double **omega = atom->omega;
   double *rmass = atom->rmass;
   double *mass = atom->mass;
   int *type = atom->type;
@@ -533,63 +552,23 @@ void FixMove::initial_integrate(int vflag)
       }
     }
 
-  // for rotate by right-hand rule around omega:
-  // P = point = vector = point of rotation
-  // R = vector = axis of rotation
-  // w = omega of rotation (from period)
-  // X0 = xoriginal = initial coord of atom
-  // R0 = runit = unit vector for R
-  // D = X0 - P = vector from P to X0
-  // C = (D dot R0) R0 = projection of atom coord onto R line
-  // A = D - C = vector from R line to X0
-  // B = R0 cross A = vector perp to A in plane of rotation
-  // A,B define plane of circular rotation around R line
-  // X = P + C + A cos(w*dt) + B sin(w*dt)
-  // V = w R0 cross (A cos(w*dt) + B sin(w*dt))
+  // for riggle: rotate with given amplitude
+  // see rotate_particle for details
+
+  } else if (mstyle == RIGGLE) {
+
+    const double arg = amplitude * sin(omega_rotate * delta);
+    const double vel_pre_fractor = amplitude * cos(omega_rotate * delta) * omega_rotate;
+
+    rotate_particles(arg,vel_pre_fractor);
+
+  // for rotate:
+  // see rotate_particle for details
 
   } else if (mstyle == ROTATE) {
-    double arg = omega_rotate * delta;
-    double sine = sin(arg);
-    double cosine = cos(arg);
+    const double arg = omega_rotate * delta;
 
-    for (int i = 0; i < nlocal; i++) {
-      if (mask[i] & groupbit) {
-        xold[0] = x[i][0];
-        xold[1] = x[i][1];
-        xold[2] = x[i][2];
-
-        d[0] = xoriginal[i][0] - point[0];
-        d[1] = xoriginal[i][1] - point[1];
-        d[2] = xoriginal[i][2] - point[2];
-        ddotr = d[0]*runit[0] + d[1]*runit[1] + d[2]*runit[2];
-        c[0] = ddotr*runit[0];
-        c[1] = ddotr*runit[1];
-        c[2] = ddotr*runit[2];
-        a[0] = d[0] - c[0];
-        a[1] = d[1] - c[1];
-        a[2] = d[2] - c[2];
-        b[0] = runit[1]*a[2] - runit[2]*a[1];
-        b[1] = runit[2]*a[0] - runit[0]*a[2];
-        b[2] = runit[0]*a[1] - runit[1]*a[0];
-        disp[0] = a[0]*cosine  + b[0]*sine;
-        disp[1] = a[1]*cosine  + b[1]*sine;
-        disp[2] = a[2]*cosine  + b[2]*sine;
-
-        x[i][0] = point[0] + c[0] + disp[0];
-        x[i][1] = point[1] + c[1] + disp[1];
-        x[i][2] = point[2] + c[2] + disp[2];
-        v[i][0] = omega_rotate * (runit[1]*disp[2] - runit[2]*disp[1]);
-        v[i][1] = omega_rotate * (runit[2]*disp[0] - runit[0]*disp[2]);
-        v[i][2] = omega_rotate * (runit[0]*disp[1] - runit[1]*disp[0]);
-        if (omega_flag) {
-          omega[i][0] = omega_rotate*runit[0];
-          omega[i][1] = omega_rotate*runit[1];
-          omega[i][2] = omega_rotate*runit[2];
-        }
-
-        domain->remap_near(x[i],xold);
-      }
-    }
+    rotate_particles(arg,omega_rotate);
 
   // for variable: compute x,v from variables
 
@@ -872,7 +851,7 @@ void FixMove::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixMove::restart(char *buf)
+void FixMove::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;
@@ -1050,5 +1029,75 @@ int FixMove::size_restart(int nlocal)
 
 void FixMove::reset_dt()
 {
-  error->all(FLERR,"Resetting timestep is not allowed with fix move");
+    error->all(FLERR,"Resetting timestep is not allowed with fix move");
+}
+
+/* ---------------------------------------------------------------------- */
+
+// for rotate by right-hand rule around omega:
+// P = point = vector = point of rotation
+// R = vector = axis of rotation
+// w = omega of rotation (from period)
+// X0 = xoriginal = initial coord of atom
+// R0 = runit = unit vector for R
+// D = X0 - P = vector from P to X0
+// C = (D dot R0) R0 = projection of atom coord onto R line
+// A = D - C = vector from R line to X0
+// B = R0 cross A = vector perp to A in plane of rotation
+// A,B define plane of circular rotation around R line
+// X = P + C + A cos(w*dt) + B sin(w*dt)
+// V = w R0 cross (A cos(w*dt) + B sin(w*dt))
+//
+// vel_pre_factor is the derivative of phi
+
+void FixMove::rotate_particles(double phi, double vel_pre_factor)
+{
+    const int nlocal = atom->nlocal;
+    int *mask = atom->mask;
+    double **x = atom->x;
+    double **v = atom->v;
+    double **omega = atom->omega;
+
+    const double sine = sin(phi);
+    const double cosine = cos(phi);
+
+    for (int i = 0; i < nlocal; i++) {
+      if (mask[i] & groupbit) {
+        double xold[3];
+        vectorCopy3D(x[i],xold);
+
+        double d[3];
+        vectorSubtract3D(xoriginal[i],point,d);
+
+        const double ddotr = vectorDot3D(d,runit);
+
+        double c[3];
+        vectorScalarMult3D(runit,ddotr,c);
+
+        double a[3];
+        vectorSubtract3D(d,c,a);
+
+        double b[3];
+        vectorCross3D(runit,a,b);
+
+        double disp[3];
+        disp[0] = a[0]*cosine  + b[0]*sine;
+        disp[1] = a[1]*cosine  + b[1]*sine;
+        disp[2] = a[2]*cosine  + b[2]*sine;
+
+        x[i][0] = point[0] + c[0] + disp[0];
+        x[i][1] = point[1] + c[1] + disp[1];
+        x[i][2] = point[2] + c[2] + disp[2];
+        v[i][0] = vel_pre_factor * (runit[1]*disp[2] - runit[2]*disp[1]);
+        v[i][1] = vel_pre_factor * (runit[2]*disp[0] - runit[0]*disp[2]);
+        v[i][2] = vel_pre_factor * (runit[0]*disp[1] - runit[1]*disp[0]);
+        if (omega_flag) {
+          omega[i][0] = vel_pre_factor*runit[0];
+          omega[i][1] = vel_pre_factor*runit[1];
+          omega[i][2] = vel_pre_factor*runit[2];
+        }
+
+        domain->remap_near(x[i],xold);
+      }
+    }
 }

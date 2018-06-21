@@ -84,9 +84,9 @@ class ContactForceCorrector : protected Pointers
       FixMultisphere const *fix_ms_;
       class Multisphere *multisphere_;
 
-      ScalarContainer<int> &max_n_ibody_contact_;
+      ScalarContainer<int> *max_n_ibody_contact_;
 
-      ScalarContainer<int> &n_ibody_contact_;
+      ScalarContainer<int> *n_ibody_contact_;
 
       bool is_wall_;
 

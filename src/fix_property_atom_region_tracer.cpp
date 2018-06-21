@@ -64,9 +64,6 @@ FixPropertyAtomRegionTracer::FixPropertyAtomRegionTracer(LAMMPS *lmp, int narg, 
   iarg_(3),
   check_every_(10)
 {
-    
-    if (strcmp(style, "property/atom/timetracer") == 0)
-        error->fix_error(FLERR, this, "Style of fix property/atom/timetracer is now property/atom/regiontracer/time");
     // do the derived class stuff
 
     // parse args

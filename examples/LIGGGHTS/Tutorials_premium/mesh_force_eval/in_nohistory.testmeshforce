@@ -56,7 +56,6 @@ compute		1 all erotate/sphere
 thermo_style	custom step atoms ke c_1 vol
 thermo		1000
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 fix 		baseforce all ave/time 50 2 100 f_cad[1] f_cad[2] f_cad[3] file post/baseforce.txt
 

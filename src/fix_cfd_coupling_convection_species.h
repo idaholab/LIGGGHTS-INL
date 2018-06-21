@@ -47,7 +47,8 @@ FixStyle(couple/cfd/speciesConvection,FixCfdCouplingConvectionSpecies)
 #ifndef LMP_FIX_CFD_COUPLING_CONVECTION_SPECIES_H
 #define LMP_FIX_CFD_COUPLING_CONVECTION_SPECIES_H
 
-#include "fix_cfd_coupling.h"
+#include "fix.h"
+#include <string>
 
 namespace LAMMPS_NS {
 
@@ -72,14 +73,14 @@ class FixCfdCouplingConvectionSpecies : public Fix {
   class FixPropertyAtom* fix_totalFlux;
 
   double species0;
-  char   speciesName_[128];
-  char   sourceName_[128];
-  char   convectiveFluxName_[128];
-  char   capacityName_[128];
-  char   steName_[128];
-  char   totalFluxName_[128];
-  char   speciesFluidName_[128];
-  char   speciesTransCoeffName_[128];
+  std::string speciesName_;
+  std::string sourceName_;
+  std::string convectiveFluxName_;
+  std::string capacityName_;
+  std::string steName_;
+  std::string totalFluxName_;
+  std::string speciesFluidName_;
+  std::string speciesTransCoeffName_;
 };
 
 }

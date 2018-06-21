@@ -553,6 +553,8 @@ void FixTemplateMultisphere::randomize_single()
       vectorCopy3D(displace_[j],pti_m->displace[j]);
   }
 
+  pti_m->radius_ins_max = vectorMaxN(pti_m->radius_ins,nspheres);
+
   vectorCopy3D(inertia_,pti_m->inertia);
   vectorCopy3D(ex_space_,pti_m->ex_space);
   vectorCopy3D(ey_space_,pti_m->ey_space);

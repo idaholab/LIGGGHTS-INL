@@ -112,7 +112,6 @@ Region::~Region()
 
 void Region::init()
 {
-
   seed = 3012211;
 
   if (xstr) {
@@ -708,4 +707,13 @@ int Region::bbox_extends_outside_box()
     vectorConstruct3D(min,extent_xlo+SMALL,extent_ylo+SMALL,extent_zlo+SMALL);
     vectorConstruct3D(max,extent_xhi-SMALL,extent_yhi-SMALL,extent_zhi-SMALL);
     return (!(domain->is_in_domain(min)) || !(domain->is_in_domain(max)));
+}
+
+void Region::update_region()
+{
+    if (varshape && update->ntimestep != lastshape)
+    {
+        shape_update();
+        lastshape = update->ntimestep;
+    }
 }

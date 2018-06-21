@@ -323,6 +323,7 @@ void InputMeshTri::meshtrifile_stl(class TriMesh *mesh,class Region *region, con
     // n = length of line including str terminator, 0 if end of file
     // if line ends in continuation char '&', concatenate next line
 
+    char is_binary = 0;
     if (me == 0) {
       m = 0;
       while (1) {
@@ -343,6 +344,29 @@ void InputMeshTri::meshtrifile_stl(class TriMesh *mesh,class Region *region, con
           break;
         }
       }
+      if (nLines == 0)
+      {
+        char *s = strchr(line, 's');
+        if (!s || strlen(s) < 5 || strncmp(s, "solid", 5) != 0)
+          is_binary = 1;
+      }
+    }
+
+    if (nLines == 0)
+    {
+        MPI_Bcast(&is_binary, 1, MPI_CHAR, 0, world);
+        if (is_binary)
+        {
+            if (me == 0)
+            {
+                fclose(nonlammps_file);
+                if (verbose_)
+                    fprintf(screen,"Note: solid keyword not found, assuming binary stl file\n");
+            }
+            nonlammps_file = NULL;
+            meshtrifile_stl_binary(mesh, region, filename);
+            break;
+        }
     }
 
     // bcast the line
@@ -374,19 +398,6 @@ void InputMeshTri::meshtrifile_stl(class TriMesh *mesh,class Region *region, con
          if (me == 0 && verbose_)
             fprintf(screen,"Note: Skipping empty line in STL file\n");
       continue;
-    }
-
-    if (strcmp(arg[0],"solid") != 0 && nLines == 1)
-    {
-        if (me == 0)
-        {
-            fclose(nonlammps_file);
-            if (verbose_)
-                fprintf(screen,"Note: solid keyword not found, assuming binary stl file\n");
-        }
-        nonlammps_file = NULL;
-        meshtrifile_stl_binary(mesh, region, filename);
-        break;
     }
 
     // detect begin and end of a solid object, facet and vertices

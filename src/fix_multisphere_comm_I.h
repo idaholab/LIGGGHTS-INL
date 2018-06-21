@@ -53,6 +53,7 @@
       void forward_comm();
       void reverse_comm();
 
+      int get_comm_size() const;
       int pack_comm(int, int*, double*, int, int*);
       int pack_comm_body(int, int*, double*, int, int*);
       int pack_comm_image_displace(int, int*, double*, int, int*);
@@ -67,6 +68,7 @@
       void unpack_comm_f_torque(int, int, double*);
       void unpack_comm_temp(int, int, double*);
 
+      int get_reverse_comm_size() const;
       int pack_reverse_comm(int, int, double*);
       int pack_reverse_comm_x_v_omega(int, int, double*);
       int pack_reverse_comm_v_omega(int, int, double*);

@@ -139,7 +139,7 @@ void AtomVecSphere::grow(int n)
   f = memory->grow(atom->f,nmax*comm->nthreads,3,"atom:f");
 
   radius = memory->grow(atom->radius,nmax,"atom:radius");
-  density = memory->grow(atom->density,nmax,"atom:density"); 
+  density = memory->grow(atom->density,nmax,"atom:density");
   rmass = memory->grow(atom->rmass,nmax,"atom:rmass");
   omega = memory->grow(atom->omega,nmax,3,"atom:omega");
   torque = memory->grow(atom->torque,nmax*comm->nthreads,3,"atom:torque");
@@ -158,7 +158,7 @@ void AtomVecSphere::grow_reset()
   tag = atom->tag; type = atom->type;
   mask = atom->mask; image = atom->image;
   x = atom->x; v = atom->v; f = atom->f;
-  radius = atom->radius; density = atom->density; rmass = atom->rmass; 
+  radius = atom->radius; density = atom->density; rmass = atom->rmass;
   omega = atom->omega; torque = atom->torque;
 }
 
@@ -181,7 +181,7 @@ void AtomVecSphere::copy(int i, int j, int delflag)
 
   radius[j] = radius[i];
   rmass[j] = rmass[i];
-  density[j] = density[i]; 
+  density[j] = density[i];
   omega[j][0] = omega[i][0];
   omega[j][1] = omega[i][1];
   omega[j][2] = omega[i][2];
@@ -234,10 +234,10 @@ int AtomVecSphere::pack_comm(int n, int *list, double *buf,
         buf[m++] = x[j][0];
         buf[m++] = x[j][1];
         buf[m++] = x[j][2];
-        buf[m++] = ubuf(type[j]).d; 
+        buf[m++] = ubuf(type[j]).d;
         buf[m++] = radius[j];
         buf[m++] = rmass[j];
-        buf[m++] = density[j]; 
+        buf[m++] = density[j];
       }
     } else {
       if (domain->triclinic == 0) {
@@ -254,10 +254,10 @@ int AtomVecSphere::pack_comm(int n, int *list, double *buf,
         buf[m++] = x[j][0] + dx;
         buf[m++] = x[j][1] + dy;
         buf[m++] = x[j][2] + dz;
-        buf[m++] = ubuf(type[j]).d; 
+        buf[m++] = ubuf(type[j]).d;
         buf[m++] = radius[j];
         buf[m++] = rmass[j];
-        buf[m++] = density[j]; 
+        buf[m++] = density[j];
       }
     }
   }
@@ -348,10 +348,10 @@ int AtomVecSphere::pack_comm_vel(int n, int *list, double *buf,
         buf[m++] = x[j][0];
         buf[m++] = x[j][1];
         buf[m++] = x[j][2];
-        buf[m++] = ubuf(type[j]).d; 
+        buf[m++] = ubuf(type[j]).d;
         buf[m++] = radius[j];
         buf[m++] = rmass[j];
-        buf[m++] = density[j]; 
+        buf[m++] = density[j];
         buf[m++] = v[j][0];
         buf[m++] = v[j][1];
         buf[m++] = v[j][2];
@@ -375,10 +375,10 @@ int AtomVecSphere::pack_comm_vel(int n, int *list, double *buf,
           buf[m++] = x[j][0] + dx;
           buf[m++] = x[j][1] + dy;
           buf[m++] = x[j][2] + dz;
-          buf[m++] = ubuf(type[j]).d; 
+          buf[m++] = ubuf(type[j]).d;
           buf[m++] = radius[j];
           buf[m++] = rmass[j];
-          buf[m++] = density[j]; 
+          buf[m++] = density[j];
           buf[m++] = v[j][0];
           buf[m++] = v[j][1];
           buf[m++] = v[j][2];
@@ -395,10 +395,10 @@ int AtomVecSphere::pack_comm_vel(int n, int *list, double *buf,
           buf[m++] = x[j][0] + dx;
           buf[m++] = x[j][1] + dy;
           buf[m++] = x[j][2] + dz;
-          buf[m++] = ubuf(type[j]).d; 
+          buf[m++] = ubuf(type[j]).d;
           buf[m++] = radius[j];
           buf[m++] = rmass[j];
-          buf[m++] = density[j]; 
+          buf[m++] = density[j];
           if (mask[i] & deform_groupbit) {
             buf[m++] = v[j][0] + dvx;
             buf[m++] = v[j][1] + dvy;
@@ -430,7 +430,7 @@ int AtomVecSphere::pack_comm_hybrid(int n, int *list, double *buf)
   m = 0;
   for (i = 0; i < n; i++) {
     j = list[i];
-    buf[m++] = ubuf(type[j]).d; 
+    buf[m++] = ubuf(type[j]).d;
     buf[m++] = radius[j];
     buf[m++] = rmass[j];
     buf[m++] = density[j];
@@ -459,10 +459,10 @@ void AtomVecSphere::unpack_comm(int n, int first, double *buf)
       x[i][0] = buf[m++];
       x[i][1] = buf[m++];
       x[i][2] = buf[m++];
-      type[i] = (int) ubuf(buf[m++]).i; 
+      type[i] = (int) ubuf(buf[m++]).i;
       radius[i] = buf[m++];
       rmass[i] = buf[m++];
-      density[i] = buf[m++]; 
+      density[i] = buf[m++];
     }
   }
 }
@@ -495,10 +495,10 @@ void AtomVecSphere::unpack_comm_vel(int n, int first, double *buf)
       x[i][0] = buf[m++];
       x[i][1] = buf[m++];
       x[i][2] = buf[m++];
-      type[i] = (int) ubuf(buf[m++]).i; 
+      type[i] = (int) ubuf(buf[m++]).i;
       radius[i] = buf[m++];
       rmass[i] = buf[m++];
-      density[i] = buf[m++]; 
+      density[i] = buf[m++];
       v[i][0] = buf[m++];
       v[i][1] = buf[m++];
       v[i][2] = buf[m++];
@@ -520,10 +520,10 @@ int AtomVecSphere::unpack_comm_hybrid(int n, int first, double *buf)
   m = 0;
   last = first + n;
   for (i = first; i < last; i++) {
-    type[i] = (int) ubuf(buf[m++]).i; 
+    type[i] = (int) ubuf(buf[m++]).i;
     radius[i] = buf[m++];
     rmass[i] = buf[m++];
-    density[i] = buf[m++]; 
+    density[i] = buf[m++];
   }
   return m;
 }
@@ -618,7 +618,7 @@ int AtomVecSphere::pack_border(int n, int *list, double *buf,
       buf[m++] = ubuf(mask[j]).d;
       buf[m++] = radius[j];
       buf[m++] = rmass[j];
-      buf[m++] = density[j]; 
+      buf[m++] = density[j];
     }
   } else {
     if (domain->triclinic == 0) {
@@ -640,7 +640,7 @@ int AtomVecSphere::pack_border(int n, int *list, double *buf,
       buf[m++] = ubuf(mask[j]).d;
       buf[m++] = radius[j];
       buf[m++] = rmass[j];
-      buf[m++] = density[j]; 
+      buf[m++] = density[j];
     }
   }
 
@@ -674,7 +674,7 @@ int AtomVecSphere::pack_border_vel(int n, int *list, double *buf,
       buf[m++] = ubuf(mask[j]).d;
       buf[m++] = radius[j];
       buf[m++] = rmass[j];
-      buf[m++] = density[j]; 
+      buf[m++] = density[j];
       buf[m++] = v[j][0];
       buf[m++] = v[j][1];
       buf[m++] = v[j][2];
@@ -703,7 +703,7 @@ int AtomVecSphere::pack_border_vel(int n, int *list, double *buf,
         buf[m++] = ubuf(mask[j]).d;
         buf[m++] = radius[j];
         buf[m++] = rmass[j];
-        buf[m++] = density[j]; 
+        buf[m++] = density[j];
         buf[m++] = v[j][0];
         buf[m++] = v[j][1];
         buf[m++] = v[j][2];
@@ -725,7 +725,7 @@ int AtomVecSphere::pack_border_vel(int n, int *list, double *buf,
         buf[m++] = ubuf(mask[j]).d;
         buf[m++] = radius[j];
         buf[m++] = rmass[j];
-        buf[m++] = density[j]; 
+        buf[m++] = density[j];
         if (mask[i] & deform_groupbit) {
           buf[m++] = v[j][0] + dvx;
           buf[m++] = v[j][1] + dvy;
@@ -760,7 +760,7 @@ int AtomVecSphere::pack_border_hybrid(int n, int *list, double *buf)
     j = list[i];
     buf[m++] = radius[j];
     buf[m++] = rmass[j];
-    buf[m++] = density[j]; 
+    buf[m++] = density[j];
   }
   return m;
 }
@@ -783,7 +783,7 @@ void AtomVecSphere::unpack_border(int n, int first, double *buf)
     mask[i] = (int) ubuf(buf[m++]).i;
     radius[i] = buf[m++];
     rmass[i] = buf[m++];
-    density[i] = buf[m++]; 
+    density[i] = buf[m++];
   }
 
   if (atom->nextra_border)
@@ -810,7 +810,7 @@ void AtomVecSphere::unpack_border_vel(int n, int first, double *buf)
     mask[i] = (int) ubuf(buf[m++]).i;
     radius[i] = buf[m++];
     rmass[i] = buf[m++];
-    density[i] = buf[m++]; 
+    density[i] = buf[m++];
     v[i][0] = buf[m++];
     v[i][1] = buf[m++];
     v[i][2] = buf[m++];
@@ -836,7 +836,7 @@ int AtomVecSphere::unpack_border_hybrid(int n, int first, double *buf)
   for (i = first; i < last; i++) {
     radius[i] = buf[m++];
     rmass[i] = buf[m++];
-    density[i] = buf[m++]; 
+    density[i] = buf[m++];
   }
   return m;
 }
@@ -862,7 +862,7 @@ int AtomVecSphere::pack_exchange(int i, double *buf)
 
   buf[m++] = radius[i];
   buf[m++] = rmass[i];
-  buf[m++] = density[i]; 
+  buf[m++] = density[i];
   buf[m++] = omega[i][0];
   buf[m++] = omega[i][1];
   buf[m++] = omega[i][2];
@@ -896,7 +896,7 @@ int AtomVecSphere::unpack_exchange(double *buf)
 
   radius[nlocal] = buf[m++];
   rmass[nlocal] = buf[m++];
-  density[nlocal] = buf[m++]; 
+  density[nlocal] = buf[m++];
   omega[nlocal][0] = buf[m++];
   omega[nlocal][1] = buf[m++];
   omega[nlocal][2] = buf[m++];
@@ -920,7 +920,7 @@ int AtomVecSphere::size_restart()
   int i;
 
   int nlocal = atom->nlocal;
-  int n = 17 * nlocal; 
+  int n = 17 * nlocal;
 
   if (atom->nextra_restart)
     for (int iextra = 0; iextra < atom->nextra_restart; iextra++)
@@ -953,7 +953,7 @@ int AtomVecSphere::pack_restart(int i, double *buf)
 
   buf[m++] = radius[i];
   buf[m++] = rmass[i];
-  buf[m++] = density[i]; 
+  buf[m++] = density[i];
   buf[m++] = omega[i][0];
   buf[m++] = omega[i][1];
   buf[m++] = omega[i][2];
@@ -995,7 +995,7 @@ int AtomVecSphere::unpack_restart(double *buf)
 
   radius[nlocal] = buf[m++];
   rmass[nlocal] = buf[m++];
-  density[nlocal] = buf[m++]; 
+  density[nlocal] = buf[m++];
   omega[nlocal][0] = buf[m++];
   omega[nlocal][1] = buf[m++];
   omega[nlocal][2] = buf[m++];
@@ -1037,9 +1037,9 @@ void AtomVecSphere::create_atom(int itype, double *coord)
   radius[nlocal] = 0.5;
   density[nlocal] = 1.0;
   if (domain->dimension == 2) rmass[nlocal] = MY_PI *
-      radius[nlocal]*radius[nlocal]*density[nlocal]; 
+      radius[nlocal]*radius[nlocal]*density[nlocal];
   else rmass[nlocal] = 4.0*MY_PI/3.0 *
-    radius[nlocal]*radius[nlocal]*radius[nlocal] * density[nlocal]; 
+    radius[nlocal]*radius[nlocal]*radius[nlocal] * density[nlocal];
   omega[nlocal][0] = 0.0;
   omega[nlocal][1] = 0.0;
   omega[nlocal][2] = 0.0;
@@ -1077,7 +1077,7 @@ void AtomVecSphere::data_atom(double *coord, tagint imagetmp, char **values)
   else
   {
     if (domain->dimension == 2) rmass[nlocal] = MY_PI *
-      radius[nlocal]*radius[nlocal]*density[nlocal]; 
+      radius[nlocal]*radius[nlocal]*density[nlocal];
     else rmass[nlocal] = 4.0*MY_PI/3.0 *
       radius[nlocal]*radius[nlocal]*radius[nlocal] * density[nlocal];
   }
@@ -1179,7 +1179,7 @@ void AtomVecSphere::pack_data(double **buf,int tag_offset)
 {
   int nlocal = atom->nlocal;
   for (int i = 0; i < nlocal; i++) {
-    buf[i][0] = ubuf(tag[i]+tag_offset).d; 
+    buf[i][0] = ubuf(tag[i]+tag_offset).d;
     buf[i][1] = ubuf(type[i]).d;
     buf[i][2] = 2.0*radius[i];
     if (radius[i] == 0.0) buf[i][3] = rmass[i];
@@ -1253,7 +1253,7 @@ void AtomVecSphere::pack_vel(double **buf)
    pack velocity info for data file
 ------------------------------------------------------------------------- */
 
-void AtomVecSphere::pack_vel(double **buf,int tag_offset) 
+void AtomVecSphere::pack_vel(double **buf,int tag_offset)
 {
   int nlocal = atom->nlocal;
   for (int i = 0; i < nlocal; i++) {

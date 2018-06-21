@@ -56,6 +56,8 @@
 using namespace LAMMPS_NS;
 using namespace FixConst;
 
+double FixDragforce::small_ =  0.00000001;
+
 /* ---------------------------------------------------------------------- */
 
 FixDragforce::FixDragforce(LAMMPS *lmp, int narg, char **arg) :
@@ -192,7 +194,7 @@ void FixDragforce::post_force(int vflag)
 
       vectorSubtract3D(v[i],U_fluid_,uRel);
       uMag = vectorMag3D(uRel);
-      if(uMag > small())
+      if(uMag > small_)
       {
           double cg = force->cg(type[i]);
           double invcg = 1./cg;

@@ -15,14 +15,12 @@ fix ID group-ID multisphere :pre
 ID, group-ID are documented in "fix"_fix.html command :ulb,l
 multisphere = style name of this fix command :l
 zero or more keyword/value pairs may be appended :l
-keyword = {allow_group_and_set} or {allow_heatsource} or {CAddRhoFluid} :l
+keyword = {allow_group_and_set} or {allow_heatsource} :l
   {allow_group_and_set} value = 'yes' or 'no'
     yes, no = determines if group and set command are allowed in the current simulation.
   {allow_heatsource} value = 'yes' or 'no'
     yes, no = determines if heatsources are allowed in the current simulation.
-  {CAddRhoFluid} value = CAdd RhoFluid
-    CAdd = Coefficient for additional mass term. (Usually 0.5)
-    RhoFluid = Fluid density :pre
+
 :ule
 
 [Examples:]
@@ -36,9 +34,8 @@ means that each timestep the total force and torque on each rigid body
 is computed as the sum of the forces and torques on its constituent
 particles and the coordinates, velocities, and orientations of the
 atoms in each body are updated so that the body moves and rotates as a
-single entity. The integration that is performed by this command is
-euqivalent to "fix_rigid"_fix_rigid.html. However, the following
-implementation details are different:
+single entity. The implementation is similar to "fix_rigid"_fix_rigid.html. 
+However, the following implementation details are different:
 
 (1) Body data held by this fix is distributed across all processes, yielding
 better parallel scalabilty.
@@ -55,19 +52,14 @@ settings or by any command that deleted particles (e.g.
 "delete_atoms"_delete_atoms.html).
 
 (4) By using this fix, gravity ("fix_gravity"_fix_gravity.html)
-will be handled correctly for for overlapping particle clumps.
+will be handled correctly for overlapping particle clumps.
 
 (5) This fix internally performs a "neigh_modify"_neigh_modify.html exclude
 command so that particles belonging to the same rigid body are excluded
 from the neighborlist build.
 
-IMPORTANT NOTE: You should not update the atoms in rigid bodies via
-other time-integration fixes (e.g. nve, nvt, npt), or you will be
-integrating their motion more than once each timestep.
+(6) For the integration of translational and rotational motion "fix nve/nonspherical"_fix_nve_nonspherical.html is required.
 
-The option {CAddRhoFluid} enables additional mass terms for the integration of
-multisphere particles. These model the influence of displaced fluid on the 
-particle motion.
 
 :line
 

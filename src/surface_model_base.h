@@ -75,18 +75,18 @@ class SurfaceModelBase : protected Pointers
   class SurfaceModel : public SurfaceModelBase{
   public:
     SurfaceModel(LAMMPS * lmp, IContactHistorySetup * hsetup, class ContactModelBase *cmb = 0);
-    inline void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
 
-    inline void registerSettings(Settings & settings);
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb);
-    inline void connectToProperties(PropertyRegistry & registry);
-    inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata);
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, double * const);
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
-    inline void tally_pp(double val,int i, int j, int index);
-    inline void tally_pw(double val,int i, int j, int index);
+    void registerSettings(Settings & settings);
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb);
+    void connectToProperties(PropertyRegistry & registry);
+    bool checkSurfaceIntersect(SurfacesIntersectData & sidata);
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, double * const);
+    void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
+    void tally_pp(double val,int i, int j, int index);
+    void tally_pw(double val,int i, int j, int index);
   };
 
 }
@@ -106,18 +106,18 @@ public: \
     { \
         error->all(FLERR, ERRMSG); \
     } \
-    inline void beginPass(SurfacesIntersectData& , ForceData& , ForceData& ) {} \
-    inline void endPass(SurfacesIntersectData& , ForceData& , ForceData& ) {} \
+    void beginPass(SurfacesIntersectData& , ForceData& , ForceData& ) {} \
+    void endPass(SurfacesIntersectData& , ForceData& , ForceData& ) {} \
  \
-    inline void registerSettings(Settings&) {} \
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {} \
-    inline void connectToProperties(PropertyRegistry&) {} \
-    inline bool checkSurfaceIntersect(SurfacesIntersectData&) { return false; } \
-    inline void surfacesIntersect(SurfacesIntersectData&, ForceData&, ForceData&) {} \
-    inline void endSurfacesIntersect(SurfacesIntersectData&, TriMesh *, double * const) {} \
-    inline void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&) {} \
-    inline void tally_pp(double, int, int, int) {} \
-    inline void tally_pw(double, int, int, int) {} \
+    void registerSettings(Settings&) {} \
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {} \
+    void connectToProperties(PropertyRegistry&) {} \
+    bool checkSurfaceIntersect(SurfacesIntersectData&) { return false; } \
+    void surfacesIntersect(SurfacesIntersectData&, ForceData&, ForceData&) {} \
+    void endSurfacesIntersect(SurfacesIntersectData&, TriMesh *, double * const) {} \
+    void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&) {} \
+    void tally_pp(double, int, int, int) {} \
+    void tally_pw(double, int, int, int) {} \
   }; \
 } \
 }

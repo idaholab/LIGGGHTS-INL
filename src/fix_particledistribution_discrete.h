@@ -65,7 +65,7 @@ class FixParticledistributionDiscrete : public Fix {
   FixParticledistributionDiscrete(class LAMMPS *, int, char **);
   ~FixParticledistributionDiscrete();
   void write_restart(FILE *);
-  void restart(char *);
+  void restart(char *, const Version &);
 
   int setmask();
 
@@ -78,10 +78,6 @@ class FixParticledistributionDiscrete : public Fix {
   double min_rad(int);
   double max_rad(int);
 
-  double min_rad()
-  { return minrad; }
-  double max_rad()
-  { return maxrad; }
   double max_r_bound()
   { return maxrbound; }
 
@@ -155,8 +151,8 @@ class FixParticledistributionDiscrete : public Fix {
   // maximum number of spheres of all templates
   int maxnspheres;
 
-  // maximum radius and bounding sphere radius of all templates
-  double minrad,maxrad,maxrbound;
+  // maximum bounding sphere radius of all templates
+  double maxrbound;
 
   // save templates
   FixPropertyAtom *fix_template_;

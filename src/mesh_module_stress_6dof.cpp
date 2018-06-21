@@ -520,7 +520,7 @@ int MeshModuleStress6DOF::setmask()
 
 void MeshModuleStress6DOF::initial_integrate(int vflag)
 {
-    double dX[3],dx[3], qOld[4],dQ[4], dq[4];
+    // double dX[3],dx[3], qOld[4],dQ[4], dq[4];
 
     if (!gravity_set_)
         add_gravity();
@@ -543,11 +543,11 @@ void MeshModuleStress6DOF::initial_integrate(int vflag)
 
     // update xcm by full step
 
-    dx[0] = dtv_ * vcm_(0)[0];
-    dx[1] = dtv_ * vcm_(0)[1];
-    dx[2] = dtv_ * vcm_(0)[2];
-    vectorAdd3D(xcm_(0),dx,xcm_(0));
-    vectorSubtract3D(xcm_(0),xcm_orig_(0),dX);
+    dx_[0] = dtv_ * vcm_(0)[0];
+    dx_[1] = dtv_ * vcm_(0)[1];
+    dx_[2] = dtv_ * vcm_(0)[2];
+    vectorAdd3D(xcm_(0),dx_,xcm_(0));
+    vectorSubtract3D(xcm_(0),xcm_orig_(0),dX_);
 
     // update angular momentum by 1/2 step
 
@@ -560,20 +560,20 @@ void MeshModuleStress6DOF::initial_integrate(int vflag)
     // returns new normalized quaternion, also updated omega at 1/2 step
     // update ex,ey,ez to reflect new quaternion
 
-    vectorCopy4D(quat_(0),qOld);
+    vectorCopy4D(quat_(0),qOld_);
     MathExtra::angmom_to_omega(angmom_(0),ex_space_(0),ey_space_(0),ez_space_(0),inertia_(0),omega_(0));
     MathExtra::richardson(quat_(0),angmom_(0),omega_(0),inertia_(0),dtq_);
     MathExtra::q_to_exyz(quat_(0),ex_space_(0),ey_space_(0),ez_space_(0));
 
     // calculate quaternion difference
     
-    MathExtraLiggghts::quat_diff(quat_(0),qOld,         dq);
-    MathExtraLiggghts::quat_diff(quat_(0),quat_orig_(0),dQ);
+    MathExtraLiggghts::quat_diff(quat_(0),qOld_,dq_);
+    MathExtraLiggghts::quat_diff(quat_(0),quat_orig_(0),dQ_);
 
     // move and rotate mesh, set velocity
 
-    mesh->move(dX,dx);
-    mesh->rotate(dQ,dq,xcm_(0));
+    mesh->move(dX_,dx_);
+    mesh->rotate(dQ_,dq_,xcm_(0));
     set_vel();
 
     // update reference point to COM
@@ -581,6 +581,7 @@ void MeshModuleStress6DOF::initial_integrate(int vflag)
     mm_stress->set_p_ref(xcm_(0));
     
     gravity_set_ = false;
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -740,15 +741,31 @@ void MeshModuleStress6DOF::set_vel()
 }
 
 /* ----------------------------------------------------------------------
+   Compute eulerian angle from quaternion
+------------------------------------------------------------------------- */
+
+/* ----------------------------------------------------------------------
    return total force or torque component on body or xcm
 ------------------------------------------------------------------------- */
 
 double MeshModuleStress6DOF::compute_vector(int n)
 {
+    double dQ[4];
+    MathExtraLiggghts::quat_diff(quat_(0),quat_orig_(0),dQ);
+    double myOmega[3];
+    MathExtraLiggghts::quat_to_EulerAngle(dQ,myOmega);
+
+    myOmega[0] = myOmega[0]*180/M_PI;
+    myOmega[1] = myOmega[1]*180/M_PI;
+    myOmega[2] = myOmega[2]*180/M_PI;
+
     if (n < 3)
         return xcm_(0)[n];
-    else
+    else if (n < 7)
         return quat_(0)[n-3];
+    else 
+        return myOmega[n-7];
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -850,6 +867,22 @@ int MeshModuleStress6DOF::modify_param(int narg, char **arg)
         _angmom[0] = force->numeric(FLERR,arg[1]);
         _angmom[1] = force->numeric(FLERR,arg[2]);
         _angmom[2] = force->numeric(FLERR,arg[3]);
+        angmom_.set(0,_angmom);
+
+        return 4;
+    }
+    else if(command.compare("omega") == 0)
+    {
+        if (narg < 4)
+            error->one(FLERR,"not enough arguments for fix_modify 'omega'");
+        // read the omega values and convert them to the angmom
+        double _omega[3];
+        _omega[0] = force->numeric(FLERR,arg[1]);
+        _omega[1] = force->numeric(FLERR,arg[2]);
+        _omega[2] = force->numeric(FLERR,arg[3]);
+        double _angmom[3];
+        //MathExtra::angmom_to_omega(_omega,ex_space_(0),ey_space_(0),ez_space_(0),inertia_(0),_angmom);
+        MathExtra::omega_to_angmom(_omega,ex_space_(0),ey_space_(0),ez_space_(0),inertia_(0),_angmom);
         angmom_.set(0,_angmom);
 
         return 4;

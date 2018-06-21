@@ -305,9 +305,10 @@ double ComputeCrosssection::calc_ang()
     int imid, ilomid, ihimid, idelta;
     double rhimid, rlomid, del, ang;
 
+    const double threshold = cut_thickness_half_*cut_thickness_half_*1e-12;
     for(int i = 0; i < n_cuts_; i++)
     {
-        if(MathExtraLiggghts::compDouble(vector[i],0.,1e-6))
+        if(MathExtraLiggghts::compDouble(vector[i],0.,threshold))
             ilo += 1;
         else
             break;
@@ -315,7 +316,7 @@ double ComputeCrosssection::calc_ang()
 
     for(int i = n_cuts_-1; i >= 0; i--)
     {
-        if(MathExtraLiggghts::compDouble(vector[i],0.,1e-6))
+        if(MathExtraLiggghts::compDouble(vector[i],0.,threshold))
             ihi -= 1;
         else
             break;
@@ -326,7 +327,7 @@ double ComputeCrosssection::calc_ang()
 
     for(int i = ilo; i <= ihi; i++)
     {
-        if(MathExtraLiggghts::compDouble(vector[i],0.,1e-6))
+        if(MathExtraLiggghts::compDouble(vector[i],0.,threshold))
             error->one(FLERR,"Compute crossection could not calculate angle - internal error");
     }
 

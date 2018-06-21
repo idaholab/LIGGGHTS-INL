@@ -81,15 +81,15 @@ namespace ContactModels
       fo_offset = cmb->get_history_offset("fo_offset");
     }
 
-    inline void registerSettings(Settings& settings){
+    void registerSettings(Settings& settings){
       settings.registerOnOff("heating_tangential_history",heating,false);
       settings.registerOnOff("heating_tracking",heating_track,false);
       //TODO error->one(FLERR,"TODO here also check if right surface model used");
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
-    inline void connectToProperties(PropertyRegistry & registry)
+    void connectToProperties(PropertyRegistry & registry)
     {
       registry.registerProperty("coeffFrict", &MODEL_PARAMS::createCoeffFrict);
       registry.registerProperty("coeffMu", &MODEL_PARAMS::createCoeffMu);
@@ -102,7 +102,7 @@ namespace ContactModels
       registry.connect("kT2kcMax", kT2kcMax,"tangential_model tan_luding");
      }
 
-    inline void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(const SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       const double enx = sidata.en[0];
       const double eny = sidata.en[1];
@@ -238,7 +238,7 @@ namespace ContactModels
       }
     }
 
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData&, ForceData&)
+    void surfacesClose(SurfacesCloseData & scdata, ForceData&, ForceData&)
     {
       // unset non-touching neighbors
       // TODO even if shearupdate == false?
@@ -249,8 +249,8 @@ namespace ContactModels
       shear[2] = 0.0;
     }
 
-    inline void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
-    inline void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
+    void beginPass(SurfacesIntersectData&, ForceData&, ForceData&){}
+    void endPass(SurfacesIntersectData&, ForceData&, ForceData&){}
     protected:
     bool heating;
     bool heating_track;

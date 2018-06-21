@@ -170,6 +170,7 @@ Atom::Atom(LAMMPS *lmp) : Pointers(lmp)
 
   sphere_flag = ellipsoid_flag = line_flag = tri_flag = body_flag = 0;
   superquadric_flag = 0;
+  convex_hull_flag = 0;
   peri_flag = electron_flag = 0;
   wavepacket_flag = sph_flag = 0;
 
@@ -268,7 +269,7 @@ Atom::~Atom()
   memory->destroy(torque);
   memory->destroy(radius);
   memory->destroy(rmass);
-  memory->destroy(density); 
+  memory->destroy(density);
   memory->destroy(vfrac);
   memory->destroy(s0);
   memory->destroy(x0);
@@ -295,7 +296,7 @@ Atom::~Atom()
   memory->destroy(num_bond);
   memory->destroy(bond_type);
   memory->destroy(bond_atom);
-  memory->destroy(bond_hist); 
+  memory->destroy(bond_hist);
 
   memory->destroy(num_angle);
   memory->destroy(angle_type);
@@ -709,17 +710,33 @@ void Atom::data_atoms(int n, char *buf)
     sublo[2] = domain->sublo_lamda[2]; subhi[2] = domain->subhi_lamda[2];
   }
 
-  if (domain->xperiodic) {
-    if (comm->myloc[0] == 0) sublo[0] -= epsilon[0];
-    if (comm->myloc[0] == comm->procgrid[0]-1) subhi[0] += epsilon[0];
-  }
-  if (domain->yperiodic) {
-    if (comm->myloc[1] == 0) sublo[1] -= epsilon[1];
-    if (comm->myloc[1] == comm->procgrid[1]-1) subhi[1] += epsilon[1];
-  }
-  if (domain->zperiodic) {
-    if (comm->myloc[2] == 0) sublo[2] -= epsilon[2];
-    if (comm->myloc[2] == comm->procgrid[2]-1) subhi[2] += epsilon[2];
+  if (comm->get_layout() != LAYOUT_TILED) {
+    if (domain->xperiodic) {
+      if (comm->myloc[0] == 0) sublo[0] -= epsilon[0];
+      if (comm->myloc[0] == comm->procgrid[0]-1) subhi[0] += epsilon[0];
+    }
+    if (domain->yperiodic) {
+      if (comm->myloc[1] == 0) sublo[1] -= epsilon[1];
+      if (comm->myloc[1] == comm->procgrid[1]-1) subhi[1] += epsilon[1];
+    }
+    if (domain->zperiodic) {
+      if (comm->myloc[2] == 0) sublo[2] -= epsilon[2];
+      if (comm->myloc[2] == comm->procgrid[2]-1) subhi[2] += epsilon[2];
+    }
+
+  } else {
+    if (domain->xperiodic) {
+      if (comm->get_mysplit(0,0) == 0.0) sublo[0] -= epsilon[0];
+      if (comm->get_mysplit(0,1) == 1.0) subhi[0] += epsilon[0];
+    }
+    if (domain->yperiodic) {
+      if (comm->get_mysplit(1,0) == 0.0) sublo[1] -= epsilon[1];
+      if (comm->get_mysplit(1,1) == 1.0) subhi[1] += epsilon[1];
+    }
+    if (domain->zperiodic) {
+      if (comm->get_mysplit(2,0) == 0.0) sublo[2] -= epsilon[2];
+      if (comm->get_mysplit(2,1) == 1.0) subhi[2] += epsilon[2];
+    }
   }
 
   // xptr = which word in line starts xyz coords

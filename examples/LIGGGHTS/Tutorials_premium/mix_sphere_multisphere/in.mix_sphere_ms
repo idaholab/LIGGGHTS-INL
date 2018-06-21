@@ -51,7 +51,8 @@ fix ins all insert/pack seed 999683 distributiontemplate pdd1 vel constant 0. 0.
 
 #integrator for multisphere rigid bodies
 # NOTE: Here we make use of the two different groups for spheres and multispheres.
-fix		intMS multispheres multisphere # use multisphere group
+fix     ms multispheres multisphere # multisphere fix itself
+fix     intMS multispheres nve/nonspherical # integrator that uses multisphere group
 fix		intSphere spheres nve/sphere # use sphere group
 
 #output settings, include total thermal energy
@@ -60,7 +61,6 @@ fix		ts all check/timestep/gran 1000 0.1 0.1
 thermo_style	custom step atoms ke c_1 f_ts[1] f_ts[2] vol
 thermo		1000
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 
 #compute rigid body properties
 compute		xcm_single all multisphere/single id 2 property xcm

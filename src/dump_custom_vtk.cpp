@@ -153,7 +153,7 @@ DumpCustomVTK::DumpCustomVTK(LAMMPS *lmp, int narg, char **arg) :
     allowed_extensions.push_back(VTK_FILE_FORMATS::PVTU);
     allowed_extensions.push_back(VTK_FILE_FORMATS::VTP);
     allowed_extensions.push_back(VTK_FILE_FORMATS::PVTP);
-    vtk_file_format = DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
 
     filecurrent = NULL;
     domainfilecurrent = NULL;
@@ -190,9 +190,9 @@ void DumpCustomVTK::init_style()
 
   header_choice = &DumpCustomVTK::header_vtk;
 
-  if (vtk_file_format == VTK_FILE_FORMATS::VTP || vtk_file_format == VTK_FILE_FORMATS::PVTP)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTP || vtk_file_format_ == VTK_FILE_FORMATS::PVTP)
     write_choice = &DumpCustomVTK::write_vtp;
-  else if (vtk_file_format == VTK_FILE_FORMATS::VTU || vtk_file_format == VTK_FILE_FORMATS::PVTU)
+  else if (vtk_file_format_ == VTK_FILE_FORMATS::VTU || vtk_file_format_ == VTK_FILE_FORMATS::PVTU)
     write_choice = &DumpCustomVTK::write_vtu;
   else
     write_choice = &DumpCustomVTK::write_vtk;
@@ -224,10 +224,10 @@ void DumpCustomVTK::write()
   nme = count();
   mbSet = vtkSmartPointer<vtkMultiBlockDataSet>::New();
   bool usePolyData = false;
-  if (vtk_file_format == VTK_FILE_FORMATS::VTP || vtk_file_format == VTK_FILE_FORMATS::PVTP)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTP || vtk_file_format_ == VTK_FILE_FORMATS::PVTP)
     usePolyData = true;
 #ifndef UNSTRUCTURED_GRID_VTK
-  if (vtk_file_format == VTK_FILE_FORMATS::VTK)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTK)
     usePolyData = true;
 #endif
   dumpParticle->prepare_mbSet(mbSet, usePolyData);
@@ -274,7 +274,7 @@ void DumpCustomVTK::setFileCurrent()
 void DumpCustomVTK::write_domain_vtk()
 {
     vtkSmartPointer<vtkDataObject> rgrid = mbSet->GetBlock(1);
-    DumpVTK::write_vtk_rectilinear_grid(rgrid, vtk_file_format, domainfilecurrent, label);
+    DumpVTK::write_vtk_rectilinear_grid(rgrid, domainfilecurrent, label);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -282,7 +282,7 @@ void DumpCustomVTK::write_domain_vtk()
 void DumpCustomVTK::write_domain_vtk_triclinic()
 {
     vtkSmartPointer<vtkDataObject> hexahedronGrid = mbSet->GetBlock(1);
-    DumpVTK::write_vtk_unstructured_grid(hexahedronGrid, vtk_file_format, domainfilecurrent, label);
+    DumpVTK::write_vtk_unstructured_grid(hexahedronGrid, domainfilecurrent, label);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -290,7 +290,11 @@ void DumpCustomVTK::write_domain_vtk_triclinic()
 void DumpCustomVTK::write_domain_vtr()
 {
     vtkSmartPointer<vtkDataObject> rgrid = mbSet->GetBlock(1);
-    DumpVTK::write_vtr(rgrid, VTK_FILE_FORMATS::VTR, domainfilecurrent);
+    // temporarily set different file format
+    const int part_vtk_file_format_ = vtk_file_format_;
+    vtk_file_format_ = VTK_FILE_FORMATS::VTR;
+    DumpVTK::write_vtr(rgrid, domainfilecurrent);
+    vtk_file_format_ = part_vtk_file_format_;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -298,7 +302,11 @@ void DumpCustomVTK::write_domain_vtr()
 void DumpCustomVTK::write_domain_vtu_triclinic()
 {
     vtkSmartPointer<vtkDataObject> hexahedronGrid = mbSet->GetBlock(1);
-    DumpVTK::write_vtu(hexahedronGrid, VTK_FILE_FORMATS::VTU, domainfilecurrent);
+    // temporarily set different file format
+    const int part_vtk_file_format_ = vtk_file_format_;
+    vtk_file_format_ = VTK_FILE_FORMATS::VTU;
+    DumpVTK::write_vtu(hexahedronGrid, domainfilecurrent);
+    vtk_file_format_ = part_vtk_file_format_;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -309,10 +317,10 @@ void DumpCustomVTK::write_vtk(int n, double *mybuf)
 
 #ifdef UNSTRUCTURED_GRID_VTK
     vtkSmartPointer<vtkDataObject> unstructuredGrid = mbSet->GetBlock(0);
-    DumpVTK::write_vtk_unstructured_grid(unstructuredGrid, vtk_file_format, filecurrent, label);
+    DumpVTK::write_vtk_unstructured_grid(unstructuredGrid, filecurrent, label);
 #else
     vtkSmartPointer<vtkDataObject> polyData = mbSet->GetBlock(0);
-    DumpVTK::write_vtk_poly(polyData, vtk_file_format, filecurrent, label);
+    DumpVTK::write_vtk_poly(polyData, filecurrent, label);
 #endif
 
     if (domain->triclinic == 0)
@@ -329,7 +337,7 @@ void DumpCustomVTK::write_vtp(int n, double *mybuf)
 
     vtkSmartPointer<vtkDataObject> polyData = mbSet->GetBlock(0);
 
-    DumpVTK::write_vtp(polyData, vtk_file_format, filecurrent);
+    DumpVTK::write_vtp(polyData, filecurrent);
 
     if (me == 0)
     {
@@ -354,7 +362,7 @@ void DumpCustomVTK::write_vtu(int n, double *mybuf)
 
     vtkSmartPointer<vtkDataObject> unstructuredGrid = mbSet->GetBlock(0);
 
-    DumpVTK::write_vtu(unstructuredGrid, vtk_file_format, filecurrent);
+    DumpVTK::write_vtu(unstructuredGrid, filecurrent);
 
     if (me == 0)
     {

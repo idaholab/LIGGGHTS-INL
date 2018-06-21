@@ -54,6 +54,7 @@ CommandStyle(read_restart,ReadRestart)
 
 #include <stdio.h>
 #include "pointers.h"
+#include "version_struct.h"
 
 namespace LAMMPS_NS {
 
@@ -67,8 +68,7 @@ class ReadRestart : protected Pointers {
   FILE *fp;
   int nfix_restart_global,nfix_restart_peratom;
   int swapflag;
-  int restart_major;
-  int restart_minor;
+  Version restart_version;
 
   void file_search(char *, char *);
   void header();

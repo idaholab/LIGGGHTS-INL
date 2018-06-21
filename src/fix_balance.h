@@ -32,6 +32,11 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
+
+    Christoph Kloss (JKU Linz)
+    Christoph Kloss (DCS Computing GmbH, Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
+
     This file is from LAMMPS, but has been modified. Copyright for
     modification:
 
@@ -68,6 +73,7 @@ class FixBalance : public Fix {
   FixBalance(class LAMMPS *, int, char **);
   ~FixBalance();
   int setmask();
+  void post_create();
   void init();
   void setup(int);
   void setup_pre_exchange();
@@ -78,26 +84,27 @@ class FixBalance : public Fix {
   double memory_usage();
 
  private:
+  int nevery,lbstyle,nitermax;
+  double thresh, stopthresh;
 
   bool execute_flag;
 
-  int nevery,nitermax;
   char bstr[4];
-  double thresh;
-  FILE *fp;
+  int wtflag;                   // 1 for weighted balancing
 
   double imbnow;                // current imbalance factor
   double imbprev;               // imbalance factor before last rebalancing
   double imbfinal;              // imbalance factor after last rebalancing
-  int maxperproc;               // max atoms on any processor
+  double maxloadperproc;        // max load on any processor
   int itercount;                // iteration count of last call to Balance
   int kspace_flag;              // 1 if KSpace solver defined
   int pending;
+  bigint lastbalance;           // last timestep balancing was attempted
 
   class Balance *balance;
   class Irregular *irregular;
 
-  void rebalance();
+  void rebalance(bool setupflag = false);
 };
 
 }

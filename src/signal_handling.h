@@ -53,7 +53,7 @@ extern bool enable_restart_writing;
 
 extern void int_handler(int signum);
 extern void usr1_handler(int signum);
-};
+}
 
-};
+}
 #endif

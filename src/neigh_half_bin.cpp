@@ -114,7 +114,7 @@ void Neighbor::half_bin_no_newton(NeighList *list)
         if (j <= i) continue;
 
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -214,7 +214,7 @@ void Neighbor::half_bin_no_newton_ghost(NeighList *list)
           if (j <= i) continue;
 
           jtype = type[j];
-          if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+          if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
@@ -246,7 +246,7 @@ void Neighbor::half_bin_no_newton_ghost(NeighList *list)
           if (j <= i) continue;
 
           jtype = type[j];
-          if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+          if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
           delx = xtmp - x[j][0];
           dely = ytmp - x[j][1];
@@ -333,7 +333,7 @@ void Neighbor::half_bin_newton(NeighList *list)
       }
 
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -358,7 +358,7 @@ void Neighbor::half_bin_newton(NeighList *list)
     for (k = 0; k < nstencil; k++) {
       for (j = binhead[ibin+stencil[k]]; j >= 0; j = bins[j]) {
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -457,7 +457,7 @@ void Neighbor::half_bin_newton_tri(NeighList *list)
         }
 
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];

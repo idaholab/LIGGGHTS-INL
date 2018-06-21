@@ -51,6 +51,7 @@
 #include "fix_base_liggghts.h"
 #include "fix_move_mesh.h"
 #include "abstract_mesh.h"
+#include "tri_mesh.h"
 #include <list>
 
 namespace LAMMPS_NS
@@ -69,10 +70,11 @@ namespace LAMMPS_NS
         virtual void setup(int vflag);
 
         virtual int setmask();
+        virtual void setup_pre_exchange() {}
         void setup_pre_force(int);
 
         void write_restart(FILE *fp);
-        void restart(char *buf);
+        void restart(char *buf, const Version &ver);
 
         virtual void pre_exchange();
         virtual void pre_force(int);
@@ -87,14 +89,13 @@ namespace LAMMPS_NS
         void move(const double * const dx, const FixMoveMesh * const caller);
         void rotate(const double dphi, const double * const axis, const double * const center, const FixMoveMesh * const caller);
 
+        virtual int modify_param(int narg, char **arg);
+
         class AbstractMesh* mesh()
         { return mesh_; }
 
         virtual bool surfaceVel()
         { return false; }
-
-        inline bool trackPerElementTemp()
-        { return trackPerElementTemp_; }
 
         bool manipulated()
         { return manipulated_; }
@@ -118,6 +119,8 @@ namespace LAMMPS_NS
             }
         }
 
+        class ParallelBase* get_parallel_base_ptr() const;
+
       protected:
 
         // mesh manipulation upon creation
@@ -135,8 +138,6 @@ namespace LAMMPS_NS
 
         double temperature_mesh_;
         double mass_temperature_;
-
-        bool trackPerElementTemp_;
 
       private:
 

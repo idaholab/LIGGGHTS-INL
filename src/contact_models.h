@@ -115,7 +115,7 @@ class Factory
     Factory(const Factory &){}
 public:
     static Factory & instance();
-    static int64_t select(int & narg, char ** & args,Custom_contact_models ccm);
+    static int64_t select(int & narg, char ** & args, const LAMMPS_NS::LAMMPS *lmp);
 
     void addNormalModel(const std::string & name, int identifier);
     void addTangentialModel(const std::string & name, int identifier);
@@ -130,7 +130,7 @@ public:
     int getSurfaceModelId(const std::string & name);
 
 private:
-    int64_t select_model(int & narg, char ** & args, Custom_contact_models ccm);
+    int64_t select_model(int & narg, char ** & args, const LAMMPS *lmp);
 };
 
 template<typename Style>
@@ -160,7 +160,7 @@ public:
     int64_t hashcode()
     { return STYLE_HASHCODE; }
 
-    inline void registerSettings(Settings & settings)
+    void registerSettings(Settings & settings)
     {
         surfaceModel.registerSettings(settings);
         normalModel.registerSettings(settings);
@@ -169,7 +169,7 @@ public:
         rollingModel.registerSettings(settings);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup)
+    void postSettings(IContactHistorySetup * hsetup)
     {
         surfaceModel.postSettings(hsetup, this);
         normalModel.postSettings(hsetup, this);
@@ -178,7 +178,7 @@ public:
         rollingModel.postSettings(hsetup, this);
     }
 
-    inline void connectToProperties(PropertyRegistry & registry)
+    void connectToProperties(PropertyRegistry & registry)
     {
         surfaceModel.connectToProperties(registry);
         normalModel.connectToProperties(registry);
@@ -187,7 +187,7 @@ public:
         rollingModel.connectToProperties(registry);
     }
 
-    inline void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel.beginPass(sidata, i_forces, j_forces);
         normalModel.beginPass(sidata, i_forces, j_forces);
@@ -196,7 +196,7 @@ public:
         rollingModel.beginPass(sidata, i_forces, j_forces);
     }
 
-    inline void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         rollingModel.endPass(sidata, i_forces, j_forces);
         tangentialModel.endPass(sidata, i_forces, j_forces);
@@ -205,7 +205,7 @@ public:
         surfaceModel.endPass(sidata, i_forces, j_forces);
     }
 
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
         return normalModel.stressStrainExponent();
     }
@@ -220,12 +220,12 @@ public:
         surfaceModel.tally_pw(val, i, j, index);
     }
 
-    inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
+    bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
     {
         return surfaceModel.checkSurfaceIntersect(sidata);
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel.surfacesIntersect(sidata, i_forces, j_forces);
         normalModel.surfacesIntersect(sidata, i_forces, j_forces);
@@ -237,13 +237,13 @@ public:
         rollingModel.surfacesIntersect(sidata, i_forces, j_forces);
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, ForceData &i_forces, ForceData &j_forces)
+    void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, ForceData &i_forces, ForceData &j_forces)
     {
         surfaceModel.endSurfacesIntersect(sidata, mesh, i_forces.delta_F);
         cohesionModel.endSurfacesIntersect(sidata, i_forces, j_forces);
     }
 
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel.surfacesClose(scdata, i_forces, j_forces);
         normalModel.surfacesClose(scdata, i_forces, j_forces);
@@ -355,7 +355,7 @@ public:
         {
             std::string warning = std::string("\n"
                 "\tThe contact model you specified is not located in any whitelist.\n"
-                "\tBecause of this the model will be run in an unoptimized version (increasing runtime by up to 20\%).\n"
+                "\tBecause of this the model will be run in an unoptimized version (increasing runtime by up to 20%%).\n"
                 "\tIn order to optimize this model you have the following options:\n"
                 "\t\t(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script\n"
                 "\t\t(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder\n"
@@ -368,7 +368,7 @@ public:
     int64_t hashcode()
     { return style_hashcode; }
 
-    inline void registerSettings(Settings & settings)
+    void registerSettings(Settings & settings)
     {
         surfaceModel->registerSettings(settings);
         normalModel->registerSettings(settings);
@@ -377,7 +377,7 @@ public:
         rollingModel->registerSettings(settings);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup)
+    void postSettings(IContactHistorySetup * hsetup)
     {
         surfaceModel->postSettings(hsetup, this);
         normalModel->postSettings(hsetup, this);
@@ -386,7 +386,7 @@ public:
         rollingModel->postSettings(hsetup, this);
     }
 
-    inline void connectToProperties(PropertyRegistry & registry)
+    void connectToProperties(PropertyRegistry & registry)
     {
         surfaceModel->connectToProperties(registry);
         normalModel->connectToProperties(registry);
@@ -395,7 +395,7 @@ public:
         rollingModel->connectToProperties(registry);
     }
 
-    inline void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel->beginPass(sidata, i_forces, j_forces);
         normalModel->beginPass(sidata, i_forces, j_forces);
@@ -404,7 +404,7 @@ public:
         rollingModel->beginPass(sidata, i_forces, j_forces);
     }
 
-    inline void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         rollingModel->endPass(sidata, i_forces, j_forces);
         tangentialModel->endPass(sidata, i_forces, j_forces);
@@ -413,7 +413,7 @@ public:
         surfaceModel->endPass(sidata, i_forces, j_forces);
     }
 
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
         return normalModel->stressStrainExponent();
     }
@@ -428,12 +428,12 @@ public:
         surfaceModel->tally_pw(val, i, j, index);
     }
 
-    inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
+    bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
     {
         return surfaceModel->checkSurfaceIntersect(sidata);
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel->surfacesIntersect(sidata, i_forces, j_forces);
         normalModel->surfacesIntersect(sidata, i_forces, j_forces);
@@ -445,13 +445,13 @@ public:
         rollingModel->surfacesIntersect(sidata, i_forces, j_forces);
     }
 
-    inline void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, ForceData &i_forces, ForceData &j_forces)
+    void endSurfacesIntersect(SurfacesIntersectData & sidata, class TriMesh *mesh, ForceData &i_forces, ForceData &j_forces)
     {
         surfaceModel->endSurfacesIntersect(sidata, mesh, i_forces.delta_F);
         cohesionModel->endSurfacesIntersect(sidata, i_forces, j_forces);
     }
 
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces)
     {
         surfaceModel->surfacesClose(scdata, i_forces, j_forces);
         normalModel->surfacesClose(scdata, i_forces, j_forces);

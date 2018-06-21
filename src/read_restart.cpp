@@ -88,7 +88,7 @@ enum{VERSION,SMALLINT,TAGINT,BIGINT,
        BOXLO_0,BOXHI_0,BOXLO_1,BOXHI_1,BOXLO_2,BOXHI_2,
        SPECIAL_LJ_1,SPECIAL_LJ_2,SPECIAL_LJ_3,
        SPECIAL_COUL_1,SPECIAL_COUL_2,SPECIAL_COUL_3,
-       XY,XZ,YZ};
+       XY,XZ,YZ,ATIME};
 enum{MASS};
 enum{PAIR,BOND,ANGLE,DIHEDRAL,IMPROPER};
 
@@ -98,8 +98,7 @@ enum{PAIR,BOND,ANGLE,DIHEDRAL,IMPROPER};
 
 ReadRestart::ReadRestart(LAMMPS *lmp) :
     Pointers(lmp),
-    restart_major(0),
-    restart_minor(0)
+    fp(0)
 {}
 
 /* ---------------------------------------------------------------------- */
@@ -186,7 +185,7 @@ void ReadRestart::command(int narg, char **arg)
   type_arrays();
   force_fields();
 
-  int nextra = modify->read_restart(fp);
+  int nextra = modify->read_restart(fp,restart_version);
   atom->nextra_store = nextra;
   memory->create(atom->extra,n,nextra,"atom:extra");
 
@@ -245,7 +244,14 @@ void ReadRestart::command(int narg, char **arg)
       }
     }
 
-    if (me == 0) fclose(fp);
+    if (me == 0 )
+    {
+        // load parallelbase data (meshes, multisphere)
+        if ( restart_version >= Version(3,9) )
+            modify->read_restart_pb(fp, nprocs_file);
+
+        fclose(fp);
+    }
 
   // one file per proc:
   // nprocs_file = # of files
@@ -279,6 +285,11 @@ void ReadRestart::command(int narg, char **arg)
 
       m = 0;
       while (m < n) m += avec->unpack_restart(&buf[m]);
+
+      // load parallelbase data (meshes, multisphere)
+      if ( restart_version >= Version(3,9) )
+          modify->read_restart_pb(fp, 1);
+
       fclose(fp);
     }
 
@@ -303,12 +314,12 @@ void ReadRestart::command(int narg, char **arg)
 
     // move atoms to new processors via irregular()
     // in case read by different proc than wrote restart file
-    // first do map_init() since irregular->migrate_atoms() will do map_clear()
+    // first do map_init() since irregular->migrate_all() will do map_clear()
 
     if (atom->map_style) atom->map_init();
     if (domain->triclinic) domain->x2lamda(atom->nlocal);
     Irregular *irregular = new Irregular(lmp);
-    irregular->migrate_atoms();
+    irregular->migrate_all();
     delete irregular;
     if (domain->triclinic) domain->lamda2x(atom->nlocal);
 
@@ -509,26 +520,7 @@ void ReadRestart::header()
         if (screen) fprintf(screen,"   --> restart file = %s\n   --> LIGGGHTS = %s\n", 
                             version,universe->version);
       }
-        // parse version number
-        // version format is:
-        // Version LIGGGHTS-REPOSITORY-NAME MAJOR.MINOR.[....]
-        // MAJOR and MINOR are integers
-        std::string ver = std::string(version);
-        std::size_t space1 = ver.find(' ');
-        std::size_t space2 = ver.find(' ', space1+1);
-        std::size_t dot1 = ver.find('.', space2+1);
-        std::size_t dot2 = ver.find('.', dot1+1);
-        if (space1 != std::string::npos &&
-            space2 != std::string::npos &&
-            dot1 != std::string::npos &&
-            dot2 != std::string::npos)
-        {
-            std::string ver_major = ver.substr(space2+1, dot1-space2-1);
-            std::string ver_minor = ver.substr(dot1+1, dot2-dot1-1);
-            restart_major = atoi(ver_major.c_str());
-            restart_minor = atoi(ver_minor.c_str());
-            printf("version %d %d\n", restart_major, restart_minor);
-        }
+      restart_version = universe->get_version(version);
       delete [] version;
 
       // check lmptype.h sizes, error if different
@@ -754,6 +746,9 @@ void ReadRestart::header()
     } else if (flag == YZ) {
       domain->triclinic = 1;
       domain->yz = read_double();
+    } else if (flag == ATIME) {
+      update->atime = read_double();
+      update->atimestep = update->ntimestep;
 
     } else error->all(FLERR,"Invalid flag in header section of restart file");
 
@@ -800,7 +795,7 @@ void ReadRestart::force_fields()
 
       force->create_pair_from_restart(fp, style);
       delete [] style;
-      if (force->pair->restartinfo) force->pair->read_restart(fp, restart_major, restart_minor);
+      if (force->pair->restartinfo) force->pair->read_restart(fp, restart_version);
       else {
         delete force->pair;
         force->pair = NULL;

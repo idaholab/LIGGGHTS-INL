@@ -61,7 +61,7 @@ class FixRegionVariable : public Fix {
   void init();
 
   void write_restart(FILE *);
-  void restart(char *);
+  void restart(char *, const Version &);
 
   class Region* region();
 

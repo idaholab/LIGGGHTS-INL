@@ -269,9 +269,9 @@ void PairSoft::write_restart(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSoft::read_restart(FILE *fp, const int major, const int minor)
+void PairSoft::read_restart(FILE *fp, const Version &ver)
 {
-  read_restart_settings(fp, major, minor);
+  read_restart_settings(fp, ver);
 
   allocate();
 
@@ -306,7 +306,7 @@ void PairSoft::write_restart_settings(FILE *fp)
    proc 0 reads from restart file, bcasts
 ------------------------------------------------------------------------- */
 
-void PairSoft::read_restart_settings(FILE *fp, const int major, const int minor)
+void PairSoft::read_restart_settings(FILE *fp, const Version &ver)
 {
   if (comm->me == 0) {
     fread(&cut_global,sizeof(double),1,fp);

@@ -45,6 +45,7 @@
 #include "update.h"
 #include "respa.h"
 #include "error.h"
+#include "force.h"
 #include "memory.h"
 #include "modify.h"
 #include "comm.h"
@@ -53,6 +54,7 @@
 #include "mpi_liggghts.h"
 #include "fix_cfd_coupling_force.h"
 #include "fix_property_atom.h"
+#include "fix_multisphere.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -60,158 +62,178 @@ using namespace FixConst;
 /* ---------------------------------------------------------------------- */
 
 FixCfdCouplingForce::FixCfdCouplingForce(LAMMPS *lmp, int narg, char **arg) : Fix(lmp,narg,arg),
-    fix_coupling_(0),
+    CAddRhoFluid_(0.0),
     fix_dragforce_(0),
+    fix_dragforce_implicit_(0),
+    fix_dragforce_total_(0),
     fix_hdtorque_(0),
-    fix_dispersionTime_(0),
-    fix_dispersionVel_(0),
-    fix_UrelOld_(0),
-    use_force_(true),
-    use_torque_(true),
-    use_dens_(false),
-    use_type_(false),
-    use_stochastic_(false),
-    use_virtualMass_(false),
-    use_superquadric_(false),
-    use_id_(false),
-    use_property_(false),
-    use_fiber_topo_(false),
-    fix_fiber_axis_(0),
-    fix_fiber_ends_(0)
+    fix_hdtorque_implicit_(0),
+    fix_coupling_(0),
+    use_torque_(false),
+    dragforce_implicit_(true)
 {
     iarg = 3;
+
+    //check if style is not /implicit
+    if (strcmp(style,"couple/cfd/force/implicit") == 0) error->fix_error(FLERR,this,"old fix style couple/cfd/force/implicit used, which is no longer supported.\nPlease use the regular couple/cfd/force and the fix/nve/cfd_cn/ class integrators for implicit drag handling.");
+
+    // register props, which are always used -> x v r
+    //std::string propName, bool push, bool pull, enum type:
+    //{SCALAR,VECTOR,VECTOR2D,QUATERNION,SCALARMULTISPHERE,VECTORMULTISPHERE,SCALARGLOB,VECTORGLOB,MATRIXGLOB}
+
+    registerProp("x",true,false,VECTOR);
+    registerProp("v",true,false,VECTOR);
+    registerProp("radius",true,false,SCALAR);
+    registerProp("dragforce",false,true,VECTOR);
 
     bool hasargs = true;
     while(iarg < narg && hasargs)
     {
         hasargs = false;
+        if(strcmp(arg[iarg],"force") == 0) {
+            if(narg < iarg+2)
+                error->fix_error(FLERR,this,"not enough arguments for 'force'");
+            iarg++;
+            if(strcmp(arg[iarg],"implicit") == 0) dragforce_implicit_ = true;
+            else if(strcmp(arg[iarg],"explicit") == 0) dragforce_implicit_ = false;
+            else
+                error->fix_error(FLERR,this,"expecting 'implicit' or 'explicit' after 'force'");
+            iarg++;
+            hasargs = true;
+        }
+        else if(strcmp(arg[iarg],"torque") == 0)
+        {
+            if(narg < iarg+2)
+                error->fix_error(FLERR,this,"not enough arguments for 'torque'");
+            iarg++;
+            if(strcmp(arg[iarg],"implicit") == 0)
+            {
+                registerProp("KslRotation",false,true,VECTOR);
+                registerProp("hdtorque",false,true,VECTOR);
+                registerProp("hdtorque_implicit",false,true,VECTOR);
+            }
+            else if(strcmp(arg[iarg],"explicit") == 0)
+            {
+                 registerProp("hdtorque",false,true,VECTOR);
+            }
+            else
+                error->fix_error(FLERR,this,"expecting 'implicit' or 'explicit' after 'torque'");
+            iarg++;
+            use_torque_=true;
+            hasargs = true;
+        }
+        else if(strcmp(arg[iarg],"transfer_superquadric") == 0)
+        {
+            if(narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'transfer_superquadric'");
+            iarg++;
+            if(strcmp(arg[iarg],"yes") == 0)
+            {
+                registerProp("hdtorque",false,true,VECTOR);
+                registerProp("KslExtra",false,true,VECTOR);
+                registerProp("ex",false,true,VECTOR);
+                registerProp("volume",true,false,SCALAR);
+                registerProp("area",true,false,SCALAR);
+                registerProp("shape",true,false,VECTOR);
+                registerProp("blockiness",true,false,VECTOR2D);
+                registerProp("quaternion",true,false,QUATERNION);
+            }
+            else if(strcmp(arg[iarg],"no") == 0) { }
+            else
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_superquadric'");
+            iarg++;
+            hasargs = true;
+        }
+        else if(strcmp(arg[iarg],"transfer_ellipsoid") == 0)
+        {
+            if(narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'transfer_ellipsoid'");
+            iarg++;
+            if(strcmp(arg[iarg],"yes") == 0)
+            {
+                registerProp("hdtorque",false,true,VECTOR);
+                registerProp("KslExtra",false,true,VECTOR);
+                registerProp("ex",false,true,VECTOR);
+                registerProp("shape",true,false,VECTOR);
 
-        if(strcmp(arg[iarg],"transfer_density") == 0) {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_density'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_dens_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_dens_ = false;
+            }
+            else if(strcmp(arg[iarg],"no") == 0) { }
             else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_density'");
-            iarg++;
-            hasargs = true;
-        }
-        else if(strcmp(arg[iarg],"transfer_torque") == 0)
-        {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_torque'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_torque_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_torque_ = false;
-            else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_torque'");
-            iarg++;
-            hasargs = true;
-        }
-        else if(strcmp(arg[iarg],"transfer_type") == 0)
-        {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_type'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_type_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_type_ = false;
-            else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_type'");
-            iarg++;
-            hasargs = true;
-        }
-        else if(strcmp(arg[iarg],"transfer_id") == 0)
-        {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_type'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_id_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_id_ = false;
-            else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_id'");
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_ellipsoid'");
             iarg++;
             hasargs = true;
         }
         else if(strcmp(arg[iarg],"transfer_stochastic") == 0)
         {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_stochastic'");
+            if(narg < iarg+2) error->fix_error(FLERR,this,"not enough arguments for 'transfer_stochastic'");
             iarg++;
             if(strcmp(arg[iarg],"yes") == 0)
-                use_stochastic_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_stochastic_ = false;
+            {
+                registerProp("dispersionTime",false,true,SCALAR);
+                registerProp("dispersionVel",false,true,VECTOR);
+
+            }
+            else if(strcmp(arg[iarg],"no") == 0) { }
             else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_stochastic'");
+              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_stochastic'");
             iarg++;
             hasargs = true;
         }
-        else if(strcmp(arg[iarg],"transfer_virtualMass") == 0)
+        else if(strcmp(arg[iarg],"transfer_property") == 0)
         {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_virtualMass'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_virtualMass_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_virtualMass_ = false;
-            else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_virtualMass'");
-            iarg++;
-            hasargs = true;
-        } else if(strcmp(arg[iarg],"transfer_property") == 0) {
+            std::string name,stype;
+            cfdCoupleType type;
             if(narg < iarg+5)
                 error->fix_error(FLERR,this,"not enough arguments for 'transfer_type'");
             iarg++;
-            use_property_ = true;
-            if(strcmp(arg[iarg++],"name"))
+            if(strcmp(arg[iarg],"name"))
                 error->fix_error(FLERR,this,"expecting 'name' after 'transfer_property'");
-            sprintf(property_name,"%s",arg[iarg++]);
-            if(strcmp(arg[iarg++],"type"))
+            iarg++;
+            name = arg[iarg];
+            iarg++;
+            if(strcmp(arg[iarg],"type"))
                 error->fix_error(FLERR,this,"expecting 'type' after property name");
-            sprintf(property_type,"%s",arg[iarg++]);
             iarg++;
+            stype=arg[iarg];
+            iarg++;
+
+            //{SCALAR,VECTOR,VECTOR2D,QUATERNION,SCALARMULTISPHERE,VECTORMULTISPHERE,SCALARGLOB,VECTORGLOB,MATRIXGLOB}
+            if (stype.compare("scalar-atom") == 0) type=SCALAR;
+            else if (stype.compare("vector-atom") == 0) type=VECTOR;
+            else if (stype.compare("vector2d-atom") == 0) type=VECTOR2D;
+            else if (stype.compare("quaternion-atom") == 0) type=QUATERNION;
+            else if (stype.compare("scalar-multisphere") == 0) type=SCALARMULTISPHERE;
+            else if (stype.compare("vector-multisphere") == 0) type=VECTORMULTISPHERE;
+            else if (stype.compare("scalar-global") == 0) type=SCALARGLOB;
+            else if (stype.compare("vector-global") == 0) type=VECTORGLOB;
+            else if (stype.compare("matrix-global") == 0) type=MATRIXGLOB;
+            else error->fix_error(FLERR,this,"unknown property type");
+
+            registerProp(name,true,false,type);
+
             hasargs = true;
-        } else if(strcmp(arg[iarg],"transfer_fiber_topology") == 0) {
-            if(narg < iarg+2)
-                error->fix_error(FLERR,this,"not enough arguments for 'transfer_fiber_topology'");
-            if(strcmp(arg[iarg],"yes") == 0)
-                use_fiber_topo_ = true;
-            else if(strcmp(arg[iarg],"no") == 0)
-                use_fiber_topo_ = false;
-            else
-                error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_fiber_topology'");
-            iarg++;
-            hasargs = true;
-        } else if(strcmp(arg[iarg],"transfer_superquadric") == 0) {
-            if(narg < iarg+2)
-              error->fix_error(FLERR,this,"not enough arguments for 'transfer_superquadric'");
-            iarg++;
-            if(strcmp(arg[iarg],"yes") == 0) {
-              use_superquadric_ = true;
-              use_torque_ = true;
-              use_force_ = true;
-            }
-            else if(strcmp(arg[iarg],"no") == 0) {
-              use_superquadric_ = false;
-            }
-            else
-              error->fix_error(FLERR,this,"expecting 'yes' or 'no' after 'transfer_superquadric'");
-            iarg++;
-            hasargs = true;
-        } else if (strcmp(this->style,"couple/cfd/force") == 0) {
-            error->fix_error(FLERR,this,"unknown keyword");
         }
+        else if (strcmp(arg[iarg],"CAddRhoFluid") == 0)
+        {
+            if(narg < iarg+3)
+                error->fix_error(FLERR,this,"not enough arguments for 'CAddRhoFluid'. You must specify the added mass coefficient AND the fluid density");
+            iarg++;
+            double CAdd = atof(arg[iarg]);
+            iarg++;
+            double fluidDensity = atof(arg[iarg]);
+            if (comm->me == 0 && screen) fprintf(screen,"fix cfd/coupling/force will consider added mass with CAdd = %g, fluidDensity: %g\n",CAdd, fluidDensity);
+            CAddRhoFluid_ = CAdd*fluidDensity;
+            iarg++;
+            hasargs = true;
+        }
+        else  if (strcmp(this->style,"couple/cfd/force") == 0) error->all(FLERR,"Illegal fix cfd coupling force command");
     }
+    if (dragforce_implicit_)
+    {
+        registerProp("Ksl",false,true,SCALAR);
+        registerProp("uf",false,true,VECTOR);
+        registerProp("dragforce_implicit",false,false,VECTOR);
+    }
+
+    if (force->typeSpecificCG()) registerProp("type",true,false,SCALAR);
 
     // flags for vector output
     vector_flag = 1;
@@ -231,117 +253,100 @@ FixCfdCouplingForce::~FixCfdCouplingForce()
 
 void FixCfdCouplingForce::post_create()
 {
-    // register dragforce
-    if(!fix_dragforce_ && use_force_)
+    //loop all mapped entries and check if fixes exist, if not create
+    //coupleParams shall have fix property pointer, bool push, bool pull, cfdCoupleType type
+    //{SCALAR,VECTOR,VECTOR2D,QUATERNION,SCALARMULTISPHERE,VECTORMULTISPHERE,SCALARGLOB,VECTORGLOB,MATRIXGLOB}
+    std::map<std::string, coupleParams >::iterator it;
+    for ( it = coupleList_.begin(); it != coupleList_.end(); it++ )
     {
-        const char* fixarg[11];
-        fixarg[0]="dragforce";
-        fixarg[1]="all";
-        fixarg[2]="property/atom";
-        fixarg[3]="dragforce";
-        fixarg[4]="vector"; // 1 vector per particle to be registered
-        fixarg[5]="yes";    // restart
-        fixarg[6]="no";     // communicate ghost
-        fixarg[7]="no";     // communicate rev
-        fixarg[8]="0.";
-        fixarg[9]="0.";
-        fixarg[10]="0.";
-        fix_dragforce_ = modify->add_fix_property_atom(11,const_cast<char**>(fixarg),style);
+        //look for fix name
+        it->second.fix_property_ = modify->find_fix_id((it->first).c_str());
+        bool isMS = ( it->second.type == SCALARMULTISPHERE ||  it->second.type == VECTORMULTISPHERE );
+        if (!it->second.fix_property_ && !isMS ) //not found, create fix, if not multisphere
+        {
+            const char* fixarg[12];
+            fixarg[0]=(it->first).c_str();
+            fixarg[1]="all";
+            if (it->second.type <= QUATERNION) fixarg[2]="property/atom";
+            else error->fix_error(FLERR,this,"not yet implemented ;)");
+            fixarg[3]=(it->first).c_str();
+            if (it->second.type == SCALAR) fixarg[4]="scalar";
+            else if (it->second.type == VECTOR) fixarg[4]="vector";
+            else if (it->second.type == VECTOR2D) fixarg[4]="vector";
+            else if (it->second.type == QUATERNION) fixarg[4]="vector";
+            else error->fix_error(FLERR,this,"not yet implemented ;)");
+            fixarg[5]="no";     // restart
+            fixarg[6]="no";     // communicate ghost
+            fixarg[7]="no";     // communicate rev
+            fixarg[8]="0.";
+            fixarg[9]="0.";
+            fixarg[10]="0.";
+            fixarg[11]="0.";
+            
+            int narg;
+            if (it->second.type == SCALAR || it->second.type == SCALARMULTISPHERE || it->second.type == SCALARGLOB) narg = 9;
+            else if (it->second.type == VECTOR2D) narg = 10;
+            else if (it->second.type == VECTOR || it->second.type == VECTORMULTISPHERE || it->second.type == VECTORMULTISPHERE) narg = 11;
+            else narg = 12;
+
+            it->second.fix_property_ = modify->add_fix_property_atom(narg,const_cast<char**>(fixarg),style);
+        }
+        else //multisphere treatment
+        {
+            class FixMultisphere *fix_multisphere = static_cast<FixMultisphere*>(modify->find_fix_style("multisphere",0));
+            if(!fix_multisphere) error->fix_error(FLERR,this,"this fix with these properties needs a fix of style multisphere defined before this fix in the input script");
+            int n_body,len1,len2;
+            // check if property exists, custom value tracker throws error if it exists
+            if(! fix_multisphere->extract_ms((it->first).c_str(),len1,len2))
+            {
+                n_body = fix_multisphere->data().n_body();
+                if ( it->second.type == SCALARMULTISPHERE )
+                {
+                    fix_multisphere->data().prop().addElementProperty< ScalarContainer<double> >((it->first).c_str(),"comm_exchange_borders","frame_invariant","restart_no",1,n_body)->setAllToZero();
+                    fix_multisphere->data().prop().getElementProperty< ScalarContainer<double> >((it->first).c_str())->setDefaultValue(0.0);
+                }
+                else
+                {
+                    fix_multisphere->data().prop().addElementProperty< VectorContainer<double,3> >((it->first).c_str(),"comm_exchange_borders","frame_invariant","restart_no",1,n_body)->setAllToZero();
+                    fix_multisphere->data().prop().getElementProperty< VectorContainer<double,3> >((it->first).c_str())->setDefaultValue(0.0);
+                }
+            }
+        }
     }
 
-    // register hydrodynamic torque
-    if(!fix_hdtorque_ && use_torque_)
-    {
-        const char* fixarg[11];
-        fixarg[0]="hdtorque";
-        fixarg[1]="all";
-        fixarg[2]="property/atom";
-        fixarg[3]="hdtorque";
-        fixarg[4]="vector"; // 1 vector per particle to be registered
-        fixarg[5]="yes";    // restart
-        fixarg[6]="no";     // communicate ghost
-        fixarg[7]="no";     // communicate rev
-        fixarg[8]="0.";
-        fixarg[9]="0.";
-        fixarg[10]="0.";
-        fix_hdtorque_ = modify->add_fix_property_atom(11,const_cast<char**>(fixarg),style);
-    }
-
-    if(!fix_dispersionTime_ && use_stochastic_)
-    {
-        const char* fixarg[9];
-        fixarg[0]="dispersionTime";
-        fixarg[1]="all";
-        fixarg[2]="property/atom";
-        fixarg[3]="dispersionTime";
-        fixarg[4]="scalar"; // 1 vector per particle to be registered
-        fixarg[5]="yes";    // restart
-        fixarg[6]="no";     // communicate ghost
-        fixarg[7]="no";     // communicate rev
-        fixarg[8]="1e12";
-        fix_dispersionTime_ = modify->add_fix_property_atom(9,const_cast<char**>(fixarg),style);
-    }
-
-    if(!fix_dispersionVel_ && use_stochastic_)
-    {
-        const char* fixarg[11];
-        fixarg[0]="dispersionVel";
-        fixarg[1]="all";
-        fixarg[2]="property/atom";
-        fixarg[3]="dispersionVel";
-        fixarg[4]="vector"; // vector per particle to be registered
-        fixarg[5]="yes";    // restart
-        fixarg[6]="no";     // communicate ghost
-        fixarg[7]="no";     // communicate rev
-        fixarg[8]="0";
-        fixarg[9]="0";
-        fixarg[10]="0";
-        fix_dispersionVel_ = modify->add_fix_property_atom(11,const_cast<char**>(fixarg),style);
-    }
-
-    if(!fix_UrelOld_ && use_virtualMass_)
-    {
-        const char* fixarg[11];
-        fixarg[0]="UrelOld";
-        fixarg[1]="all";
-        fixarg[2]="property/atom";
-        fixarg[3]="UrelOld";
-        fixarg[4]="vector"; // vector per particle to be registered
-        fixarg[5]="yes";    // restart
-        fixarg[6]="no";     // communicate ghost
-        fixarg[7]="no";     // communicate rev
-        fixarg[8]="0";
-        fixarg[9]="0";
-        fixarg[10]="0";
-        fix_dispersionVel_ = modify->add_fix_property_atom(11,const_cast<char**>(fixarg),style);
-    }
-
-    if(use_fiber_topo_)
-    {
-        const char *fixarg[] = {
-              "topo",       // fix id
-              "all",        // fix group
-              "bond/fiber/topology" // fix style
-        };
-        modify->add_fix(3,const_cast<char**>(fixarg));
-    }
+    fix_dragforce_ = (FixPropertyAtom*)(coupleList_.find("dragforce")->second.fix_property_);
+    if (coupleList_.count("dragforce_implicit") > 0)
+        fix_dragforce_implicit_= (FixPropertyAtom*)(coupleList_.find("dragforce_implicit")->second.fix_property_);
+    if (use_torque_)
+        fix_hdtorque_ = (FixPropertyAtom*)(coupleList_.find("hdtorque")->second.fix_property_);
+    if (coupleList_.count("hdtorque_implicit") > 0)
+        fix_hdtorque_implicit_= (FixPropertyAtom*)(coupleList_.find("hdtorque_implicit")->second.fix_property_);
 }
 
 /* ---------------------------------------------------------------------- */
 
 void FixCfdCouplingForce::pre_delete(bool unfixflag)
 {
-    if(unfixflag && fix_dragforce_) modify->delete_fix("dragforce");
-    if(unfixflag && fix_hdtorque_) modify->delete_fix("hdtorque");
+    if (unfixflag)
+    {
+        if (fix_dragforce_)
+            modify->delete_fix("dragforce");
+        if (fix_dragforce_implicit_)
+            modify->delete_fix("dragforce_implicit");
+        if (fix_hdtorque_)
+            modify->delete_fix("hdtorque");
+        if (fix_hdtorque_implicit_)
+            modify->delete_fix("hdtorque_implicit");
+    }
 }
 
 /* ---------------------------------------------------------------------- */
 
 int FixCfdCouplingForce::setmask()
 {
-  int mask = 0;
-  mask |= POST_FORCE;
-  return mask;
+    int mask = 0;
+    mask |= POST_FORCE;
+    return mask;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -351,45 +356,28 @@ void FixCfdCouplingForce::init()
     // make sure there is only one fix of this style
     if(modify->n_fixes_style(style) != 1)
       error->fix_error(FLERR,this,"More than one fix of this style is not allowed");
-
     // find coupling fix
     fix_coupling_ = static_cast<FixCfdCoupling*>(modify->find_fix_style_strict("couple/cfd",0));
     if(!fix_coupling_)
       error->fix_error(FLERR,this,"Fix couple/cfd/force needs a fix of type couple/cfd");
 
-    //  values to be transfered to OF
-
-    fix_coupling_->add_push_property("x","vector-atom");
-    fix_coupling_->add_push_property("v","vector-atom");
-    fix_coupling_->add_push_property("radius","scalar-atom");
-    if(use_superquadric_) {
-      fix_coupling_->add_push_property("volume","scalar-atom");
-      fix_coupling_->add_push_property("area","scalar-atom");
-      fix_coupling_->add_push_property("shape","vector-atom");
-      fix_coupling_->add_push_property("blockiness","vector2D-atom");
-      fix_coupling_->add_push_property("quaternion","quaternion-atom");
-    }
-    if(use_type_) fix_coupling_->add_push_property("type","scalar-atom");
-    if(use_dens_) fix_coupling_->add_push_property("density","scalar-atom");
-    if(use_torque_) fix_coupling_->add_push_property("omega","vector-atom");
-    if(use_id_) fix_coupling_->add_push_property("id","scalar-atom");
-
-    if(use_property_) fix_coupling_->add_push_property(property_name,property_type);
-
-    // values to come from OF
-    if(use_force_) fix_coupling_->add_pull_property("dragforce","vector-atom");
-    if(use_torque_) fix_coupling_->add_pull_property("hdtorque","vector-atom");
-
-    if(use_stochastic_)
+    //loop all mapped entries and add push / pull properties
+    //coupleParams shall have fix property pointer, bool push, bool pull, cfdCoupleType type
+    //{SCALAR,VECTOR,VECTOR2D,QUATERNION,SCALARMULTISPHERE,VECTORMULTISPHERE,SCALARGLOB,VECTORGLOB,MATRIXGLOB}
+    const char* cfdCoupleTypeNames[9] = {"scalar-atom","vector-atom","vector2D-atom","quaternion-atom","scalar-multisphere","vector-multisphere","scalar-global","vector-global","matrix-global"};
+    std::map<std::string, coupleParams >::iterator it;
+    for ( it = coupleList_.begin(); it != coupleList_.end(); it++ )
     {
-        fix_coupling_->add_pull_property("dispersionTime","scalar-atom");
-        fix_coupling_->add_pull_property("dispersionVel","vector-atom");
-    }
-
-    if(use_fiber_topo_)
-    {
-        fix_coupling_->add_pull_property("fiber_axis","vector-atom");
-        fix_coupling_->add_pull_property("fiber_ends","vector-atom");
+        if (it->second.push)
+        {
+              
+              fix_coupling_->add_push_property(it->first.c_str(),cfdCoupleTypeNames[it->second.type]);
+        }
+        if (it->second.pull)
+        {
+              
+              fix_coupling_->add_pull_property(it->first.c_str(),cfdCoupleTypeNames[it->second.type]);
+        }
     }
 
     vectorZeroize3D(dragforce_total);
@@ -397,7 +385,29 @@ void FixCfdCouplingForce::init()
 
     if (strcmp(update->integrate_style,"respa") == 0)
        error->fix_error(FLERR,this,"'run_style respa' not supported.");
+    fix_dragforce_total_ = static_cast<FixPropertyAtom*>(modify->find_fix_property("dragforce_total","property/atom","vector",0,0,style,false));
+    if (!fix_dragforce_total_)
+    {
+          const char* fixarg[11];
+          fixarg[0]="dragforce_total";
+          fixarg[1]="all";
+          fixarg[2]="property/atom";
+          fixarg[3]="dragforce_total";
+          fixarg[4]="vector";
+          fixarg[5]="no";    // restart
+          fixarg[6]="no";     // communicate ghost
+          fixarg[7]="no";     // communicate rev
+          fixarg[8]="0.";
+          fixarg[9]="0.";
+          fixarg[10]="0.";
+          fix_dragforce_total_ = modify->add_fix_property_atom(11,const_cast<char**>(fixarg),style);
+    }
 
+    //check if being used with cfd_cn class integrator
+    if (dragforce_implicit_)
+    {
+        if ( ! modify->find_fix_style("nve/cfd_cn",0)) error->warning(FLERR,"Trying to use implicit drag formulation without integrator style nve/cfd_cn! The drag will be ignored.");
+    }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -414,34 +424,59 @@ void FixCfdCouplingForce::setup(int vflag)
 
 void FixCfdCouplingForce::post_force(int)
 {
-  double **f = atom->f;
-  double **torque = atom->torque;
-  int *mask = atom->mask;
-  int nlocal = atom->nlocal;
-  double **dragforce = fix_dragforce_->array_atom;
-  double **hdtorque = fix_hdtorque_->array_atom;
+    //explicit treatment of forces
+    double **f = atom->f;
+    double **torque = atom->torque;
+    int *mask = atom->mask;
+    int nlocal = atom->nlocal;
+    double **dragforce = fix_dragforce_->array_atom;
+    double **hdtorque;
+    if(use_torque_) hdtorque = fix_hdtorque_->array_atom;
+    double **dragforce_implicit;
+    if (fix_dragforce_implicit_) dragforce_implicit = fix_dragforce_implicit_->array_atom;
+    double **hdtorque_implicit;
+    if (fix_hdtorque_implicit_) hdtorque_implicit = fix_hdtorque_implicit_->array_atom;
+    double **dragforce_sum;
+    if (fix_dragforce_total_) dragforce_sum = fix_dragforce_total_->array_atom;
 
-  vectorZeroize3D(dragforce_total);
-  vectorZeroize3D(hdtorque_total);
+    fix_dragforce_total_->set_all(0.0, true);
+    vectorZeroize3D(dragforce_total);
+    vectorZeroize3D(hdtorque_total);
 
-  // add dragforce to force vector
-  
-  for (int i = 0; i < nlocal; i++)
-  {
-    if (mask[i] & groupbit)
+    // add dragforce to force vector
+    
+    for (int i = 0; i < nlocal; i++)
     {
-        if(use_force_)
+        if (mask[i] & groupbit)
         {
-            vectorAdd3D(f[i],dragforce[i],f[i]);
-            vectorAdd3D(dragforce_total,dragforce[i],dragforce_total);
-        }
-        if(use_torque_)
-        {
-            vectorAdd3D(torque[i],hdtorque[i],torque[i]);
-            vectorAdd3D(hdtorque_total,hdtorque[i],hdtorque_total);
+            vectorAdd3D(f[i], dragforce[i], f[i]);
+            if(use_torque_) vectorAdd3D(torque[i], hdtorque[i], torque[i]);
+            vectorAdd3D(dragforce_sum[i], dragforce[i], dragforce_sum[i]);
+            if (fix_dragforce_implicit_) vectorAdd3D(dragforce_sum[i], dragforce_implicit[i], dragforce_sum[i]);
+            vectorAdd3D(dragforce_total, dragforce_sum[i], dragforce_total);
+            if(use_torque_)
+            {
+                vectorAdd3D(hdtorque_total,hdtorque[i],hdtorque_total);
+                if (fix_hdtorque_implicit_) vectorAdd3D(hdtorque_total,hdtorque_implicit[i],hdtorque_total);
+            }
         }
     }
-  }
+}
+
+/* ---------------------------------------------------------------------- */
+
+void FixCfdCouplingForce::registerProp(std::string propName, bool push, bool pull, cfdCoupleType type)
+{
+    std::map<std::string, coupleParams >::const_iterator it = coupleList_.find(propName);
+    if ( it == coupleList_.end())
+    {
+        if(comm->me == 0 && screen && push)
+            fprintf(screen,"fix/couple/cfd/force: adding a property to push %s \n",propName.c_str());
+        if(comm->me == 0 && screen && pull)
+            fprintf(screen,"fix/couple/cfd/force: adding a property to pull %s \n",propName.c_str());
+        coupleParams newParams = {NULL, push, pull, type};
+        coupleList_.insert(std::pair<std::string, coupleParams>(propName, newParams));
+    }
 }
 
 /* ----------------------------------------------------------------------

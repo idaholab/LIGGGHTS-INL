@@ -51,7 +51,7 @@ mesh_keyword = {scale} or {move} or {rotate} or {temperature} or {mass_temperatu
   {extrude_planar} value = length
     length = length (length units) that a planar mesh is extruded in anti-normal direction :pre
 zero or more surface_keywords/surface_value pairs may be appended :l
-surface_keyword = {surface_vel} or {surface_ang_vel} or {curvature} or {curvature_tolerant} :l
+surface_keyword = {surface_vel} or {surface_ang_vel} or {curvature} or {curvature_tolerant} or {all_edges_corners_active} or {weighted_wall_formulation} :l
   {surface_vel} values = vx vy vz
     vx vy vz = conveyor belt surface velocity  (velocity units)
   {surface_ang_vel} values = origin ox oy oz axis ax ay az omega om
@@ -62,9 +62,13 @@ surface_keyword = {surface_vel} or {surface_ang_vel} or {curvature} or {curvatur
     omega = mandatory keyword
     om = rotational velocity around specifyied axis (rad/time units)
   {curvature} value = c
-    c = maximum angle between mesh faces belonging to the same surface (in degree) 
+    c = maximum angle between mesh faces belonging to the same surface (in degree)
   {curvature_tolerant} value = ct
-    ct = yes or no :pre
+    ct = yes or no
+  {all_edges_corners_active} value = active
+    active = yes or no :pre
+  {weighted_wall_formulation} value = active
+    active = yes or no :pre
 zero or more module_keywords/module_value pairs may be appended if a mesh module is used :l
   see the respective mesh module parameter list for details :pre
 
@@ -85,7 +89,7 @@ ASCII STL files or legacy ASCII VTK files. Style {mesh/surface} is a general sur
 consist of only 1 planar face.
 
 The {region} keyword can be used to filter the elements which are imported. An element is only
-imported if all of its vertices is inside the specified "region"_region.html. Please note that 
+imported if all of its vertices is inside the specified "region"_region.html. Please note that
 the geometric extent of this "region"_region.html refer to the unscaled, unmoved, and unrotated
 original state of the geometry.
 
@@ -116,6 +120,30 @@ belt velocity parallel to the mesh face, the velocity magnitude for each mesh fa
 equal to the conveyor belt velocity. This ensures the model makes sense also in case
 the mesh is curved. Likewise, the optional rotation model activated via keyword
 {surface_ang_vel} mimics rotational motion of the mesh (e.g. for modeling a shear cell)
+
+Under some rare circumstances, contacts between a particle and a
+triangle corner or triangle edge can be missed. Setting
+{all_edges_corners_active} to {yes} circumvents this by setting all
+edges/corners to active. This is needed for energy evaluation via "fix
+calculate/wall_dissipated_elastic_energy"_fix_caclulate_dissipated_energy.html.
+
+IMPORTANT NOTE: The following keyword {weighted_wall_formulation} is missing
+several error checks and might cause undefined behaviour if used incorrectly.
+Make sure you manually check all the restrictions listed below.
+
+The keyword {weighted_wall_formulation} is an experimental feature that computes
+the particle-wall contribution using a different algorithm. This keyword should
+only be used in conjunction with meshes that are watertight (locally where
+particle interactions happen). Depending on the mesh resolution this keyword
+might cause performance penalties. The key task of the algorithm is to ensure
+that the normal contact between mesh and particle conserves energy.  This can be
+used to improve the result of "fix
+calculate/wall_dissipated_elastic_energy"_fix_caclulate_dissipated_energy.html.
+Note that this is not true for any other contact models (e.g. tangential).
+Additionally, this keyword does not work with any models that require
+non-surface contacts (e.g. bond models).
+
+In some cases (e.g. evaluation of dissipated energy), {set_edges_corners_active} is needed to ensure ener
 
 [Mesh modules:]
 
@@ -165,7 +193,7 @@ changing the mesh import parameters ({scale}, {move}, {rotate}), (b)
 changing the mesh dynamics if a "fix move/mesh"_fix_move_mesh.html is
 applied or using "boundary m m m"_boundary.html
 
-There are a couple of features that help you read / repair a mesh which 
+There are a couple of features that help you read / repair a mesh which
 can not be read correctly in the first place:
 
 {precision} :l
@@ -190,28 +218,28 @@ If LIGGGHTS(R)-INL stalls because of duplicate elements, you can try setting
 {heal} to auto_remove_duplicates. LIGGGHTS(R)-INL will then try to heal the geometry
 by removing duplicate elements.
 
-With the optional {element_exclusion_list} keyword is used in mode 'write', LIGGGHTS(R)-INL 
-will write a list of elements which 
+With the optional {element_exclusion_list} keyword is used in mode 'write', LIGGGHTS(R)-INL
+will write a list of elements which
 
 have more than the allowed 5 face neighbors per surface :l
 have an angle below 0.0181185 degrees :l
 are duplicate :l
 
-element to a file. The 'read' mode can then use this file and will skip the elements in 
-the list. However, you can also manually write such a file to exclude elements you do not 
+element to a file. The 'read' mode can then use this file and will skip the elements in
+the list. However, you can also manually write such a file to exclude elements you do not
 want to have included
 
 IMPORTANT NOTE: The {element_exclusion_list write} model works in serial only. However,
 this is not a real restriction, since you can generate the exclusion lists in serial,
 but then read them to import the mesh into a parallel simulation
 
-IMPORTANT NOTE: If you use the 'heal' or 'element_exclusion_list' keywords, you should 
+IMPORTANT NOTE: If you use the 'heal' or 'element_exclusion_list' keywords, you should
 check the changes to the geometry, e.g. by using a "dump mesh/stl"_dump.html command.
 
 With the {min_feature_length} option, you can exlude elements which do not belong
 to an entity which has any element larger than {min_feature_length}. In this context,
 'entity' is defined by the 'neighborhood' of the element.
-{min_feature_length} also writes to the exclusion list, and can thus only be used along 
+{min_feature_length} also writes to the exclusion list, and can thus only be used along
 with the 'element_exclusion_list' feature. This feature is only available in the
 PREMIUM version of LIGGGHTS.
 

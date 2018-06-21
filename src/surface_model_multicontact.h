@@ -77,9 +77,9 @@ namespace ContactModels
             cmb->add_history_offset("delta", delta_offset);
         }
 
-        inline void registerSettings(Settings&) {}
-        inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
-        inline void connectToProperties(PropertyRegistry&)
+        void registerSettings(Settings&) {}
+        void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+        void connectToProperties(PropertyRegistry&)
         {
             FixMultiContactHalfSpace *fix_mc = static_cast<FixMultiContactHalfSpace*>(modify->find_fix_style("multicontact/halfspace", 0));
             if (!fix_mc)
@@ -89,7 +89,7 @@ namespace ContactModels
             neighbor->register_contact_dist_factor(2.0);
         }
 
-        inline bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
+        bool checkSurfaceIntersect(SurfacesIntersectData & sidata)
         {
             #ifdef SUPERQUADRIC_ACTIVE_FLAG
                 sidata.is_non_spherical = false;
@@ -97,7 +97,7 @@ namespace ContactModels
             return true;
         }
 
-        inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
+        void surfacesIntersect(SurfacesIntersectData & sidata, ForceData&, ForceData&)
         {
             const bool update_history = sidata.computeflag && sidata.shearupdate;
             if (update_history)
@@ -179,7 +179,7 @@ namespace ContactModels
             sidata.P_diss = 0.;
         }
 
-        inline void endSurfacesIntersect(SurfacesIntersectData& sidata, TriMesh * mesh, double * const i_forces)
+        void endSurfacesIntersect(SurfacesIntersectData& sidata, TriMesh * mesh, double * const i_forces)
         {
             // add the normal force to the contact history
             const int fn_offset = sidata.is_wall ? 3 : 2;
@@ -188,7 +188,7 @@ namespace ContactModels
                 sidata.contact_history[delta_offset+fn_offset] = fabs(vectorDot3D(i_forces, sidata.en));
         }
 
-        inline void surfacesClose(SurfacesCloseData& sidata, ForceData&, ForceData&)
+        void surfacesClose(SurfacesCloseData& sidata, ForceData&, ForceData&)
         {
             const bool update_history = sidata.computeflag && sidata.shearupdate;
             if (update_history)
@@ -210,8 +210,8 @@ namespace ContactModels
 
         void beginPass(SurfacesIntersectData&, ForceData&, ForceData&) {}
         void endPass(SurfacesIntersectData&, ForceData&, ForceData&) {}
-        inline void tally_pp(double,int,int,int) {}
-        inline void tally_pw(double,int,int,int) {}
+        void tally_pp(double,int,int,int) {}
+        void tally_pw(double,int,int,int) {}
     };
 }
 }

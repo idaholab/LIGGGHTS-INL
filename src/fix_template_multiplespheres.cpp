@@ -248,6 +248,7 @@ void FixTemplateMultiplespheres::post_create()
 
     calc_bounding_sphere();
     calc_center_of_mass();
+    calc_orientation();
 
     // check amount of overlap
     // needed for some functionalities
@@ -503,6 +504,34 @@ void FixTemplateMultiplespheres::calc_center_of_mass()
 
 }
 
+/* ----------------------------------------------------------------------
+   calc orientation
+------------------------------------------------------------------------- */
+
+void FixTemplateMultiplespheres::calc_orientation()
+{
+    
+    orientation = 3;
+
+    for(int itest = 0; itest < 3; itest++)
+    {
+        double test[3],ei[3]= {0.,0.,0.};
+        ei[itest] = 1.;
+
+        bool all_success = true;
+        for(int i = 0; i < nspheres-1; i++)
+        {
+            vectorSubtract3D(x_sphere[i],x_sphere[i+1],test);
+            double crossvec[3];
+            vectorCross3D(ei,test,crossvec);
+            if(vectorMag3D(crossvec) > 1e-10)
+                all_success = false;
+        }
+        if(all_success)
+            orientation = itest;
+    }
+}
+
 /* ----------------------------------------------------------------------*/
 
 double FixTemplateMultiplespheres::max_r_bound()
@@ -545,30 +574,52 @@ int FixTemplateMultiplespheres::number_spheres()
 
 void FixTemplateMultiplespheres::randomize_single()
 {
-  
-  pti->nparticles = nspheres;
-  pti->density_ins = expectancy(pdf_density);
-  pti->volume_ins = volume_expect;
-  pti->mass_ins = mass_expect;
-  pti->r_bound_ins = r_bound;
-  vectorCopy3D(x_bound,pti->x_bound_ins);
-  pti->atom_type = atom_type;
-  if(atom_type_sphere)
-  {
-    vectorCopyN(atom_type_sphere,pti->atom_type_vector,nspheres);
-    pti->atom_type_vector_flag = true;
-  }
+    
+    pti->nparticles = nspheres;
+    pti->density_ins = expectancy(pdf_density);
+    pti->volume_ins = volume_expect;
+    pti->mass_ins = mass_expect;
+    pti->r_bound_ins = r_bound;
+    vectorCopy3D(x_bound,pti->x_bound_ins);
+    pti->atom_type = atom_type;
+    if(atom_type_sphere)
+    {
+        vectorCopyN(atom_type_sphere,pti->atom_type_vector,nspheres);
+        pti->atom_type_vector_flag = true;
+    }
 
-  for(int j = 0; j < nspheres; j++)
-  {
-      pti->radius_ins[j] = r_sphere[j];
-      vectorCopy3D(x_sphere[j],pti->x_ins[j]);
-  }
+    for(int j = 0; j < nspheres; j++)
+    {
+        pti->radius_ins[j] = r_sphere[j];
+        vectorCopy3D(x_sphere[j],pti->x_ins[j]);
+    }
 
-  vectorZeroize3D(pti->v_ins);
-  vectorZeroize3D(pti->omega_ins);
+    pti->radius_ins_max = vectorMaxN(pti->radius_ins,nspheres);
 
-  pti->groupbit = groupbit;
+    vectorZeroize3D(pti->v_ins);
+    vectorZeroize3D(pti->omega_ins);
+
+    pti->groupbit = groupbit;
+
+    if(bonded)
+    {
+        if (!pti->fix_property)
+        {
+            pti->fix_property = new FixPropertyAtom*[1];
+            if (pti->fix_property_value)
+                error->one(FLERR, "Internal error (fix property pti list)");
+            pti->fix_property_value = new double*[1];
+            pti->fix_property_value[0] = new double[1];
+            if (pti->fix_property_nentry)
+                error->one(FLERR, "Internal error (fix property pti list)");
+            pti->fix_property_nentry = new int[1];
+        }
+        pti->fix_property[0] = fix_bond_random_id;
+        
+        pti->fix_property_value[0][0] = static_cast<double>(update->ntimestep)+random_insertion->uniform();
+        pti->n_fix_property = 1;
+        pti->fix_property_nentry[0] = 1;
+    }
 }
 
 /* ----------------------------------------------------------------------*/
@@ -608,6 +659,8 @@ void FixTemplateMultiplespheres::randomize_ptilist(int n_random,int distribution
               pti->radius_ins[j] = r_sphere[j];
               vectorCopy3D(x_sphere[j],pti->x_ins[j]);
           }
+
+          pti->radius_ins_max = vectorMaxN(pti->radius_ins,nspheres);
 
           vectorZeroize3D(pti->v_ins);
           vectorZeroize3D(pti->omega_ins);

@@ -47,6 +47,7 @@
 #define LMP_COMPUTE_H
 
 #include "pointers.h"
+#include "iloopcallbackcallable.h"
 
 #define INVOKED_SCALAR  1<<0
 #define INVOKED_VECTOR  1<<1
@@ -56,7 +57,7 @@
 
 namespace LAMMPS_NS {
 
-class Compute : protected Pointers {
+class Compute : protected Pointers, public LIGGGHTS::ILoopCallbackCallable {
  public:
   char *id,*style;
   int igroup,groupbit;
@@ -136,8 +137,10 @@ class Compute : protected Pointers {
   virtual void compute_peratom() {}
   virtual void compute_local() {}
 
+  virtual int get_comm_size() const { return 0; }
   virtual int pack_comm(int, int *, double *, int, int *) {return 0;}
   virtual void unpack_comm(int, int, double *) {}
+  virtual int get_reverse_comm_size() const { return 0; }
   virtual int pack_reverse_comm(int, int, double *) {return 0;}
   virtual void unpack_reverse_comm(int, int *, double *) {}
 
@@ -148,6 +151,10 @@ class Compute : protected Pointers {
   virtual void restore_bias_all() {}
 
   virtual void reset_extra_compute_fix(const char *);
+
+  // implementation of ILoopCallbackCallable interface
+  void registerNextCall(bigint);
+  bool callRequired(bigint);
 
   void addstep(bigint);
   int matchstep(bigint);

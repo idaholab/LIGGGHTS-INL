@@ -51,32 +51,34 @@ ComputeStyle(surface,ComputeSurface)
 
 namespace LAMMPS_NS {
 
-class ComputeSurface : public Compute {
+class ComputeSurface : public Compute
+{
 
- public:
+public:
 
-  ComputeSurface(class LAMMPS *, int &iarg, int, char **);
-  ~ComputeSurface();
-  void init();
-  void init_list(int, class NeighList *);
-  double compute_scalar();
-  void compute_peratom();
-  int pack_reverse_comm(int, int, double *);
-  void unpack_reverse_comm(int, int *, double *);
-  double memory_usage();
+    ComputeSurface(class LAMMPS *, int &iarg, int, char **);
+    ~ComputeSurface();
+    void init();
+    void init_list(int, class NeighList *);
+    double compute_scalar();
+    void compute_peratom();
+    int pack_reverse_comm(int, int, double *);
+    void unpack_reverse_comm(int, int *, double *);
+    double memory_usage();
 
- protected:
+protected:
 
-  int nmax_;
-  class NeighList *list_;
+    int nmax_;
+    int iregion_;
+    class NeighList *list_;
 
-  double *is_on_surface_;
+    double *is_on_surface_;
 
-  double point_up_[3];
-  double n_vec_up_[3];
-  bool use_com_;
-  double angle_;
-  double cosine_sqr_;
+    double point_up_[3];
+    double n_vec_up_[3];
+    bool use_com_;
+    double angle_;
+    double cosine_sqr_;
 };
 
 }

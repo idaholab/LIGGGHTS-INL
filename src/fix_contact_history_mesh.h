@@ -93,7 +93,7 @@ class FixContactHistoryMesh : public FixContactHistory {
 
   // spefific interface for mesh
 
-  bool handleContact(int iPart, int idTri, double *&history, bool intersectflag, bool faceflag);
+  bool handleContact(int iPart, int idTri, double *&history, bool intersectflag, bool faceflag, const bool weightedWallFormulation);
   void markAllContacts();
   void cleanUpContacts();
   void cleanUpContactJumps();

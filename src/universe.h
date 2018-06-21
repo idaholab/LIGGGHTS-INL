@@ -48,6 +48,7 @@
 
 #include <stdio.h>
 #include "pointers.h"
+#include "version_struct.h"
 
 namespace LAMMPS_NS {
 
@@ -60,7 +61,7 @@ class Universe : protected Pointers {
 
   FILE *uscreen;          // universe screen output
   FILE *ulogfile;         // universe logfile
-                          
+  FILE *uwarnfile;        // universe warnfile
   FILE *uthermofile;      // universe thermofile
 
   int existflag;          // 1 if universe exists due to -partition flag
@@ -81,6 +82,7 @@ class Universe : protected Pointers {
   void add_world(char *);
   int consistent();
   void id(char *id);       
+  Version get_version(const char * version = NULL) const;
 };
 
 }

@@ -105,7 +105,7 @@ void Neighbor::half_nsq_no_newton(NeighList *list)
     for (j = i+1; j < nall; j++) {
       if (includegroup && !(mask[j] & bitmask)) continue;
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
@@ -194,7 +194,7 @@ void Neighbor::half_nsq_no_newton_ghost(NeighList *list)
       for (j = i+1; j < nall; j++) {
         if (includegroup && !(mask[j] & bitmask)) continue;
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -216,7 +216,7 @@ void Neighbor::half_nsq_no_newton_ghost(NeighList *list)
       for (j = i+1; j < nall; j++) {
         if (includegroup && !(mask[j] & bitmask)) continue;
         jtype = type[j];
-        if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+        if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
         delx = xtmp - x[j][0];
         dely = ytmp - x[j][1];
@@ -309,7 +309,7 @@ void Neighbor::half_nsq_newton(NeighList *list)
       }
 
       jtype = type[j];
-      if (exclude && exclusion(i,j,itype,jtype,mask,molecule)) continue;
+      if (exclude && exclusion(i,j,itype,jtype,mask,molecule,false)) continue;
 
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];

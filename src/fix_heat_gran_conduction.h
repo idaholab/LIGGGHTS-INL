@@ -50,6 +50,7 @@ FixStyle(heat/gran,FixHeatGranCond)
 #define LMP_FIX_HEATGRAN_CONDUCTION_H
 
 #include "fix_heat_gran.h"
+#include "physicsheatconduction.h"
 
 namespace LAMMPS_NS {
 
@@ -58,26 +59,17 @@ namespace LAMMPS_NS {
     FixHeatGranCond(class LAMMPS *, int, char **);
     ~FixHeatGranCond();
     virtual void post_create();
-    virtual void pre_delete(bool);
 
     int setmask();
     void init();
     virtual void pre_force(int vflag);
     virtual void post_force(int vflag);
 
-    virtual void cpl_evaluate(class ComputePairGranLocal *);
-    void register_compute_pair_local(ComputePairGranLocal *);
-    void unregister_compute_pair_local(ComputePairGranLocal *);
-
-    virtual void updatePtrs();
-
   protected:
+    virtual void updatePtrs();
+    template <int> void post_force_eval(int);
+
     int iarg_;
-
-    template <int,int> void post_force_eval(int,int);
-
-    class FixPropertyGlobal* fix_conductivity_;
-    double *conductivity_;
 
     bool store_contact_data_;
     class FixPropertyAtom* fix_conduction_contact_area_;
@@ -89,14 +81,10 @@ namespace LAMMPS_NS {
     double *wall_heattransfer_coeff_;
     double *wall_temp_;
 
-    // model for contact area calculation
-    int area_calculation_mode_;
+    double temp_max_;
 
-    double fixed_contact_area_;
-
-    // for heat transfer area correction
-    int area_correction_flag_;
-    double const* const* deltan_ratio_;
+  private:
+    PhysicsHeatConduction heatPhy;
   };
 
 }

@@ -71,6 +71,7 @@ struct SurfacesCloseData {
   int *contact_flags;
   double *contact_history;
   LAMMPS_NS::TriMesh *mesh;
+  int iMesh;
   LAMMPS_NS::FixMeshSurface *fix_mesh;
 
   int i;
@@ -137,15 +138,15 @@ struct SurfacesIntersectData : SurfacesCloseData {
   double rinv;      
   double en[3];     
 
-  double kt;
+  double kt;        
   double kn;
   double gammat;
   double gamman;
 
-  double Fn;
+  double Fn;     
   double Ft;
 
-  double vn;
+  double vn;    
   double deltan;
   double cri;   
   double crj;   

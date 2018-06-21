@@ -277,6 +277,6 @@ int Histogram<T>::read_restart(double *buf)
     return m;
 }
 
-};
+}
 
 #endif

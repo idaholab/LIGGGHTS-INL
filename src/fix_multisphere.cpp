@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
 #include "fix_multisphere.h"
 #include "domain_wedge.h"
 #include "math_extra.h"
@@ -102,13 +103,16 @@ FixMultisphere::FixMultisphere(LAMMPS *lmp, int narg, char **arg) :
   Vclump_(0),
   allow_group_and_set_(false),
   allow_heatsource_(false),
-  CAdd_(0.),
-  fluidDensity_(0.),
-  concave_(false),
-  add_dragforce_(true)
+  concave_(false)
 {
+    std::ostringstream integrator_warning;
+    if (strcmp(style, "multisphere/nointegration") == 0)
+        integrator_warning << "With version 4.0 fix multisphere/nointegration is deprecated and will be removed in future versions. You should change the style from multisphere/nointegration to multisphere. By default fix multisphere registers no integrator anymore.";
+    else
+        integrator_warning << "With version 4.0 fix " << style << " no longer registeres an integrator. You need to manually add a fix nve/nonspherical to your input script if you want to integrate the multispheres";
+    error->warning(FLERR, integrator_warning.str().c_str());
     
-    if(0 == strcmp(style,"concave"))
+    if(strcmp(style,"concave") == 0)
     {
         concave_ = true;
         int strln = strlen("multisphere") + 1;
@@ -149,17 +153,6 @@ FixMultisphere::FixMultisphere(LAMMPS *lmp, int narg, char **arg) :
             iarg += 2;
             hasargs = true;
         }
-        else if (strcmp(arg[iarg],"CAddRhoFluid") == 0)
-        {
-            if(narg < iarg+3)
-                ms_error(FLERR,"not enough arguments for 'CAddRhoFluid'. You must specify the added mass coefficient AND the fluid density");
-            CAdd_         = atof(arg[iarg+1]);
-            fluidDensity_ = atof(arg[iarg+2]);
-            fprintf(screen,"cfd_coupling_force_ms_implicit will consider added mass with CAdd = %g, fluidDensity: %g\n",
-                    CAdd_, fluidDensity_);
-            iarg += 3;
-            hasargs = true;
-        }
         else if(0 == strcmp(style,"multisphere") || 0 == strcmp(style,"multisphere/advanced"))
         {
             char *errmsg = new char[strlen(arg[iarg])+50];
@@ -176,16 +169,17 @@ FixMultisphere::FixMultisphere(LAMMPS *lmp, int narg, char **arg) :
     grow_arrays(atom->nmax);
 
     char **modarg;
-    modarg = new char*[3];
+    modarg = new char*[4];
     modarg[2] = new char[50];
     modarg[0] = (char*) "exclude";
     modarg[1] = (char*) "molecule";
+    modarg[3] = (char*) "gran";
     strcpy(modarg[2],arg[1]); 
-    neighbor->modify_params(3,modarg);
+    neighbor->modify_params(4,modarg);
     delete [] modarg[2];
     delete []modarg;
 
-    restart_global = 1;
+    restart_global = 1; // keep for creation of required per-body elements during restart
     restart_peratom = 1;
     restart_pbc = 1;
     atom->add_callback(0);
@@ -223,6 +217,9 @@ FixMultisphere::FixMultisphere(LAMMPS *lmp, int narg, char **arg) :
     
     if(atom->quaternion)
         comm_reverse += 4;
+
+    // try to gather timestep info
+    reset_dt();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -241,6 +238,9 @@ FixMultisphere::~FixMultisphere()
         delete []accepts_restart_data_from_style;
         accepts_restart_data_from_style = 0;
     }
+
+    if (Vclump_)
+        delete []Vclump_;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -344,7 +344,6 @@ int FixMultisphere::setmask()
     mask |= PRE_NEIGHBOR;
     mask |= PRE_FORCE;
     mask |= PRE_FINAL_INTEGRATE;
-    mask |= FINAL_INTEGRATE;
     return mask;
 }
 
@@ -429,10 +428,7 @@ void FixMultisphere::init()
     fix_remove_.clear();
 
     // timestep info
-
-    dtv = update->dt;
-    dtf = 0.5 * update->dt * force->ftm2v;
-    dtq = 0.5 * update->dt;
+    reset_dt();
 }
 
 /* ---------------------------------------------------------------------- */
@@ -592,106 +588,6 @@ int FixMultisphere::getMask(int ibody)
 
 /* ---------------------------------------------------------------------- */
 
-void FixMultisphere::initial_integrate(int vflag)
-{
-    int timestep = update->ntimestep;
-    double **xcm = multisphere_.xcm_.begin();
-    double **vcm = multisphere_.vcm_.begin();
-    double **fcm = multisphere_.fcm_.begin();
-    double **torquecm = multisphere_.torquecm_.begin();
-    double **ex_space = multisphere_.ex_space_.begin();
-    double **ey_space = multisphere_.ey_space_.begin();
-    double **ez_space = multisphere_.ez_space_.begin();
-    double **angmom = multisphere_.angmom_.begin();
-    double **omega = multisphere_.omega_.begin();
-    double **quat = multisphere_.quat_.begin();
-    double **inertia = multisphere_.inertia_.begin();
-    double *masstotal = multisphere_.masstotal_.begin();
-    double *density = multisphere_.density_.begin();
-    int *start_step = multisphere_.start_step_.begin();
-    double **v_integrate = multisphere_.v_integrate_.begin();
-    bool **fflag = multisphere_.fflag_.begin();
-    bool **tflag = multisphere_.tflag_.begin();
-    int nbody = multisphere_.n_body();
-
-    if(strstr(style,"nointegration"))
-        return;
-
-    int n_stream = modify->n_fixes_style("insert/stream");
-    bool has_stream = n_stream > 0;
-
-    for (int ibody = 0; ibody < nbody; ibody++)
-    {
-        /*
-        if(!(getMask(ibody) & groupbit) )
-          continue;*/
-
-        if(has_stream && timestep < start_step[ibody])
-        {
-            vectorCopy3D(v_integrate[ibody],vcm[ibody]);
-
-            // update xcm by full step
-            xcm[ibody][0] += dtv * vcm[ibody][0];
-            xcm[ibody][1] += dtv * vcm[ibody][1];
-            xcm[ibody][2] += dtv * vcm[ibody][2];
-            
-            continue;
-        }
-
-        // update vcm by 1/2 step
-
-        const double addMassTerm = 1.0+CAdd_*fluidDensity_/density[ibody];
-        const double dtfm = dtf / (masstotal[ibody] * addMassTerm );
-
-        if(fflag[ibody][0]) vcm[ibody][0] += dtfm * fcm[ibody][0];
-        if(fflag[ibody][1]) vcm[ibody][1] += dtfm * fcm[ibody][1];
-        if(fflag[ibody][2]) vcm[ibody][2] += dtfm * fcm[ibody][2];
-
-        // update xcm by full step
-
-        xcm[ibody][0] += dtv * vcm[ibody][0];
-        xcm[ibody][1] += dtv * vcm[ibody][1];
-        xcm[ibody][2] += dtv * vcm[ibody][2];
-
-        // update angular momentum by 1/2 step
-        const double dtt = dtf / addMassTerm;
-        if(tflag[ibody][0]) angmom[ibody][0] += dtt * torquecm[ibody][0];
-        if(tflag[ibody][1]) angmom[ibody][1] += dtt * torquecm[ibody][1];
-        if(tflag[ibody][2]) angmom[ibody][2] += dtt * torquecm[ibody][2];
-
-        // compute omega at 1/2 step from angmom at 1/2 step and current q
-        // update quaternion a full step via Richardson iteration
-        // returns new normalized quaternion, also updated omega at 1/2 step
-        // update ex,ey,ez to reflect new quaternion
-
-        MathExtra::angmom_to_omega(angmom[ibody],ex_space[ibody],ey_space[ibody],
-                                   ez_space[ibody],inertia[ibody],omega[ibody]);
-        MathExtra::richardson(quat[ibody],angmom[ibody],omega[ibody],
-                              inertia[ibody],dtq);
-        MathExtra::q_to_exyz(quat[ibody],
-                             ex_space[ibody],ey_space[ibody],ez_space[ibody]);
-
-    }
-
-    // virial setup before call to set_xv
-
-    if (vflag)
-        v_setup(vflag);
-    else
-        evflag = 0;
-
-    // set coords/orient and velocity/rotation of atoms in rigid bodies
-    // from quarternion and omega
-
-    set_xv();
-
-    rev_comm_flag_ = MS_COMM_REV_X_V_OMEGA;
-    reverse_comm();
-
-}
-
-/* ---------------------------------------------------------------------- */
-
 void FixMultisphere::setup_pre_force(int dummy)
 {
     pre_force(dummy);
@@ -714,89 +610,7 @@ void FixMultisphere::pre_force(int)
 void FixMultisphere::pre_final_integrate()
 {
     comm_correct_force(false);
-}
-
-/* ---------------------------------------------------------------------- */
-
-void FixMultisphere::final_integrate()
-{
-  int timestep = update->ntimestep;
-  //double **xcm = multisphere_.xcm_.begin();
-  double **vcm = multisphere_.vcm_.begin();
-  double **fcm = multisphere_.fcm_.begin();
-  double **torquecm = multisphere_.torquecm_.begin();
-  double **ex_space = multisphere_.ex_space_.begin();
-  double **ey_space = multisphere_.ey_space_.begin();
-  double **ez_space = multisphere_.ez_space_.begin();
-  double **angmom = multisphere_.angmom_.begin();
-  double **omega = multisphere_.omega_.begin();
-  double **inertia = multisphere_.inertia_.begin();
-  double *masstotal = multisphere_.masstotal_.begin();
-  double *density = multisphere_.density_.begin();
-  int *start_step = multisphere_.start_step_.begin();
-  bool **fflag = multisphere_.fflag_.begin();
-  bool **tflag = multisphere_.tflag_.begin();
-  int nbody = multisphere_.n_body();
-
-  // calculate forces and torques on body
-
-  calc_force(false);
-
-  if(strstr(style,"nointegration"))
-    return;
-
-  int n_stream = modify->n_fixes_style("insert/stream");
-  bool has_stream = n_stream > 0;
-
-  // resume integration
-  for (int ibody = 0; ibody < nbody; ibody++)
-  {
-    /*
-    if (!(getMask(ibody) & groupbit))
-      continue; */
-
-    if(has_stream && timestep < start_step[ibody]) continue;
-
-    // update vcm by 1/2 step
-    const double addMassTerm = 1.0+CAdd_*fluidDensity_/density[ibody];
-    const double dtfm = dtf / ( masstotal[ibody] * addMassTerm );
-    if(fflag[ibody][0]) vcm[ibody][0] += dtfm * fcm[ibody][0];
-    if(fflag[ibody][1]) vcm[ibody][1] += dtfm * fcm[ibody][1];
-    if(fflag[ibody][2]) vcm[ibody][2] += dtfm * fcm[ibody][2];
-
-    // update angular momentum by 1/2 step
-    const double dtt = dtf / addMassTerm;
-    if(tflag[ibody][0]) angmom[ibody][0] += dtt * torquecm[ibody][0];
-    if(tflag[ibody][1]) angmom[ibody][1] += dtt * torquecm[ibody][1];
-    if(tflag[ibody][2]) angmom[ibody][2] += dtt * torquecm[ibody][2];
-
-    MathExtra::angmom_to_omega(angmom[ibody],ex_space[ibody],ey_space[ibody],
-                               ez_space[ibody],inertia[ibody],omega[ibody]);
-  }
-
-  set_v();
-
-  rev_comm_flag_ = MS_COMM_REV_V_OMEGA;
-  reverse_comm();
-
-  fw_comm_flag_ = MS_COMM_FW_V_OMEGA;
-  forward_comm();
-}
-
-/* ----------------------------------------------------------------------
-   call to set_v, plus according fwd communication
-------------------------------------------------------------------------- */
-
-void FixMultisphere::set_v_communicate()
-{
-  
-  set_v();
-
-  rev_comm_flag_ = MS_COMM_REV_V_OMEGA;
-  reverse_comm();
-
-  fw_comm_flag_ = MS_COMM_FW_V_OMEGA;
-  forward_comm();
+    calc_force(false);
 }
 
 /* ----------------------------------------------------------------------
@@ -839,8 +653,8 @@ void FixMultisphere::calc_force(bool setupflag)
   double **xcm = multisphere_.xcm_.begin();
   double *masstotal = multisphere_.masstotal_.begin();
   double **fcm = multisphere_.fcm_.begin();
-  double **dragforce_cm = multisphere_.dragforce_cm_.begin();
-  double **hdtorque_cm = multisphere_.hdtorque_cm_.begin();
+//  double **dragforce_cm = multisphere_.dragforce_cm_.begin();
+//  double **hdtorque_cm = multisphere_.hdtorque_cm_.begin();
   double **torquecm = multisphere_.torquecm_.begin();
   double *temp = multisphere_.temp_.begin();
   double *temp_old = multisphere_.temp_old_.begin();
@@ -954,13 +768,117 @@ void FixMultisphere::calc_force(bool setupflag)
             
       }
   }
-  if(add_dragforce_)
-  {
-    for (ibody = 0; ibody < nbody; ibody++)
-    {
-        
-        vectorAdd3D(fcm[ibody],dragforce_cm[ibody],fcm[ibody]);
-        vectorAdd3D(torquecm[ibody],hdtorque_cm[ibody],torquecm[ibody]);
+//  if(add_dragforce_)
+//  {
+//    for (ibody = 0; ibody < nbody; ibody++)
+//    {
+//        
+//        vectorAdd3D(fcm[ibody],dragforce_cm[ibody],fcm[ibody]);
+//        vectorAdd3D(torquecm[ibody],hdtorque_cm[ibody],torquecm[ibody]);
+//    }
+//  }
+}
+
+/* ----------------------------------------------------------------------
+   set space-frame velocity of each atom in a rigid body
+   set omega and angmom of extended particles
+   v = Vcm + (W cross (x - Xcm))
+------------------------------------------------------------------------- */
+
+void FixMultisphere::set_v()
+{
+    set_v(LOOP_ALL);
+}
+
+/*-----------------------------------------------------------------------*/
+
+void FixMultisphere::set_v(int ghostflag)
+{
+  int ibody;
+  int xbox,ybox,zbox;
+  double x0=0.0,x1=0.0,x2=0.0,v0=0.0,v1=0.0,v2=0.0,massone;
+  double delta[3],vr[6];
+
+  double **x = atom->x;
+  double **v = atom->v;
+  double **f = atom->f;
+  double *rmass = atom->rmass;
+  double *mass = atom->mass;
+  double **omega_one = atom->omega;
+  int *type = atom->type;
+  tagint *image = atom->image;
+  int nlocal = atom->nlocal;
+  int nghost = atom->nghost;
+  double **vcm = multisphere_.vcm_.begin();
+  double **omega = multisphere_.omega_.begin();
+  double **ex_space = multisphere_.ex_space_.begin();
+  double **ey_space = multisphere_.ey_space_.begin();
+  double **ez_space = multisphere_.ez_space_.begin();
+
+  int nloop = 0;
+
+  if(ghostflag == LOOP_ALL) nloop = nlocal+nghost;
+  else if(ghostflag == LOOP_LOCAL) nloop = nlocal;
+  else error->all(FLERR,"Illegal call to FixNVEMultisphere::set_v");
+
+  double xprd = domain->xprd;
+  double yprd = domain->yprd;
+  double zprd = domain->zprd;
+
+  // set v of each atom
+
+  for (int i = 0; i < nloop; i++) {
+    if (body_[i] < 0) continue;
+    ibody = map(body_[i]);
+    if (ibody < 0) continue;
+
+    MathExtra::matvec(ex_space[ibody],ey_space[ibody],ez_space[ibody],displace_[i],delta);
+
+    // save old velocities for virial
+
+    if (evflag) {
+      v0 = v[i][0];
+      v1 = v[i][1];
+      v2 = v[i][2];
+    }
+
+    v[i][0] = omega[ibody][1]*delta[2] - omega[ibody][2]*delta[1] + vcm[ibody][0];
+    v[i][1] = omega[ibody][2]*delta[0] - omega[ibody][0]*delta[2] + vcm[ibody][1];
+    v[i][2] = omega[ibody][0]*delta[1] - omega[ibody][1]*delta[0] + vcm[ibody][2];
+
+    omega_one[i][0] = omega[ibody][0];
+    omega_one[i][1] = omega[ibody][1];
+    omega_one[i][2] = omega[ibody][2];
+
+    // virial = unwrapped coords dotted into body constraint force
+    // body constraint force = implied force due to v change minus f external
+    // assume f does not include forces internal to body
+    // 1/2 factor b/c initial_integrate contributes other half
+    // assume per-atom contribution is due to constraint force on that atom
+
+    if (evflag && i < nlocal) { 
+      if (rmass) massone = rmass[i];
+      else massone = mass[type[i]];
+      const double fc0 = massone*(v[i][0] - v0)/dtf - f[i][0];
+      const double fc1 = massone*(v[i][1] - v1)/dtf - f[i][1];
+      const double fc2 = massone*(v[i][2] - v2)/dtf - f[i][2];
+
+      xbox = (image[i] & IMGMASK) - IMGMAX;
+      ybox = (image[i] >> IMGBITS & IMGMASK) - IMGMAX;
+      zbox = (image[i] >> IMG2BITS) - IMGMAX;
+
+      x0 = x[i][0] + xbox*xprd;
+      x1 = x[i][1] + ybox*yprd;
+      x2 = x[i][2] + zbox*zprd;
+
+      vr[0] = 0.5*x0*fc0;
+      vr[1] = 0.5*x1*fc1;
+      vr[2] = 0.5*x2*fc2;
+      vr[3] = 0.5*x0*fc1;
+      vr[4] = 0.5*x0*fc2;
+      vr[5] = 0.5*x1*fc2;
+
+      v_tally(1,&i,1.0,vr);
     }
   }
 }
@@ -1090,110 +1008,6 @@ void FixMultisphere::set_xv(int ghostflag)
 }
 
 /* ----------------------------------------------------------------------
-   set space-frame velocity of each atom in a rigid body
-   set omega and angmom of extended particles
-   v = Vcm + (W cross (x - Xcm))
-------------------------------------------------------------------------- */
-
-void FixMultisphere::set_v()
-{
-    set_v(LOOP_ALL);
-}
-
-/*-----------------------------------------------------------------------*/
-
-void FixMultisphere::set_v(int ghostflag)
-{
-  int ibody;
-  int xbox,ybox,zbox;
-  double x0=0.0,x1=0.0,x2=0.0,v0=0.0,v1=0.0,v2=0.0,massone;
-  double delta[3],vr[6];
-
-  double **x = atom->x;
-  double **v = atom->v;
-  double **f = atom->f;
-  double *rmass = atom->rmass;
-  double *mass = atom->mass;
-  double **omega_one = atom->omega;
-  int *type = atom->type;
-  tagint *image = atom->image;
-  int nlocal = atom->nlocal;
-  int nghost = atom->nghost;
-  double **vcm = multisphere_.vcm_.begin();
-  double **omega = multisphere_.omega_.begin();
-  double **ex_space = multisphere_.ex_space_.begin();
-  double **ey_space = multisphere_.ey_space_.begin();
-  double **ez_space = multisphere_.ez_space_.begin();
-
-  int nloop = 0;
-
-  if(ghostflag == LOOP_ALL) nloop = nlocal+nghost;
-  else if(ghostflag == LOOP_LOCAL) nloop = nlocal;
-  else error->all(FLERR,"Illegal call to FixMultisphere::set_v");
-
-  double xprd = domain->xprd;
-  double yprd = domain->yprd;
-  double zprd = domain->zprd;
-
-  // set v of each atom
-
-  for (int i = 0; i < nloop; i++) {
-    if (body_[i] < 0) continue;
-    ibody = map(body_[i]);
-    if (ibody < 0) continue;
-
-    MathExtra::matvec(ex_space[ibody],ey_space[ibody],ez_space[ibody],displace_[i],delta);
-
-    // save old velocities for virial
-
-    if (evflag) {
-      v0 = v[i][0];
-      v1 = v[i][1];
-      v2 = v[i][2];
-    }
-
-    v[i][0] = omega[ibody][1]*delta[2] - omega[ibody][2]*delta[1] + vcm[ibody][0];
-    v[i][1] = omega[ibody][2]*delta[0] - omega[ibody][0]*delta[2] + vcm[ibody][1];
-    v[i][2] = omega[ibody][0]*delta[1] - omega[ibody][1]*delta[0] + vcm[ibody][2];
-
-    omega_one[i][0] = omega[ibody][0];
-    omega_one[i][1] = omega[ibody][1];
-    omega_one[i][2] = omega[ibody][2];
-
-    // virial = unwrapped coords dotted into body constraint force
-    // body constraint force = implied force due to v change minus f external
-    // assume f does not include forces internal to body
-    // 1/2 factor b/c initial_integrate contributes other half
-    // assume per-atom contribution is due to constraint force on that atom
-
-    if (evflag && i < nlocal) { 
-      if (rmass) massone = rmass[i];
-      else massone = mass[type[i]];
-      const double fc0 = massone*(v[i][0] - v0)/dtf - f[i][0];
-      const double fc1 = massone*(v[i][1] - v1)/dtf - f[i][1];
-      const double fc2 = massone*(v[i][2] - v2)/dtf - f[i][2];
-
-      xbox = (image[i] & IMGMASK) - IMGMAX;
-      ybox = (image[i] >> IMGBITS & IMGMASK) - IMGMAX;
-      zbox = (image[i] >> IMG2BITS) - IMGMAX;
-
-      x0 = x[i][0] + xbox*xprd;
-      x1 = x[i][1] + ybox*yprd;
-      x2 = x[i][2] + zbox*zprd;
-
-      vr[0] = 0.5*x0*fc0;
-      vr[1] = 0.5*x1*fc1;
-      vr[2] = 0.5*x2*fc2;
-      vr[3] = 0.5*x0*fc1;
-      vr[4] = 0.5*x0*fc2;
-      vr[5] = 0.5*x1*fc2;
-
-      v_tally(1,&i,1.0,vr);
-    }
-  }
-}
-
-/* ----------------------------------------------------------------------
    delete atoms belonging to deleted bodies
 ------------------------------------------------------------------------- */
 
@@ -1244,10 +1058,6 @@ void FixMultisphere::pre_exchange()
 void FixMultisphere::pre_neighbor()
 {
     
-    int nall = atom->nlocal + atom->nghost;
-    double *corner_ghost = fix_corner_ghost_->vector_atom;
-    vectorZeroizeN(corner_ghost,nall);
-
     fw_comm_flag_ = MS_COMM_FW_BODY;
     forward_comm();
 
@@ -1259,11 +1069,12 @@ void FixMultisphere::pre_neighbor()
     multisphere_.remap_bodies(body_);
     rev_comm_flag_ = MS_COMM_REV_IMAGE;
     reverse_comm();
+
+    int nall = atom->nlocal + atom->nghost;
+    double *corner_ghost = fix_corner_ghost_->vector_atom;
+    vectorZeroizeN(corner_ghost,nall);
+
     multisphere_.exchange();
-
-    multisphere_.calc_nbody_all();
-
-    multisphere_.generate_map();
 
     // set deletion flag
     // if any deleted atoms, do re-neigh in 100 steps at latest to remove
@@ -1384,10 +1195,10 @@ int FixMultisphere::maxsize_restart()
 
 void FixMultisphere::write_restart(FILE *fp)
 {
-    multisphere_.writeRestart(fp);
+    multisphere_.write_restart_parallel(fp);
 }
 
-void FixMultisphere::restart(char *buf)
+void FixMultisphere::restart(char *buf, const Version &ver)
 {
     double *list = (double *) buf;
 
@@ -1405,7 +1216,20 @@ void FixMultisphere::restart(char *buf)
         }
     }
 
-    multisphere_.restart(list);
+    if ( ver < Version(3,9) )
+        multisphere_.restart_serial(list);
+    else
+        multisphere_.restart_parallel(list);
+
+}
+
+/* ---------------------------------------------------------------------- */
+
+void FixMultisphere::reset_dt()
+{
+    dtv = update->dt;
+    dtf = 0.5 * update->dt * force->ftm2v;
+    dtq = 0.5 * update->dt;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1474,4 +1298,17 @@ int FixMultisphere::modify_param(int narg, char **arg)
         return 4;
     }
     return 0;
+}
+
+/* ---------------------------------------------------------------------- */
+
+void *FixMultisphere::extract_ms(const char *name, int &len1, int &len2)
+{
+    if (strcmp(name,"body") == 0)
+    {
+        len1 = atom->tag_max();
+        len2 = 1;
+        return (void *) body_;
+    }
+    return multisphere_.extract(name,len1,len2);
 }

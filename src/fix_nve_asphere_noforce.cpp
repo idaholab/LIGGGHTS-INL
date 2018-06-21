@@ -99,13 +99,12 @@ void FixNVEAsphereNoforce::init()
 void FixNVEAsphereNoforce::initial_integrate(int vflag)
 {
   AtomVecEllipsoid::Bonus *bonus;
-  if (avec) bonus = avec->bonus;
+  bonus = avec->bonus;
   double **x = atom->x;
   double **v = atom->v;
   double **angmom = atom->angmom;
   double *rmass = atom->rmass;
   int *ellipsoid = atom->ellipsoid;
-  int *type = atom->type;
   int *mask = atom->mask;
   int nlocal = atom->nlocal;
   if (igroup == atom->firstgroup) nlocal = atom->nfirst;

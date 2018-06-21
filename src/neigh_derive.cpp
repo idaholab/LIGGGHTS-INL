@@ -374,8 +374,8 @@ void Neighbor::skip_from_respa(NeighList *list)
   int *numneigh_inner_skip = list->listskip->listinner->numneigh;
   int **firstneigh_inner_skip = list->listskip->listinner->firstneigh;
 
-  NeighList *listmiddle;
-  int *ilist_middle,*numneigh_middle,**firstneigh_middle;
+  NeighList *listmiddle = NULL;
+  int *ilist_middle = NULL,*numneigh_middle = NULL,**firstneigh_middle = NULL;
   MyPage<int> *ipage_middle = NULL;
   int *numneigh_middle_skip,**firstneigh_middle_skip;
   int respamiddle = list->respamiddle;

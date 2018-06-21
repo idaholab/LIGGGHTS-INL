@@ -32,12 +32,19 @@
 
 -------------------------------------------------------------------------
     Contributing author and copyright for this file:
+
+    Christoph Kloss (JKU Linz)
+    Christoph Kloss (DCS Computing GmbH, Linz)
+    Arno Mayrhofer (DCS Computing GmbH, Linz)
+
     (if no contributing author is listed, this file has been contributed
     by the core developer)
 
     Copyright 2012-     DCS Computing GmbH, Linz
     Copyright 2009-2012 JKU Linz
 ------------------------------------------------------------------------- */
+
+#if defined(LAMMPS_VTK)
 
 #include <string.h>
 #include "dump_decomposition_vtk.h"
@@ -49,6 +56,12 @@
 #include "fix.h"
 #include "modify.h"
 #include "comm.h"
+#include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
+#include <vtkVoxel.h>
+#include <vtkPoints.h>
+#include <vtkIntArray.h>
+#include <vtkCellData.h>
 
 // include last to ensure correct macros
 #include "domain_definitions.h"
@@ -57,204 +70,182 @@ using namespace LAMMPS_NS;
 
 /* ---------------------------------------------------------------------- */
 
-DumpDecompositionVTK::DumpDecompositionVTK(LAMMPS *lmp, int narg, char **arg) : Dump(lmp, narg, arg)
+DumpDecompositionVTK::DumpDecompositionVTK(LAMMPS *lmp, int narg, char **arg) :
+    Dump(lmp, narg, arg),
+    DumpVTK(lmp),
+    xdata(NULL),
+    ydata(NULL),
+    zdata(NULL),
+    lasttimestep(-1),
+    filecurrent(NULL)
 {
-  if (narg != 5)
-    error->all(FLERR,"Illegal dump decomposition command");
+    if (narg != 5)
+        error->all(FLERR,"Illegal dump decomposition command");
 
-  //INFO: CURRENTLY ONLY PROC 0 writes
+    //INFO: CURRENTLY ONLY PROC 0 writes
 
-  //multifile=1;             // 0 = one big file, 1 = one file per timestep
-  //multiproc=0;             // 0 = proc 0 writes for all, 1 = one file/proc
+    format_default = NULL;
 
-  format_default = NULL;
+    //number of properties written out in one line with buff
+    size_one=1;  //dont use buff
 
-  //number of properties written out in one line with buff
-  size_one=1;  //dont use buff
+    std::list<int> allowed_extensions;
+    allowed_extensions.push_back(VTK_FILE_FORMATS::VTK);
+    allowed_extensions.push_back(VTK_FILE_FORMATS::VTU);
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
 
-  lasttimestep=-1;
-
-  len[0] = comm->procgrid[0]+1;
-  len[1] = comm->procgrid[1]+1;
-  len[2] = comm->procgrid[2]+1;
-
-  xdata = new double[len[0]];
-  xdata_all = new double[len[0]];
-  ydata = new double[len[1]];
-  ydata_all = new double[len[1]];
-  zdata = new double[len[2]];
-  zdata_all = new double[len[2]];
+    xdata = new double[2*comm->nprocs];
+    ydata = new double[2*comm->nprocs];
+    zdata = new double[2*comm->nprocs];
+    all_nlocal_ = new int[comm->nprocs];
 }
 
 /* ---------------------------------------------------------------------- */
 
 DumpDecompositionVTK::~DumpDecompositionVTK()
 {
-  delete []xdata;
-  delete []ydata;
-  delete []zdata;
-  delete []xdata_all;
-  delete []ydata_all;
-  delete []zdata_all;
+    delete []xdata;
+    delete []ydata;
+    delete []zdata;
+    delete []all_nlocal_;
+    delete []filecurrent;
 }
 
 /* ---------------------------------------------------------------------- */
 
 void DumpDecompositionVTK::init_style()
 {
-  if (domain->triclinic == 1)
-    error->all(FLERR,"Can not perform dump decomposition for triclinic box");
-  if (binary)
-    error->all(FLERR,"Can not perform dump decomposition in binary mode");
+    if (domain->triclinic == 1)
+        error->all(FLERR,"Can not perform dump decomposition for triclinic box");
+    if (binary)
+        error->all(FLERR,"Can not perform dump decomposition in binary mode");
 
-  // default format not needed
+    // default format not needed
 
-  delete [] format;
-  format = new char[150];
+    delete [] format;
+    format = new char[150];
 
-  // setup function ptrs
+    // open single file, one time only
 
-  header_choice = &DumpDecompositionVTK::header_item;
-  pack_choice = &DumpDecompositionVTK::pack_item;
-  write_choice = &DumpDecompositionVTK::write_item;
+    if (multifile == 0)
+        openfile();
 
-  // open single file, one time only
+    delete []xdata;
+    delete []ydata;
+    delete []zdata;
 
-  if (multifile == 0) openfile();
-
-  delete []xdata;
-  delete []ydata;
-  delete []zdata;
-  delete []xdata_all;
-  delete []ydata_all;
-  delete []zdata_all;
-  len[0] = comm->procgrid[0]+1;
-  len[1] = comm->procgrid[1]+1;
-  len[2] = comm->procgrid[2]+1;
-  xdata = new double[len[0]];
-  xdata_all = new double[len[0]];
-  ydata = new double[len[1]];
-  ydata_all = new double[len[1]];
-  zdata = new double[len[2]];
-  zdata_all = new double[len[2]];
+    xdata = new double[2*comm->nprocs];
+    ydata = new double[2*comm->nprocs];
+    zdata = new double[2*comm->nprocs];
 }
 
 /* ---------------------------------------------------------------------- */
 
 int DumpDecompositionVTK::modify_param(int narg, char **arg)
 {
-  error->warning(FLERR,"dump_modify keyword is not supported by 'dump decomposition' and is thus ignored");
-  return 0;
+    const int mvtk = DumpVTK::modify_param(narg, arg);
+    if (mvtk > 0)
+        return mvtk;
+    return 0;
 }
 
 /* ---------------------------------------------------------------------- */
 
 void DumpDecompositionVTK::write_header(bigint ndump)
 {
-  if (multiproc) (this->*header_choice)(ndump);
-  else if (me == 0) (this->*header_choice)(ndump);
+    if (comm->me!=0)
+        return;
 }
 
 /* ---------------------------------------------------------------------- */
 
 int DumpDecompositionVTK::count()
 {
-  if (comm->me!=0) return 0;
-  return 1;
+    if (comm->me!=0)
+        return 0;
+    return 1;
 }
 
 /* ---------------------------------------------------------------------- */
 
 void DumpDecompositionVTK::pack(int *ids)
 {
-   (this->*pack_choice)();
+    
+    double to_send[2];
+    to_send[0] = domain->sublo[0];
+    to_send[1] = domain->subhi[0];
+    MPI_Gather(to_send, 2, MPI_DOUBLE, xdata, 2, MPI_DOUBLE, 0 ,world);
+    to_send[0] = domain->sublo[1];
+    to_send[1] = domain->subhi[1];
+    MPI_Gather(to_send, 2, MPI_DOUBLE, ydata, 2, MPI_DOUBLE, 0 ,world);
+    to_send[0] = domain->sublo[2];
+    to_send[1] = domain->subhi[2];
+    MPI_Gather(to_send, 2, MPI_DOUBLE, zdata, 2, MPI_DOUBLE, 0 ,world);
+    MPI_Gather(&(atom->nlocal), 1, MPI_INT, all_nlocal_, 1, MPI_INT, 0, world);
+
+    return;
 }
 
 /* ---------------------------------------------------------------------- */
 
 void DumpDecompositionVTK::write_data(int n, double *mybuf)
 {
-  (this->*write_choice)(n,mybuf);
+    
+    if (comm->me!=0)
+        return;
+
+    //ensure it is only written once in multi-proc (work-around)
+    if(lasttimestep==update->ntimestep)
+        return;
+    lasttimestep=update->ntimestep;
+    DumpVTK::setFileCurrent(filecurrent, filename, multifile, padflag);
+
+    vtkSmartPointer<vtkUnstructuredGrid> procGrid = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    procGrid->Allocate(comm->nprocs, 1);
+
+    vtkSmartPointer<vtkPoints> procPoints = vtkSmartPointer<vtkPoints>::New();
+    procPoints->SetNumberOfPoints(8*comm->nprocs);
+
+    vtkSmartPointer<vtkIntArray> nlocal = vtkSmartPointer<vtkIntArray>::New();
+    vtkSmartPointer<vtkIntArray> proc = vtkSmartPointer<vtkIntArray>::New();
+    nlocal->SetName("nlocal");
+    proc->SetName("proc");
+
+    for (int i = 0; i < comm->nprocs; i++)
+    {
+        procPoints->InsertPoint(8*i+0, xdata[2*i+0], ydata[2*i+0], zdata[2*i+0]);
+        procPoints->InsertPoint(8*i+1, xdata[2*i+0], ydata[2*i+0], zdata[2*i+1]);
+        procPoints->InsertPoint(8*i+2, xdata[2*i+0], ydata[2*i+1], zdata[2*i+0]);
+        procPoints->InsertPoint(8*i+3, xdata[2*i+0], ydata[2*i+1], zdata[2*i+1]);
+        procPoints->InsertPoint(8*i+4, xdata[2*i+1], ydata[2*i+0], zdata[2*i+0]);
+        procPoints->InsertPoint(8*i+5, xdata[2*i+1], ydata[2*i+0], zdata[2*i+1]);
+        procPoints->InsertPoint(8*i+6, xdata[2*i+1], ydata[2*i+1], zdata[2*i+0]);
+        procPoints->InsertPoint(8*i+7, xdata[2*i+1], ydata[2*i+1], zdata[2*i+1]);
+
+        vtkSmartPointer<vtkVoxel> procCell = vtkSmartPointer<vtkVoxel>::New();
+        procCell->GetPointIds()->SetId(0, 8*i+0);
+        procCell->GetPointIds()->SetId(1, 8*i+1);
+        procCell->GetPointIds()->SetId(2, 8*i+2);
+        procCell->GetPointIds()->SetId(3, 8*i+3);
+        procCell->GetPointIds()->SetId(4, 8*i+4);
+        procCell->GetPointIds()->SetId(5, 8*i+5);
+        procCell->GetPointIds()->SetId(6, 8*i+6);
+        procCell->GetPointIds()->SetId(7, 8*i+7);
+
+        procGrid->InsertNextCell(procCell->GetCellType(), procCell->GetPointIds());
+
+        nlocal->InsertNextValue(all_nlocal_[i]);
+        proc->InsertNextValue(i);
+    }
+    procGrid->SetPoints(procPoints);
+    procGrid->GetCellData()->AddArray(nlocal);
+    procGrid->GetCellData()->AddArray(proc);
+
+    //vtkSmartPointer<vtkDataObject> procGrid = mbSet->GetBlock(1);
+    if (vtk_file_format_ == VTK_FILE_FORMATS::VTU)
+        DumpVTK::write_vtu(procGrid, filecurrent);
+    else
+        DumpVTK::write_vtk_unstructured_grid(procGrid, filecurrent);
 }
 
-/* ---------------------------------------------------------------------- */
-
-void DumpDecompositionVTK::header_item(bigint ndump)
-{
-  if (comm->me!=0) return;
-  fprintf(fp,"# vtk DataFile Version 2.0\nLIGGGHTS mesh/gran/VTK export\nASCII\n");
-}
-
-void DumpDecompositionVTK::footer_item()
-{
-  return;
-
-}
-
-/* ---------------------------------------------------------------------- */
-
-void DumpDecompositionVTK::pack_item()
-{
-  
-  xdata[0] = -BIG;
-  if(comm->myloc[0] == 0) xdata[0] = domain->sublo[0];
-  for(int i = 0; i < comm->procgrid[0]; i++)
-  {
-      xdata[i+1] = -BIG;
-      if(comm->myloc[0] == i) xdata[i+1] = domain->subhi[0];
-  }
-
-  ydata[0] = -BIG;
-  if(comm->myloc[1] == 0) ydata[0] = domain->sublo[1];
-  for(int i = 0; i < comm->procgrid[1]; i++)
-  {
-      ydata[i+1] = -BIG;
-      if(comm->myloc[1] == i) ydata[i+1] = domain->subhi[1];
-  }
-
-  zdata[0] = -BIG;
-  if(comm->myloc[2] == 0) zdata[0] = domain->sublo[2];
-  for(int i = 0; i < comm->procgrid[2]; i++)
-  {
-      zdata[i+1] = -BIG;
-      if(comm->myloc[2] == i) zdata[i+1] = domain->subhi[2];
-  }
-
-  MPI_Allreduce(xdata,xdata_all,len[0],MPI_DOUBLE,MPI_MAX,world);
-  MPI_Allreduce(ydata,ydata_all,len[1],MPI_DOUBLE,MPI_MAX,world);
-  MPI_Allreduce(zdata,zdata_all,len[2],MPI_DOUBLE,MPI_MAX,world);
-
-  return;
-}
-
-/* ---------------------------------------------------------------------- */
-
-void DumpDecompositionVTK::write_item(int n, double *mybuf)
-{
-  
-  if (comm->me!=0) return;
-
-  //ensure it is only written once in multi-proc (work-around)
-  if(lasttimestep==update->ntimestep)return;
-  lasttimestep=update->ntimestep;
-
-  //write the data
-  fprintf(fp,"DATASET RECTILINEAR_GRID\nDIMENSIONS %d %d %d\n",len[0],len[1],len[2]);
-
-  fprintf(fp,"X_COORDINATES %d float\n",len[0]);
-  for (int i = 0; i < len[0]; i++)
-     fprintf(fp,"%f ",xdata_all[i]);
-  fprintf(fp,"\n");
-
-  fprintf(fp,"Y_COORDINATES %d float\n",len[1]);
-  for (int i = 0; i < len[1]; i++)
-     fprintf(fp,"%f ",ydata_all[i]);
-  fprintf(fp,"\n");
-
-  fprintf(fp,"Z_COORDINATES %d float\n",len[2]);
-  for (int i = 0; i < len[2]; i++)
-     fprintf(fp,"%f ",zdata_all[i]);
-  fprintf(fp,"\n");
-
-  //footer not needed
-}
+#endif

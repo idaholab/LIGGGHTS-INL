@@ -110,11 +110,11 @@ double ComputeERotateAsphere::compute_scalar()
 {
   invoked_scalar = update->ntimestep;
 
-  AtomVecEllipsoid::Bonus *ebonus;
+  AtomVecEllipsoid::Bonus *ebonus = NULL;
   if (avec_ellipsoid) ebonus = avec_ellipsoid->bonus;
-  AtomVecLine::Bonus *lbonus;
+  AtomVecLine::Bonus *lbonus = NULL;
   if (avec_line) lbonus = avec_line->bonus;
-  AtomVecTri::Bonus *tbonus;
+  AtomVecTri::Bonus *tbonus = NULL;
   if (avec_tri) tbonus = avec_tri->bonus;
   int *ellipsoid = atom->ellipsoid;
   int *line = atom->line;

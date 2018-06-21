@@ -108,8 +108,10 @@ void Error::universe_all(const char *file, int line, const char *str)
   if (universe->nworlds > 1) {
     if (screen && screen != stdout) fclose(screen);
     if (logfile) fclose(logfile);
+    if (warnfile) fclose(warnfile);
   }
   if (universe->ulogfile) fclose(universe->ulogfile);
+  if (universe->uwarnfile) fclose(universe->uwarnfile);
 
   MPI_Finalize();
   exit(1);
@@ -177,6 +179,7 @@ void Error::all(const char *file, int line, const char *str)
   if (output) delete output;
   if (screen && screen != stdout) fclose(screen);
   if (logfile) fclose(logfile);
+  if (warnfile) fclose(warnfile);
 
   if (universe->nworlds > 1) MPI_Abort(universe->uworld,1);
   MPI_Finalize();
@@ -189,12 +192,12 @@ void Error::all(const char *file, int line, const char *str)
    even if derived class
 ------------------------------------------------------------------------- */
 
-void Error::fix_error(const char *file, int line, Fix *fix,const char *str)
+void Error::fix_error(const char *file, const int line, const Fix *const fix,const char *str)
 {
   fix_error(file, line, fix, fix->style,str);
 }
 
-void Error::fix_error(const char *file, int line, Fix *fix, const char *fixstylestr,const char *str)
+void Error::fix_error(const char *file, const int line, const Fix *const fix, const char *fixstylestr,const char *str)
 {
   MPI_Barrier(world);
 
@@ -225,13 +228,14 @@ void Error::fix_error(const char *file, int line, Fix *fix, const char *fixstyle
   if (output) delete output;
   if (screen && screen != stdout) fclose(screen);
   if (logfile) fclose(logfile);
+  if (warnfile) fclose(warnfile);
 
   if (universe->nworlds > 1) MPI_Abort(universe->uworld,1);
   MPI_Finalize();
   exit(1);
 }
 
-void Error::compute_error(const char *file, int line, Compute *compute,const char *str)
+void Error::compute_error(const char *file, const int line, const Compute *const compute, const char *str)
 {
   MPI_Barrier(world);
 
@@ -262,6 +266,7 @@ void Error::compute_error(const char *file, int line, Compute *compute,const cha
   if (output) delete output;
   if (screen && screen != stdout) fclose(screen);
   if (logfile) fclose(logfile);
+  if (warnfile) fclose(warnfile);
 
   if (universe->nworlds > 1) MPI_Abort(universe->uworld,1);
   MPI_Finalize();
@@ -327,6 +332,7 @@ void Error::warning(const char *file, int line, const char *str, int logflag)
   if (screen) fprintf(screen,"WARNING: %s (%s:%d)\n",str,file,line);
   if (logflag && logfile) fprintf(logfile,"WARNING: %s (%s:%d)\n",
                                   str,file,line);
+  if (warnfile) fprintf(warnfile,"WARNING: %s (%s:%d)\n",str,file,line);
 }
 
 /* ----------------------------------------------------------------------
@@ -345,6 +351,7 @@ void Error::warningAll(const char *file, int line, const char *str, int logflag)
     if (screen) fprintf(screen,"WARNING: %s (%s:%d)\n",str,file,line);
     if (logflag && logfile) fprintf(logfile,"WARNING: %s (%s:%d)\n",
                                   str,file,line);
+    if (warnfile) fprintf(screen,"WARNING: %s (%s:%d)\n",str,file,line);
   }
 }
 
@@ -373,7 +380,42 @@ void Error::done()
   if (output) delete output;
   if (screen && screen != stdout) fclose(screen);
   if (logfile) fclose(logfile);
+  if (warnfile) fclose(warnfile);
 
   MPI_Finalize();
   exit(1);
+}
+
+/* ----------------------------------------------------------------------
+   called by one proc in world
+   write to world screen only if non-NULL on this proc
+   always write to universe screen
+   forces abort of entire world (and universe) if any proc in world calls
+   exits with error code 0 (=no error)!
+------------------------------------------------------------------------- */
+
+void Error::exit_one(const char *file, int line, const char *str)
+{
+    int me = 0;
+    MPI_Comm_rank(world,&me);
+    if (screen)
+    {
+        fprintf(screen,"EXIT on proc %d: %s (%s:%d)\n",
+                me,str,file,line);
+        const char * special_msg = specialMessages_.generate_message();
+        if(special_msg)
+            fprintf(screen,"%s (%s:%d)\n",special_msg,file,line);
+    }
+    if (universe->nworlds > 1)
+    {
+        if (universe->uscreen)
+        {
+            fprintf(universe->uscreen,"EXIT on proc %d: %s (%s:%d)\n",
+                    universe->me,str,file,line);
+            const char * special_msg = specialMessages_.generate_message();
+            if(special_msg)
+                fprintf(universe->uscreen,"%s (%s:%d)\n",special_msg,file,line);
+        }
+    }
+    MPI_Abort(world,0);
 }

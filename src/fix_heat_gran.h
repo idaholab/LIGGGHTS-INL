@@ -43,21 +43,22 @@
 #define LMP_FIX_HEATGRAN_ABSTRACT_H
 
 #include "fix.h"
+#include "iloopcallbackcaller.h"
 
 static const double SMALL_FIX_HEAT_GRAN = 1.e-6;
 
 namespace LAMMPS_NS {
 
-  class FixHeatGran : public Fix {
+  class FixHeatGran : public Fix, public LIGGGHTS::ILoopCallbackCaller {
 
     friend class FixMultisphere;
     friend class Multisphere;
 
   public:
     FixHeatGran(class LAMMPS *, int, char **);
-    ~FixHeatGran(){};
+    ~FixHeatGran();
     virtual void post_create();
-    virtual void pre_delete(bool unfixflag){ UNUSED(unfixflag); };
+    virtual void pre_delete(bool unfixflag){ UNUSED(unfixflag); }
 
     void initial_integrate(int vflag);
 
@@ -65,14 +66,9 @@ namespace LAMMPS_NS {
     virtual int setmask();
     virtual void init();
 
-    // per default these three methods throw errors.
-    virtual void cpl_evaluate(class ComputePairGranLocal *);
-    virtual void register_compute_pair_local(class ComputePairGranLocal *);
-    virtual void unregister_compute_pair_local(class ComputePairGranLocal *);
+  protected:
     virtual void updatePtrs();
 
-  protected:
-    class ComputePairGranLocal *cpl;
     class FixPropertyAtom* fix_heatFlux;
     class FixPropertyAtom* fix_heatSource;
     class FixPropertyAtom* fix_temp;

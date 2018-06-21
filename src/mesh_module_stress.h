@@ -51,7 +51,29 @@ MeshModuleStyle(stress,MeshModuleStress)
 #ifndef LMP_MESH_MODULE_STRESS_H
 #define LMP_MESH_MODULE_STRESS_H
 
+/* ---------------------------------------------------------------------- */
+
+#include "global_properties.h"
 #include "mesh_module.h"
+
+namespace MODEL_PARAMS
+{
+    static const char * HARDNESS = "hardness";
+
+    inline VectorProperty *createHardness(PropertyRegistry &registry, const char *caller, bool sanity_checks)
+    {
+        VectorProperty *Y = createPerTypeProperty(registry, HARDNESS, caller, sanity_checks, 0.0);
+        const double * const Y_val = Y->data;
+        const LAMMPS * const lmp = registry.getLAMMPS();
+        const int max_type = registry.max_type();
+        for (int i=1; i<max_type+1; i++)
+            if (Y_val[i] < 1e-10)
+                lmp->error->all(FLERR, "hardness > 0 required");
+        return Y;
+    }
+}
+
+/* ---------------------------------------------------------------------- */
 
 namespace LAMMPS_NS
 {
@@ -75,10 +97,12 @@ namespace LAMMPS_NS
         virtual double compute_vector(int n);
 
         virtual void add_particle_contribution(int ip, double *frc,
-                            double *delta, int iTri, double *v_wall);
+                            double *delta, int iTri, double *v_wall, double *contact_history);
 
         void add_global_external_contribution(double *frc);
         void add_global_external_contribution(double *frc,double *trq);
+
+        virtual int modify_param(int narg, char **arg);
 
         // inline access
 
@@ -125,7 +149,7 @@ namespace LAMMPS_NS
 
         // STRESS
         // total force and total torque
-        double f_total_[3], torque_total_[3]; 
+        double f_total_[3], torque_total_[3];
 
         // inline access
 
@@ -180,13 +204,20 @@ namespace LAMMPS_NS
 
         // WEAR
 
-        // flag for wear model and Finnie constant
+        // variables for wear framework
         int wear_flag_;
-        double const* const* k_finnie_;
+        int wear_model_type_;
         ScalarContainer<double> *wear_;
         ScalarContainer<double> *wear_step_;
         ScalarContainer<double> *wear_increment_;
         bool store_wear_increment_;
+
+        // constant for Finnie wear model
+        double const* const* k_finnie_;
+        // input parameters for Archard wear model
+        double const* const* k_archard_;
+        class FixPropertyGlobal *hardness_;
+        double *hardness_value_;
   };
 
 } /* namespace LAMMPS_NS */

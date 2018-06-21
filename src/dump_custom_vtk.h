@@ -99,7 +99,6 @@ class DumpCustomVTK : public Dump, public DumpVTK
   vtkSmartPointer<vtkMultiBlockDataSet> mbSet;
 
   int nevery;                // dump frequency for output
-  int vtk_file_format;       // which vtk file format to write (vtk, vtp, vtu ...)
 
   int nfield;                // # of keywords listed by user
   int ioptional;             // index of start of optional args

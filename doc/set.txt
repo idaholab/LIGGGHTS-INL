@@ -80,9 +80,9 @@ keyword = {type} or {type/fraction} or {mol} or {x} or {y} or {z} or \
     yes = add per-atom quantities to a region or a group
   {until} value = final timestep
     final timestep = the final timestep value until which the per-atom quantity is to be added
-  {property/atom} value = varname var_value[0] var_value[1] ....
+  {property/atom} value = varname var_value\[0\] var_value\[1\] ....
     varname = name of the variable to be set
-    var_value[0], var_value[1]... = values of the property to be set.
+    var_value\[0\], var_value\[1\]... = values of the property to be set.
     value can be an atom-style variable (see below)
   {blockiness} values = n1 n2
     n1, n2 = superquadric blockiness parameters, more or equal 2 
@@ -362,8 +362,8 @@ Keyword {property/atom} can update per-particle properties defined by
 a "fix property/atom"_fix_property.html command. varname is the name of
 the variable you want to set, it is followed by the values that should
 be assigned to this variable. The number of values provided as
-var_value[i] must correspond to the number of values needed for the
-update, i.e. only var_value[0] if the defined property is a scalar,
+var_value\[i\] must correspond to the number of values needed for the
+update, i.e. only var_value\[0\] if the defined property is a scalar,
 and the appropriate number if the property is a vector. See
 "fix property/atom"_fix_property.html for details on how to define
 such a per-particle property.

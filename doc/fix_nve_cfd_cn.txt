@@ -1,0 +1,15 @@
+"LIGGGHTS(R)-INL WWW Site"_liws - "LIGGGHTS(R)-INL Documentation"_ld - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+fix nve/cfd_cn command :h3
+
+[Description:]
+
+:link(cfdemdoc,https://www.cfdem.com/media/CFDEM/docu/CFDEMcoupling_Manual.html)
+Descriptions of fix nve/cfd_cn/* commands are contained in your local copy of the CFDEMcoupling(R) documentation. The public version is accessible here "www.cfdem.com"_cfdemdoc
+These commands are used to couple necessary forces and data with CFDEMcoupling(R) solvers.

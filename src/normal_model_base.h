@@ -73,15 +73,15 @@ class NormalModel : public NormalModelBase
 {
 public:
     NormalModel(LAMMPS * lmp, IContactHistorySetup * hsetup, class ContactModelBase *cmb = 0);
-    inline void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void registerSettings(Settings & settings);
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb);
-    inline void connectToProperties(PropertyRegistry & registry);
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
-    inline void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
+    void beginPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void endPass(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void registerSettings(Settings & settings);
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb);
+    void connectToProperties(PropertyRegistry & registry);
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces);
+    void surfacesClose(SurfacesCloseData & scdata, ForceData & i_forces, ForceData & j_forces);
 
-    inline double stressStrainExponent();
+    double stressStrainExponent();
 };
 
   template<>
@@ -95,8 +95,8 @@ public:
     void registerSettings(Settings&){}
     void surfacesIntersect(SurfacesIntersectData&, ForceData&, ForceData&){}
     void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&){}
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
-    inline double stressStrainExponent() { return 0.0; }
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    double stressStrainExponent() { return 0.0; }
   };
 
 }

@@ -86,7 +86,7 @@ RegUnion::RegUnion(LAMMPS *lmp, int narg, char **arg) : Region(lmp, narg, arg)
 
   Region **regions = domain->regions;
   for (int ilist = 0; ilist < nregion; ilist++)
-    if (regions[list[ilist]]->varshape) varshape = 1;
+    if (regions[list[ilist]]->has_varshape()) varshape = 1;
 
   // extent of union of regions
   // has bounding box if interior and all sub-regions have bounding box
@@ -276,5 +276,5 @@ void RegUnion::shape_update()
 {
   Region **regions = domain->regions;
   for (int ilist = 0; ilist < nregion; ilist++)
-    regions[list[ilist]]->shape_update();
+    regions[list[ilist]]->update_region();
 }

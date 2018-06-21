@@ -54,6 +54,7 @@
 #include "contact_interface.h"
 #include "fix_relax_contacts.h"
 #include "fix_property_atom.h"
+#include "iloopcallbackcaller.h"
 #include <vector>
 #include <string>
 
@@ -63,7 +64,7 @@ namespace LAMMPS_NS {
 
 class ComputePairGranLocal;
 
-class PairGran : public Pair, public LIGGGHTS::IContactHistorySetup {
+class PairGran : public Pair, public LIGGGHTS::IContactHistorySetup, public LIGGGHTS::ILoopCallbackCaller {
 public:
 
   friend class FixWallGran;
@@ -75,19 +76,20 @@ public:
   /* INHERITED FROM Pair */
 
   virtual void compute(int eflag, int vflag);
-  virtual void compute_pgl(int eflag, int vflag);
   virtual void settings(int, char **) = 0;
   virtual void coeff(int, char **);
   virtual void init_style();
   virtual void init_granular() {} 
   virtual void init_list(int, class NeighList *);
   virtual double init_one(int, int);
+  int get_comm_size() const
+  { return 1; }
   int pack_comm(int n, int *list,double *buf, int pbc_flag, int *pbc);
   void unpack_comm(int n, int first, double *buf);
   virtual void write_restart(FILE *);
-  virtual void read_restart(FILE *, const int major, const int minor);
+  virtual void read_restart(FILE *, const Version &ver);
   virtual void write_restart_settings(FILE *){}
-  virtual void read_restart_settings(FILE *, const int major, const int minor){}
+  virtual void read_restart_settings(FILE *, const Version &ver){}
   virtual bool contact_match(const std::string mtype, const std::string model) = 0;
   virtual void reset_dt();
   double memory_usage();
@@ -96,13 +98,6 @@ public:
 
   int  cplenable()
   { return cpl_enable; }
-
-  void register_compute_pair_local(class ComputePairGranLocal *,int&);
-  void unregister_compute_pair_local(class ComputePairGranLocal *ptr);
-
-  void cpl_add_pair(LCM::SurfacesIntersectData & sidata, LCM::ForceData & i_forces);
-
-  void cpl_pair_finalize();
 
   /* PUBLIC ACCESS FUNCTIONS */
 
@@ -114,9 +109,6 @@ public:
 
   inline int dnum()
   { return dnum_all; }
-
-  inline class ComputePairGranLocal * cpl() const
-  { return cpl_; }
 
   inline bool storeContactForces() const
   { return store_contact_forces_; }
@@ -220,7 +212,7 @@ public:
     }
   }
 
-  virtual void compute_force(int eflag, int vflag,int addflag) = 0;
+  virtual void compute_force(int eflag, int vflag) = 0;
   virtual bool forceoff();
 
   virtual void updatePtrs();
@@ -244,7 +236,6 @@ public:
 
   // stuff for compute pair gran local
   int cpl_enable;
-  class ComputePairGranLocal *cpl_;
 
   // storage for per-contact forces and torque
   bool store_contact_forces_;

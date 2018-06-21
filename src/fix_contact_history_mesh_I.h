@@ -48,7 +48,7 @@
 
   /* ---------------------------------------------------------------------- */
 
-  inline bool FixContactHistoryMesh::handleContact(int iP, int idTri, double *&history,bool intersect,bool faceflag)
+  inline bool FixContactHistoryMesh::handleContact(int iP, int idTri, double *&history,bool intersect,bool faceflag, const bool weightedWallFormulation)
   {
     
     // check if contact with iTri was there before
@@ -58,7 +58,7 @@
 
     // else new contact - add contact if did not calculate contact with coplanar neighbor already
     
-    if(faceflag && coplanarContactAlready(iP,idTri))
+    if(faceflag && coplanarContactAlready(iP,idTri) && !weightedWallFormulation)
     {
         // did not add new contact
         return false;
@@ -75,7 +75,7 @@
         // check if one of the contacts of previous steps is coplanar with iTri
         
         // if so, copy history
-        if(faceflag)
+        if(faceflag && !weightedWallFormulation)
             checkCoplanarContactHistory(iP,idTri,history);
         return true;
     }

@@ -83,6 +83,10 @@ DumpMeshVTM::DumpMeshVTM(LAMMPS *lmp, int narg, char **arg) :
     }
     vtkMPIController * controller = getLocalController();
 
+    std::list<int> allowed_extensions;
+    allowed_extensions.push_back(VTK_FILE_FORMATS::PVTM);
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
+
     int ioptional = 5;
     dumpMesh = new DumpMesh(lmp, nclusterprocs, multiproc, filewriter, fileproc, controller);
     ioptional += dumpMesh->parse_parameters(narg-ioptional, &(arg[ioptional]));
@@ -136,58 +140,9 @@ void DumpMeshVTM::pack(int *ids)
 
 /* ---------------------------------------------------------------------- */
 
-void DumpMeshVTM::setFileCurrent() {
-    delete [] filecurrent;
-    filecurrent = NULL;
-
-    char *filestar = filename;
-    if (multiproc)
-    {
-        if (multiproc > 1) // if dump_modify fileper or nfile was used
-        {
-            delete [] multiname_ex;
-            multiname_ex = NULL;
-            char *ptr = strchr(filename,'%');
-            if (ptr)
-            {
-                int id;
-                if (me + nclusterprocs == nprocs) // last filewriter
-                    id = multiproc -1;
-                else
-                    id = me/nclusterprocs;
-                multiname_ex = new char[strlen(filename) + 16];
-                *ptr = '\0';
-                sprintf(multiname_ex,"%s_%d%s",filename,id,ptr+1);
-                *ptr = '%';
-            }
-        } // else multiname_ex built in constructor is OK
-        filestar = multiname_ex;
-    }
-
-    if (multifile == 0)
-    {
-        filecurrent = new char[strlen(filestar) + 1];
-        strcpy(filecurrent, filestar);
-    }
-    else
-    {
-        filecurrent = new char[strlen(filestar) + 16];
-        char *ptr = strchr(filestar,'*');
-        *ptr = '\0';
-        if (padflag == 0)
-        {
-            sprintf(filecurrent,"%s" BIGINT_FORMAT "%s",
-                    filestar,update->ntimestep,ptr+1);
-        }
-        else
-        {
-            char bif[8],pad[16];
-            strcpy(bif,BIGINT_FORMAT);
-            sprintf(pad,"%%s%%0%d%s%%s",padflag,&bif[1]);
-            sprintf(filecurrent,pad,filestar,update->ntimestep,ptr+1);
-        }
-        *ptr = '*';
-    }
+void DumpMeshVTM::setFileCurrent()
+{
+    DumpVTK::setFileCurrent(filecurrent, filename, multifile, padflag);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -209,15 +164,7 @@ void DumpMeshVTM::write_data(int n, double *mybuf)
     if (!filewriter)
         return;
 
-    vtkSmartPointer<vtkXMLMultiBlockDataWriter> mbWriter = vtkXMLMultiBlockDataWriter::New();
-    mbWriter->SetFileName(filecurrent);
-    setVtkWriterOptions(vtkXMLWriter::SafeDownCast(mbWriter));
-#if VTK_MAJOR_VERSION < 6
-    mbWriter->SetInput(mbSet);
-#else
-    mbWriter->SetInputData(mbSet);
-#endif
-    mbWriter->Write();
+    DumpVTK::write_vtm(mbSet, filecurrent);
 }
 
 /* ---------------------------------------------------------------------- */

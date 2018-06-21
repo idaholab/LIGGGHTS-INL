@@ -58,6 +58,7 @@
 #include "neighbor.h"
 
 #include "mpi_liggghts.h"
+#include "vector_liggghts.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
@@ -128,6 +129,7 @@ void FixPropertyAtom::parse_args(int narg, char **arg)
       error->all(FLERR,"Error in fix property/atom: Number of default values provided not consistent with scalar style. Provide 1 value or use style 'vector'");
 
     defaultvalues = new double[nvalues];
+    vectorZeroizeN(defaultvalues,nvalues);
 
     // fix handles properties that need to be initialized at particle creation
     create_attribute = 1;
@@ -568,7 +570,7 @@ void FixPropertyAtom::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixPropertyAtom::restart(char *buf)
+void FixPropertyAtom::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;

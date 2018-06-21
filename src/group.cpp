@@ -227,7 +227,7 @@ void Group::assign(int narg, char **arg)
         bound2 = force->inumeric(FLERR,arg[4]);
       } else if (narg != 4) error->all(FLERR,"Illegal group command");
 
-      int *attribute;
+      int *attribute = NULL;
       if (category == TYPE) attribute = atom->type;
       else if (category == MOLECULE) attribute = atom->molecule;
       else if (category == ID) attribute = atom->tag;
@@ -254,7 +254,7 @@ void Group::assign(int narg, char **arg)
     // args = list of values
 
     } else {
-      int *attribute;
+      int *attribute = NULL;
       if (category == TYPE) attribute = atom->type;
       else if (category == MOLECULE) attribute = atom->molecule;
       else if (category == ID) attribute = atom->tag;

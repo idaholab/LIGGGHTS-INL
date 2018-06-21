@@ -53,31 +53,36 @@
 #define LMP_ERROR_H
 
 #include "pointers.h"
+#include "compute.h"
+#include "fix.h"
+#include "error_special.h"
 
 namespace LAMMPS_NS {
 
 class Error : protected Pointers {
  public:
-  Error(class LAMMPS *);
+  Error(LAMMPS *);
   virtual ~Error();
 
   void universe_all(const char *, int, const char *);
   void universe_one(const char *, int, const char *);
   void universe_warn(const char *, int, const char *);
 
-  void all(const char *, int, const char *);
-  void fix_error(const char *, int, class Fix*,const char *); 
-  void fix_error(const char *, int, class Fix*,const char *,const char *); 
-  void compute_error(const char *, int, class Compute*,const char *); 
-  void cg(const char *, int, const char *); 
+  void all(const char *, const int, const char *);
+  void fix_error(const char *, const int, const Fix *const, const char *);
+  void fix_error(const char *, const int, const Fix *const, const char *, const char *);
+  void compute_error(const char *, const int, const Compute *const, const char *);
+  void cg(const char *, int, const char *);
   void one(const char *, int, const char *);
   void warning(const char *, int, const char *, int = 1);
   void warningAll(const char *, int, const char *, int = 1);
   void message(const char *, int, const char *, int = 1);
   void done();
 
+  void exit_one(const char*, int, const char*);
+
  private:
-  class SpecialMessages &specialMessages_;
+  SpecialMessages &specialMessages_;
 };
 
 }

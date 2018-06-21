@@ -79,7 +79,6 @@ private:
     char *filecurrent;
     DumpMesh *dumpMesh_;
 
-    int vtk_file_format_;
     vtkSmartPointer<vtkMultiBlockDataSet> mbSet_;
 
     int dataMode_;

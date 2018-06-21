@@ -40,6 +40,9 @@
 
 #ifndef CONTACT_MODEL_BASE_H_
 #define CONTACT_MODEL_BASE_H_
+
+#include <string>
+
 namespace LIGGGHTS
 {
 namespace ContactModels
@@ -64,6 +67,8 @@ public:
         Pointers(lmp),
         is_wall_(_is_wall)
     {}
+
+    virtual bool contact_match(const std::string mtype, const std::string model) = 0;
 
 private:
 

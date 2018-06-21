@@ -91,7 +91,7 @@ class RollingModelBase : protected Pointers
     void registerSettings(Settings&){}
     void surfacesIntersect(SurfacesIntersectData&, ForceData&, ForceData&){}
     void surfacesClose(SurfacesCloseData&, ForceData&, ForceData&){}
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
   };
 
 }

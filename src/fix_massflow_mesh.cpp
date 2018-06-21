@@ -460,7 +460,7 @@ void FixMassflowMesh::post_integrate()
             }
 
             // particle is now on nvec_ side
-            if(dot > 0.  && 7 == barySign) 
+            if(dot > 0.  && barySign == 7) 
             {
                 //particle was not on nvec_ side before
                 if((compDouble(counter[iPart],0.)) ) // compDouble(counter[iPart],0.))
@@ -480,6 +480,10 @@ void FixMassflowMesh::post_integrate()
                         //reset counter to avoid problems with other fixes & mark to be deleted
                         counter[iPart] = -1.0;
                         atom_tags_delete_.push_back(atom->tag[iPart]);
+                    } else
+                    {
+                        counter[iPart] = once_ ? 2. : 1.;
+                        
                     }
 
                     if (screenflag_ && screen)
@@ -511,11 +515,8 @@ void FixMassflowMesh::post_integrate()
                         fprintf(fp_,"\n");
                         fflush(fp_);
                     }
-                }
 
-                 if(!delete_atoms_) //only set if not marked for deletion
-                    counter[iPart] = once_ ? 2. : 1.;
-                
+                }
             }
             else if(dot <= 0.) // dot <= 0
             {
@@ -595,8 +596,9 @@ void FixMassflowMesh::pre_exchange()
 void FixMassflowMesh::write_restart(FILE *fp)
 {
   int n = 0;
-  double list[6];
+  double list[7];
   list[n++] = mass_;
+  list[n++] = nparticles_;
   list[n++] = t_count_;
   list[n++] = mass_last_;
   list[n++] = nparticles_last_;
@@ -614,12 +616,13 @@ void FixMassflowMesh::write_restart(FILE *fp)
    use state info from restart file to restart the Fix
 ------------------------------------------------------------------------- */
 
-void FixMassflowMesh::restart(char *buf)
+void FixMassflowMesh::restart(char *buf, const Version &)
 {
   int n = 0;
   double *list = (double *) buf;
 
   mass_ = list[n++];
+  nparticles_ = list[n++];
   t_count_ = list[n++];
   mass_last_ = list[n++];
   nparticles_last_ = list[n++];

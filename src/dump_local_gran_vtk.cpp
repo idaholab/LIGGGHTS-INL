@@ -99,41 +99,7 @@ DumpLocalGranVTK::DumpLocalGranVTK(LAMMPS *lmp, int narg, char **arg) :
     allowed_extensions.push_back(VTK_FILE_FORMATS::PVTU);
     allowed_extensions.push_back(VTK_FILE_FORMATS::VTP);
     allowed_extensions.push_back(VTK_FILE_FORMATS::PVTP);
-    vtk_file_format = DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
-
-    // ensure no old % format is used
-    // this is set in dump.cpp
-    if (multiproc)
-        error->all(FLERR, "dump local/gran/vtk no longer allow parallel writing by setting the \% character. Instead use a filename with suffix .pvtX (X = {u, p}).");
-    // find last dot
-    char *suffix = strrchr(filename, '.');
-    if (strlen(suffix) == 5)
-    {
-        multiproc = 1;
-        nclusterprocs = 1;
-        filewriter = 1;
-        fileproc = comm->me;
-        MPI_Comm_split(world,me,0,&clustercomm);
-        if (strcmp(suffix, ".pvtp") == 0)
-            vtk_file_format = VTK_FILE_FORMATS::PVTP;
-        else if (strcmp(suffix, ".pvtu") == 0)
-            vtk_file_format = VTK_FILE_FORMATS::PVTU;
-        else
-            error->all(FLERR, "dump local/gran/vtk only allows .pvtu or .pvtp for parallel writing");
-    }
-    else if (strlen(suffix) == 4)
-    {
-        if (strcmp(suffix, ".vtp") == 0)
-            vtk_file_format = VTK_FILE_FORMATS::VTP;
-        else if (strcmp(suffix, ".vtu") == 0)
-            vtk_file_format = VTK_FILE_FORMATS::VTU;
-        else if (strcmp(suffix, ".vtk") == 0)
-            vtk_file_format = VTK_FILE_FORMATS::VTK;
-        else
-            error->warning(FLERR, "Unknown suffix in dump local/gran/vtk, expected .vt{u,p,k}. Writing legacy VTK file.");
-    }
-    else
-        error->warning(FLERR, "Unknown suffix in dump local/gran/vtk, expected .vt{u,p,k}. Writing legacy VTK file.");
+    DumpVTK::identify_file_type(filename, allowed_extensions, style, multiproc, nclusterprocs, filewriter, fileproc, world, clustercomm);
 
     filecurrent = NULL;
 
@@ -167,12 +133,16 @@ void DumpLocalGranVTK::init_style()
 
   header_choice = &DumpLocalGranVTK::header_vtk;
 
-  if (vtk_file_format == VTK_FILE_FORMATS::VTP || vtk_file_format == VTK_FILE_FORMATS::PVTP)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTP || vtk_file_format_ == VTK_FILE_FORMATS::PVTP)
     write_choice = &DumpLocalGranVTK::write_vtp;
-  else if (vtk_file_format == VTK_FILE_FORMATS::VTU || vtk_file_format == VTK_FILE_FORMATS::PVTU)
+  else if (vtk_file_format_ == VTK_FILE_FORMATS::VTU || vtk_file_format_ == VTK_FILE_FORMATS::PVTU)
     write_choice = &DumpLocalGranVTK::write_vtu;
   else
     write_choice = &DumpLocalGranVTK::write_vtk;
+
+  // register next call for next multiple of nevery
+  const bigint nextCall = ((update->ntimestep+nevery-1)/nevery)*nevery; // ceil to next nevery
+  dumpLocalGran->registerNextCall(nextCall);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -202,15 +172,17 @@ void DumpLocalGranVTK::write()
   // nme = # of dump lines this proc contributes to dump
   mbSet = vtkSmartPointer<vtkMultiBlockDataSet>::New();
   bool usePolyData = false;
-  if (vtk_file_format == VTK_FILE_FORMATS::VTP || vtk_file_format == VTK_FILE_FORMATS::PVTP)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTP || vtk_file_format_ == VTK_FILE_FORMATS::PVTP)
     usePolyData = true;
 #ifndef UNSTRUCTURED_GRID_VTK
-  if (vtk_file_format == VTK_FILE_FORMATS::VTK)
+  if (vtk_file_format_ == VTK_FILE_FORMATS::VTK)
     usePolyData = true;
 #endif
   dumpLocalGran->prepare_mbSet(mbSet, usePolyData);
   if (filewriter)
       write_data(0, NULL);
+
+  dumpLocalGran->registerNextCall(update->ntimestep+nevery);
 
 }
 
@@ -235,10 +207,10 @@ void DumpLocalGranVTK::write_vtk(int n, double *mybuf)
     setFileCurrent();
 #ifdef UNSTRUCTURED_GRID_VTK
     vtkSmartPointer<vtkDataObject> unstructuredGrid = mbSet->GetBlock(0);
-    DumpVTK::write_vtk_unstructured_grid(unstructuredGrid, vtk_file_format, filecurrent);
+    DumpVTK::write_vtk_unstructured_grid(unstructuredGrid, filecurrent);
 #else
     vtkSmartPointer<vtkDataObject> polyData = mbSet->GetBlock(0);
-    DumpVTK::write_vtk_poly(polyData, vtk_file_format, filecurrent);
+    DumpVTK::write_vtk_poly(polyData, filecurrent);
 #endif
 }
 
@@ -249,7 +221,7 @@ void DumpLocalGranVTK::write_vtp(int n, double *mybuf)
     setFileCurrent();
 
     vtkSmartPointer<vtkDataObject> polyData = mbSet->GetBlock(0);
-    DumpVTK::write_vtp(polyData, vtk_file_format, filecurrent);
+    DumpVTK::write_vtp(polyData, filecurrent);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -259,7 +231,7 @@ void DumpLocalGranVTK::write_vtu(int n, double *mybuf)
     setFileCurrent();
 
     vtkSmartPointer<vtkDataObject> unstructuredGrid = mbSet->GetBlock(0);
-    DumpVTK::write_vtu(unstructuredGrid, vtk_file_format, filecurrent);
+    DumpVTK::write_vtu(unstructuredGrid, filecurrent);
 }
 
 /* ---------------------------------------------------------------------- */

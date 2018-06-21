@@ -50,8 +50,6 @@ ComputeStyle(wall/gran/local,ComputePairGranLocal)
 #define LMP_COMPUTE_PAIR_GRAN_LOCAL_H
 
 #include "compute.h"
-//#include "pair_gran.h"
-//#include "pair_gran_proxy.h"
 
 namespace LAMMPS_NS {
 
@@ -59,146 +57,152 @@ class PairGran;
 
 class ComputePairGranLocal : public Compute {
 
- public:
-  ComputePairGranLocal(class LAMMPS *, int &iarg, int, char **);
-  ~ComputePairGranLocal();
-  void post_create();
-  void pre_delete(bool uncomputeflag);
-  void init();
-  virtual void init_cpgl(bool requestflag);
-  void init_list(int, class NeighList *);
-  void compute_local();
-  double memory_usage();
-  void reference_deleted();
-  virtual void add_pair(int i,int j,double fx,double fy,double fz,double tor1,double tor2,double tor3,double *hist, const double * const contact_point);
-  virtual void add_heat(int i,int j,double hf);
-  virtual void add_wall_1(int iFMG,int iTri,int iP,double *contact_point,double *v_wall);
-  virtual void add_wall_2(int i,double fx,double fy,double fz,double tor1,double tor2,double tor3,double *hist,double rsq, double *normal_);
-  virtual void add_heat_wall(int i,double hf);
+public:
+    ComputePairGranLocal(class LAMMPS *, int &iarg, int, char **);
+    ~ComputePairGranLocal();
+    void post_create();
+    void pre_delete(bool uncomputeflag);
+    void init();
+    virtual void init_cpgl(bool requestflag);
+    void init_list(int, class NeighList *);
+    void compute_local();
+    double memory_usage();
+    virtual void add_heat_pp(const int i, const int j, const double hf);
+    virtual void add_heat_pw(const LIGGGHTS::ContactModels::SurfacesIntersectData &sidata, const double hf);
 
-  virtual void pair_finalize();
-  int get_history_offset(const char * const name);
+    virtual void pair_finalize();
+    int get_history_offset(const char * const name);
 
-  /* inline access */
+    virtual void deleteReference();
+    virtual void beginPass();
+    virtual void compute_post_force(const LCM::SurfacesIntersectData & sidata, const LCM::ForceData & i_forces, const LCM::ForceData & j_forces);
+    virtual void endPass();
 
-  virtual bool decide_add(double *hist, double * &contact_pos)
-  { return true; }
+    /* inline access */
 
-  inline int get_nvalues()
-  { return nvalues; }
+    virtual bool decide_add(double *hist, double * &contact_pos)
+    { return true; }
 
-  inline double** get_data()
-  { return array; }
+    inline int get_nvalues()
+    { return nvalues; }
 
-  inline int get_ncount()
-  { return ncount_added_via_pair; }
+    inline double** get_data()
+    { return array; }
 
-  virtual int offset_x1()
-  { return (posflag > 0 ? 0 : -1); }
+    inline int get_ncount()
+    { return ncount_added_via_pair; }
 
-  virtual int offset_x2()
-  { return (posflag > 0 ? 3 : -1); }
+    virtual int offset_x1()
+    { return (posflag > 0 ? 0 : -1); }
 
-  virtual int offset_v1()
-  { return (velflag > 0 ? posflag*6 : -1); }
+    virtual int offset_x2()
+    { return (posflag > 0 ? 3 : -1); }
 
-  virtual int offset_v2()
-  { return (velflag > 0 ? posflag*6+3 : -1); }
+    virtual int offset_v1()
+    { return (velflag > 0 ? posflag*6 : -1); }
 
-  virtual int offset_id1()
-  { return (idflag > 0 ? posflag*6+velflag*6 : -1);}
+    virtual int offset_v2()
+    { return (velflag > 0 ? posflag*6+3 : -1); }
 
-  virtual int offset_id2()
-  { return (idflag > 0 ? posflag*6+velflag*6+1 : -1);}
+    virtual int offset_id1()
+    { return (idflag > 0 ? posflag*6+velflag*6 : -1);}
 
-  virtual int offset_f()
-  { return (fflag > 0 ? posflag*6+velflag*6+idflag*3 : -1);}
+    virtual int offset_id2()
+    { return (idflag > 0 ? posflag*6+velflag*6+1 : -1);}
 
-  virtual int offset_fn()
-  { return (fnflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3 : -1);}
+    virtual int offset_f()
+    { return (fflag > 0 ? posflag*6+velflag*6+idflag*3 : -1);}
 
-  virtual int offset_ft()
-  { return (ftflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3 : -1);}
+    virtual int offset_fn()
+    { return (fnflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3 : -1);}
 
-  virtual int offset_torque()
-  { return (torqueflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3 : -1);}
+    virtual int offset_ft()
+    { return (ftflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3 : -1);}
 
-  virtual int offset_torquen()
-  { return (torquenflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3 : -1);}
+    virtual int offset_torque()
+    { return (torqueflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3 : -1);}
 
-  virtual int offset_torquet()
-  { return (torquetflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3 : -1);}
+    virtual int offset_torquen()
+    { return (torquenflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3 : -1);}
 
-  virtual int offset_history()
-  { return (histflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3 : -1);}
+    virtual int offset_torquet()
+    { return (torquetflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3 : -1);}
 
-  virtual int offset_area()
-  { return (areaflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum : -1);}
+    virtual int offset_history()
+    { return (histflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3 : -1);}
 
-  virtual int offset_delta()
-  { return (deltaflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 : -1);}
+    virtual int offset_area()
+    { return (areaflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum : -1);}
 
-  virtual int offset_heat()
-  { return (heatflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 : -1);}
+    virtual int offset_delta()
+    { return (deltaflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 : -1);}
 
-  virtual int offset_contact_point()
-  {
-    return (cpflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 : -1);
-    //return offset_history() + get_history_offset("contact_point_offset");
-  }
+    virtual int offset_heat()
+    { return (heatflag > 0 ? posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 : -1);}
 
-  virtual int offset_ms_id1()
-  {
-    return (msidflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 + cpflag*3 : -1);
-  }
+    virtual int offset_contact_point()
+    {
+        return (cpflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 : -1);
+        //return offset_history() + get_history_offset("contact_point_offset");
+    }
 
-  virtual int offset_ms_id2()
-  {
-    return (msidflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 + cpflag*3 +1 : -1);
-  }
+    virtual int offset_ms_id1()
+    {
+        return (msidflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 + cpflag*3 : -1);
+    }
 
- protected:
+    virtual int offset_ms_id2()
+    {
+        return (msidflag > 0 ?   posflag*6+velflag*6+idflag*3+fflag*3+fnflag*3+ftflag*3+torqueflag*3+torquenflag*3+torquetflag*3+histflag*dnum+areaflag*1 + deltaflag*1 + heatflag*1 + cpflag*3 +1 : -1);
+    }
 
-  int nvalues;      // number of double values per entry
-  int ncount;       // count of eligible pair - all who are eligible for surfacesIntersect or surfacesClose
+protected:
 
-  int ncount_added_via_pair; // count actually added via call from pair_gran
-                             // might be lower than ncount because is based on hasForceUpdate occurrences
-                             // not all the surfacesClose calls have hasForceUpdate=true
+    int nvalues;      // number of double values per entry
+    int ncount;       // count of eligible pair - all who are eligible for surfacesIntersect or surfacesClose
 
-  int newton_pair;
+    int ncount_added_via_pair; // count actually added via call from pair_gran
+    // might be lower than ncount because is based on hasForceUpdate occurrences
+    // not all the surfacesClose calls have hasForceUpdate=true
 
-  // if 0, pair data is extracted
-  // if 1, wall data is extracted
-  int wall;
+    int newton_pair;
 
-  // flag if compute is working
-  // can be set via pair, fix
-  int reference_exists;
+    // if 0, pair data is extracted
+    // if 1, wall data is extracted
+    int wall;
 
-  // pointers to classes holding the data
-  class PairGran *pairgran;
-  class FixHeatGranCond *fixheat;
-  class FixWallGran *fixwall;
-  class FixMultisphere *fix_ms;
+    // flag if compute is working
+    // can be set via pair, fix
+    int reference_exists;
 
-  int ipair;
+    // pointers to classes holding the data
+    class PairGran *pairgran;
+    class FixHeatGranCond *fixheat;
+    class FixWallGran *fixwall;
+    class FixMultisphere *fix_ms;
 
-  int posflag,velflag,idflag,fflag,fnflag,ftflag,torqueflag,torquenflag,torquetflag,histflag,areaflag,deltaflag,heatflag,cpflag,msidflag;
+    int ipair;
 
-  bool   verbose;
+    int posflag,velflag,idflag,fflag,fnflag,ftflag,torqueflag,torquenflag,torquetflag,histflag,areaflag,deltaflag,heatflag,cpflag,msidflag;
 
-  int dnum;
+    bool   verbose;
 
-  int nmax;
-  double *vector;
-  double **array;
+    int dnum;
 
-  class NeighList *list;
+    int nmax;
+    double *vector;
+    double **array;
 
-  virtual int count_pairs(int &nCountWithOverlap);
-  int count_wallcontacts(int &nCountWithOverlap);
-  void reallocate(int);
+    class NeighList *list;
+
+    virtual int count_pairs(int &nCountWithOverlap);
+    int count_wallcontacts(int &nCountWithOverlap);
+    void reallocate(int);
+
+private:
+
+    virtual void post_force_pp(const LCM::SurfacesIntersectData & sidata, const LCM::ForceData & i_forces, const LCM::ForceData & j_forces);
+    virtual void post_force_pw(const LCM::SurfacesIntersectData & sidata, const LCM::ForceData & i_forces, const LCM::ForceData & j_forces);
 };
 
 }

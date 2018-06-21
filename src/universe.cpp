@@ -81,6 +81,7 @@ Universe::Universe(LAMMPS *lmp, MPI_Comm communicator) : Pointers(lmp)
 
   uscreen = stdout;
   ulogfile = NULL;
+  uwarnfile = NULL;
   uthermofile = NULL; 
 
   existflag = 0;
@@ -250,4 +251,41 @@ void Universe::id(char *id)
 {
   universe_id = new char[strlen(id)+1];
   strcpy(universe_id,id);
+}
+
+/* ----------------------------------------------------------------------
+   return version number
+------------------------------------------------------------------------- */
+
+Version Universe::get_version(const char *version) const
+{
+    if (!version)
+        version = this->version;
+    // parse version number
+    // version format is:
+    // Version LIGGGHTS-REPOSITORY-NAME MAJOR.MINOR.[....]
+    // MAJOR and MINOR are integers
+    int major = 0, minor = 0;
+    std::string ver = std::string(version);
+    std::size_t space1 = ver.find(' ');
+    std::size_t space2 = ver.find(' ', space1+1);
+    std::size_t dot1 = ver.find('.', space2+1);
+    std::size_t dot2 = ver.find('.', dot1+1);
+    if (space1 != std::string::npos &&
+        space2 != std::string::npos &&
+        dot1 != std::string::npos &&
+        dot2 != std::string::npos)
+    {
+        std::string ver_major = ver.substr(space2+1, dot1-space2-1);
+        std::string ver_minor = ver.substr(dot1+1, dot2-dot1-1);
+        major = atoi(ver_major.c_str());
+        minor = atoi(ver_minor.c_str());
+
+        //internal def version contains 'plusplus'
+        std::string devVersion = "plusplus";
+        if (ver.find(devVersion, dot2+1) != std::string::npos)
+            minor++;
+    }
+
+    return Version(major,minor);
 }

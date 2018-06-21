@@ -126,8 +126,8 @@ FixCfdCouplingConvectiveImpl::~FixCfdCouplingConvectiveImpl()
 
 void FixCfdCouplingConvectiveImpl::pre_delete(bool unfixflag)
 {
-    if(fix_heatFluid)       modify->delete_fix("fix_heatFluid");
-    if(fix_heatTransCoeff)  modify->delete_fix("fix_heatTransCoeff");
+    if(fix_heatFluid)       modify->delete_fix("heatFluid");
+    if(fix_heatTransCoeff)  modify->delete_fix("heatTransCoeff");
     if(fix_convectiveFlux)  modify->delete_fix("convectiveHeatFlux");
 }
 

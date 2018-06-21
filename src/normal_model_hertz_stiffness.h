@@ -77,7 +77,7 @@ namespace ContactModels
       settings.registerOnOff("limitForce", limitForce);
     }
 
-    inline void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
+    void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry)
     {
@@ -98,12 +98,12 @@ namespace ContactModels
 
     // effective exponent for stress-strain relationship
     
-    inline double stressStrainExponent()
+    double stressStrainExponent()
     {
       return 1.5;
     }
 
-    inline void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
+    void surfacesIntersect(SurfacesIntersectData & sidata, ForceData & i_forces, ForceData & j_forces)
     {
       const int itype = sidata.itype;
       const int jtype = sidata.jtype;
@@ -168,9 +168,9 @@ namespace ContactModels
         #ifdef NONSPHERICAL_ACTIVE_FLAG
                 if(sidata.is_non_spherical) {
                   //for non-spherical particles normal force can produce torque!
-                  i_forces.delta_torque[0] += torque_i[0];
-                  i_forces.delta_torque[1] += torque_i[1];
-                  i_forces.delta_torque[2] += torque_i[2];
+                  i_forces.delta_torque[0] += sidata.area_ratio*torque_i[0];
+                  i_forces.delta_torque[1] += sidata.area_ratio*torque_i[1];
+                  i_forces.delta_torque[2] += sidata.area_ratio*torque_i[2];
                 }
         #endif
       } else {

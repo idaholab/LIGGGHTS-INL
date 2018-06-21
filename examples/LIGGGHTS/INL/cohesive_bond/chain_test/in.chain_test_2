@@ -49,7 +49,7 @@ fix     m4 all property/global coefficientFriction peratomtypepair 1 0.5
 fix     m5 all property/global radiusMultiplierBond peratomtypepair 1 1
 fix     m6 all property/global normalBondStiffnessPerUnitArea peratomtypepair 1 1e7
 fix     m7 all property/global tangentialBondStiffnessPerUnitArea peratomtypepair 1 1e6
-fix     m8 all property/global maxDistanceBond peratomtypepair 1 0.5
+fix     m8 all property/global maxDistanceBond peratomtypepair 1 0.25
 
 fix     m9 all property/global dampingNormalForceBond peratomtypepair 1 0.5
 fix     m10 all property/global dampingTangentialForceBond peratomtypepair 1 0.5
@@ -84,7 +84,6 @@ compute         rke all erotate/sphere
 thermo_style	custom step atoms ke c_rke f_ts[1] f_ts[2] vol
 thermo          ${nDump}
 thermo_modify	lost ignore norm no
-compute_modify	thermo_temp dynamic yes
 compute         cmpbond all  pair/gran/local/bond
 
 #insert the first particles so that dump is not empty

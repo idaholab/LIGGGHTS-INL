@@ -112,7 +112,7 @@ void CreateAtoms::command(int narg, char **arg)
     if (nregion == -1) error->all(FLERR,
                                   "Create_atoms region ID does not exist");
     domain->regions[nregion]->init();
-    iarg = 3;;
+    iarg = 3;
   } else if (strcmp(arg[1],"single") == 0) {
     style = SINGLE;
     if (narg < 5) error->all(FLERR,"Illegal create_atoms command");
@@ -126,8 +126,8 @@ void CreateAtoms::command(int narg, char **arg)
     nrandom = force->inumeric(FLERR,arg[2]);
     if (seed_char)
         delete [] seed_char;
-    seed_char = new char [strlen(arg[2])+1];
-    strcpy(seed_char, arg[2]);
+    seed_char = new char [strlen(arg[3])+1];
+    strcpy(seed_char, arg[3]);
     if (strcmp(arg[4],"NULL") == 0) nregion = -1;
     else {
       nregion = domain->find_region(arg[4]);
@@ -236,17 +236,32 @@ void CreateAtoms::command(int narg, char **arg)
   }
 
   if (style == BOX || style == REGION) {
-    if (domain->xperiodic) {
-      if (comm->myloc[0] == 0) sublo[0] -= epsilon[0];
-      if (comm->myloc[0] == comm->procgrid[0]-1) subhi[0] -= 2.0*epsilon[0];
-    }
-    if (domain->yperiodic) {
-      if (comm->myloc[1] == 0) sublo[1] -= epsilon[1];
-      if (comm->myloc[1] == comm->procgrid[1]-1) subhi[1] -= 2.0*epsilon[1];
-    }
-    if (domain->zperiodic) {
-      if (comm->myloc[2] == 0) sublo[2] -= epsilon[2];
-      if (comm->myloc[2] == comm->procgrid[2]-1) subhi[2] -= 2.0*epsilon[2];
+    if (comm->get_layout() != LAYOUT_TILED) {
+      if (domain->xperiodic) {
+        if (comm->myloc[0] == 0) sublo[0] -= epsilon[0];
+        if (comm->myloc[0] == comm->procgrid[0]-1) subhi[0] -= 2.0*epsilon[0];
+      }
+      if (domain->yperiodic) {
+        if (comm->myloc[1] == 0) sublo[1] -= epsilon[1];
+        if (comm->myloc[1] == comm->procgrid[1]-1) subhi[1] -= 2.0*epsilon[1];
+      }
+      if (domain->zperiodic) {
+        if (comm->myloc[2] == 0) sublo[2] -= epsilon[2];
+        if (comm->myloc[2] == comm->procgrid[2]-1) subhi[2] -= 2.0*epsilon[2];
+      }
+    } else {
+      if (domain->xperiodic) {
+        if (comm->get_mysplit(0,0) == 0.0) sublo[0] -= epsilon[0];
+        if (comm->get_mysplit(0,1) == 1.0) subhi[0] -= 2.0*epsilon[0];
+      }
+      if (domain->yperiodic) {
+        if (comm->get_mysplit(1,0) == 0.0) sublo[1] -= epsilon[1];
+        if (comm->get_mysplit(1,1) == 1.0) subhi[1] -= 2.0*epsilon[1];
+      }
+      if (domain->zperiodic) {
+        if (comm->get_mysplit(2,0) == 0.0) sublo[2] -= epsilon[2];
+        if (comm->get_mysplit(2,1) == 1.0) subhi[2] -= 2.0*epsilon[2];
+      }
     }
   }
 

@@ -1,0 +1,85 @@
+"CFDEMproject WWW Site"_liws - "LIGGGHTS(R)-INL Commands"_lc :c
+
+:link(liws,http://www.cfdem.com)
+:link(ld,Manual.html)
+:link(lc,Section_commands.html#comm)
+
+:line
+
+How-To for "SUPERQUADRIC" simulations in LIGGGHTS(R)-INL :h3
+
+:line
+
+Description :h4
+
+This text describes how to perform "SUPERQUADRIC" simulations in LIGGGHTS(R)-INL.
+
+Introduction :h4
+
+"SUPERQUADRIC" simulations allow LIGGGHTS(R)-INL to use superquadric bodies as
+particles.
+
+Compilation :h4
+
+Before starting the compilation, you have to enable the SUPERQUADRIC model in
+your Makefile. In case of Makefile.auto you can activate the model by settings
+the {USE_SUPERQUADRIC} flag to "ON" within your {src/MAKE/Makefile.user}.
+
+If you want to use your own Makefile please see the section "Specialized
+makefile"_#makefile below.
+
+Detailed description :h4
+
+The overall simulation structure stays the same for SUPERQUADRIC simulations as
+used for standard LIGGGHTS(R)-INL simulations. In order to create a SUPERQUADRIC
+simulation based on an existing case you have to perform following steps:
+
+Use "atom_style superquadric"_atom_style.html For contact models (pair_style
+gran as well as fix wall/gran) use "surface
+superquadric"_gran_surface_superquadric.html The SUPERQUADRIC model requires a
+special integrator, namly "fix nve/nonspherical"_fix_nve_nonspherical.html To
+define new SUPERQUADRIC particles use the "fix
+particletemplate/superquadric"_fix_particletemplate_superquadric.html :ul
+
+Performance :h4
+
+The SUPERQUADRIC model uses the framework of LIGGGHT(R). Therefore, the parallel
+scalability is linear as LIGGGHTS(R)-INL itself. Compared to standard LIGGGHTS(R)-INL,
+the calculation of contact points is computational expensive for superquadric
+bodies, which leads to a lower maximum number of particles per processor.
+
+Spezialized makefile :h4,link(makefile)
+
+:link(boost,http://www.boost.org/)
+
+The following settings must be adjusted manually in your Makefile:
+
+    LMP_INC += -DSUPERQUADRIC_ACTIVE_FLAG -DNONSPHERICAL_ACTIVE_FLAG :pre
+
+NOTE: Make sure that you add the definitions after the original assignments of
+LMP_INC and EXTRA_INC. Otherwise your changes will be overwritten.
+
+To simulate superquadrics the beta function needs to be available. If you have
+GCC version >= 7.1 no further action is needed. If you have an older GCC version
+have a look whether your standard library supports the TR1 extension, in
+particular whether the {tr1/cmath} header file is available. If this is the case
+another flag should be added to LMP_INC:
+
+    LMP_INC += -DHAVE_TR1_CMATH :pre
+
+In case none of the above applies, the "boost"_boost library is required to
+provided the beta function. On most LINUX-distributions a recent version can be
+installed via the package managment systems. Most Boost libraries are
+header-only: they consist entirely of header files containing templates and
+inline functions, and require no separately-compiled library binaries or special
+treatment when linking (See "here"_boost). In this case, an extra include path
+needs to be set in your makefile:
+
+    EXTRA_INC += -IPath/to/your/Boost/include :pre
+
+
+:line
+
+Questions? :h4
+
+If any questions remain, do not hesitate to contact us.
