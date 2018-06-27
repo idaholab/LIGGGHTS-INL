@@ -1,8 +1,7 @@
-# MPICH with Intel C++ compiler
-# default folder for MPICH: /opt/mpich
-# default folder for Intel compilers: /opt/intel
+# mpi = mpic++, VTK 7.1 (alternative compilation, might need modification)
 
 # Note: the path to VTK libs is specifically configured for INL FALCON HPC
+#       but disabled for now
 
 SHELL = /bin/sh
 
@@ -11,18 +10,12 @@ SHELL = /bin/sh
 # specify flags and libraries needed for your compiler
 
 CC =		mpic++
-# Optimized version
-#CCFLAGS =	-O2  -restrict
-# Debug version
-CCFLAGS =	-O0 -g -pg -ftrapuv -traceback -debug all
+CCFLAGS =	-Og -g -pg -fPIC
 SHFLAGS =	-fPIC
 DEPFLAGS =	-M
 
 LINK =		mpic++
-# Optimized version
-#LINKFLAGS =	-O2 -fPIC
-# Debug version
-LINKFLAGS =	-O0 -g -pg -ftrapuv -traceback -debug all
+LINKFLAGS =	-Og -g -pg -fPIC
 LIB =		-lstdc++
 SIZE =		size
 
@@ -78,9 +71,9 @@ JPG_LIB =
 # PATH = path for VTK library
 # LIB = name of VTK library
 
-VTK_INC =#	-I/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/include/vtk-7.1
-VTK_PATH =#	-L/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/lib
-VTK_LIB =#	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
+VTK_INC =	#-I/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/include/vtk-7.1
+VTK_PATH =	#-L/apps/local/easybuild/software/VTK/7.1.1-gmvolf-5.5.4-Python-2.7.9/lib
+VTK_LIB =	#-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
 
 # ---------------------------------------------------------------------
 # build rules and dependencies
