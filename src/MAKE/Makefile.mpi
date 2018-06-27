@@ -1,22 +1,4 @@
-<<<<<<< 298e66fd705bc78e2242ba306344c21273c4def9:src/MAKE/Makefile.mpi
-<<<<<<< 600ce8560df6544d26bc7307428000a47068f195:src/MAKE/Makefile.mpi
 # mpi = mpic++, VTK 6.2 (alternative compilation, might need modification)
-=======
-# mpi = mpic++, VTK 7.1.0 (alternative compilation, might need modification)
-=======
-# mpi = mpic++, VTK 6.2 (alternative compilation, might need modification)
->>>>>>> Renamed INL custom makefiles for better clarity:src/MAKE/Makefile.inl_macos
-##########################################################################
-#   This configuration is specifically for an INL Mac computer
-# in which MOOSE Environment is installed.
-#   MOOSE Environment uses CLANG compilers by default,
-# which does not support the "atoi" function.
-#   Therefore, users have to manually assign path to GCC compilers.
-# The path to the GCC compilers depend on the version of MOOSE Environment
-#   It is VERY important to use the matched "mpirun" or "mpiexec" for
-# running simulations. Otherwise there could be unexpected breakdown!!!
-##########################################################################
->>>>>>> Updated makefile for INL MacOS:src/MAKE/Makefile.inl_macos
 
 SHELL = /bin/sh
 
