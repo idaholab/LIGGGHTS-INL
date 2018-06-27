@@ -14,7 +14,7 @@ CC =		mpic++
 # Optimized version
 #CCFLAGS =	-O2  -restrict
 # Debug version
-CCFLAGS =	-O0 -g -pg -ftrapuv -traceback -debug all
+CCFLAGS =	-O0 -g -ftrapuv -traceback -debug all
 SHFLAGS =	-fPIC
 DEPFLAGS =	-M
 
@@ -22,7 +22,7 @@ LINK =		mpic++
 # Optimized version
 #LINKFLAGS =	-O2 -fPIC
 # Debug version
-LINKFLAGS =	-O0 -g -pg -ftrapuv -traceback -debug all
+LINKFLAGS =	-O0 -g -ftrapuv -traceback -debug all
 LIB =		-lstdc++
 SIZE =		size
 
