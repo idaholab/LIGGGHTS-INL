@@ -1,4 +1,4 @@
-# mpi = mpic++, VTK 6.2 (alternative compilation, might need modification)
+# mpi = mpic++, VTK 7.1 (alternative compilation, might need modification)
 
 SHELL = /bin/sh
 
