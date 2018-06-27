@@ -1,4 +1,4 @@
-# mpi = mpic++, VTK 7.1.0 (alternative compilation, might need modification)
+# mpi = mpic++, VTK 6.2 (alternative compilation, might need modification)
 ##########################################################################
 #   This configuration is specifically for an INL Mac computer
 # in which MOOSE Environment is installed.
@@ -84,9 +84,9 @@ JPG_LIB =
 # PATH = path for VTK library
 # LIB = name of VTK library
 
-VTK_INC =#	-I/opt/moose/VTK-7.1.0/clang-opt/include/vtk-7.1
-VTK_PATH =#	-L/opt/moose/VTK-7.1.0/clang-opt/lib
-VTK_LIB =#	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
+VTK_INC =#	-I/usr/include/vtk-6.2
+VTK_PATH =	#-L/usr/lib/x86_64-linux-gnu
+VTK_LIB =#	-lvtkCommonCore-6.2 -lvtkIOCore-6.2 -lvtkIOXML-6.2 -lvtkIOLegacy-6.2 -lvtkCommonDataModel-6.2 -lvtkIOParallel-6.2 -lvtkParallelCore-6.2 -lvtkParallelMPI-6.2 -lvtkIOImage-6.2 -lvtkCommonExecutionModel-6.2 -lvtkFiltersCore-6.2 -lvtkIOParallelXML-6.2
 
 # ---------------------------------------------------------------------
 # build rules and dependencies
