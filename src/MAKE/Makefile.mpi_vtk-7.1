@@ -8,7 +8,7 @@ SHELL = /bin/sh
 
 CC =		mpic++
 # Optimized version
-CCFLAGS =	-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-unused-result -fPIC
+CCFLAGS =	-O3 -funroll-loops -fstrict-aliasing -Wall -Wno-unused-result -fPIC
 # Debug version
 #CCFLAGS =	-Og -g -pg -fPIC
 SHFLAGS =	-fPIC
@@ -16,7 +16,7 @@ DEPFLAGS =	-M
 
 LINK =		mpic++
 # Optimized version
-LINKFLAGS =	-O2 -fPIC
+LINKFLAGS =	-O3 -fPIC
 # Debug version
 #LINKFLAGS =	-Og -g -pg -fPIC
 LIB =		-lstdc++
@@ -74,8 +74,8 @@ JPG_LIB =
 # PATH = path for VTK library
 # LIB = name of VTK library
 
-VTK_INC =	-I/opt/vtk-7.1/include/vtk-7.1
-VTK_PATH =	-L/opt/vtk-7.1/lib
+VTK_INC =	-I/opt/vtk/include/vtk-7.1
+VTK_PATH =	-L/opt/vtk/lib
 VTK_LIB =	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
 
 # ---------------------------------------------------------------------
