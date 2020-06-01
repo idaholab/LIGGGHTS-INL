@@ -142,6 +142,7 @@ struct SurfacesIntersectData : SurfacesCloseData {
   double kn;
   double gammat;
   double gamman;
+  double deltaZero;
 
   double Fn;     
   double Ft;

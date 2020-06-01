@@ -126,6 +126,14 @@ namespace MODEL_PARAMS
     MatrixProperty* createMaxCohesiveStress(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     MatrixProperty* createCohesionStrength(PropertyRegistry & registry, const char * caller, bool sanity_checks);
 
+    // hysteretic nonlinear model parameters
+    MatrixProperty* createAlphaCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createCinCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createAoneCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createAtwoCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createAthreeCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+    MatrixProperty* createKcinCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks);
+
     // heat transfer
     VectorProperty* createThermalCunductivity(PropertyRegistry & registry, const char * caller, bool sanity_checks);
     VectorProperty* createHeatCapacity(PropertyRegistry & registry, const char * caller, bool sanity_checks);

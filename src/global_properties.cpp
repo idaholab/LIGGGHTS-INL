@@ -111,6 +111,14 @@ namespace MODEL_PARAMS
   static const char * VB_ELAST = "viscoBondElast";
   static const char * THERMAL_CUNDUCTIVITY = "thermalConductivity";
   static const char * HEAT_CAPACITY = "thermalCapacity";
+  // hysteretic nonlinear model parameters
+  static const char * ALPHA_CUSTOM = "alphaCustom";
+  static const char * CIN_CUSTOM = "cinCustom";
+  static const char * AONE_CUSTOM = "aoneCustom";
+  static const char * ATWO_CUSTOM = "atwoCustom";
+  static const char * ATHREE_CUSTOM = "athreeCustom";
+  static const char * KCIN_CUSTOM = "kcinCustom";
+
   /* -----------------------------------------------------------------------
    * Utility functions
    * ----------------------------------------------------------------------- */
@@ -931,6 +939,40 @@ namespace MODEL_PARAMS
   MatrixProperty* createTangentialMultiplier(PropertyRegistry & registry, const char * caller, bool)
   {
     return createPerTypePairProperty(registry, TANGENTIAL_MULTIPLIER, caller);
+  }
+
+  /* ---------------------------------------------------------------------- */
+  //  hysteretic model parameters
+  /* ---------------------------------------------------------------------- */
+   MatrixProperty* createAlphaCustom(PropertyRegistry & registry, const char * caller, bool)
+    {
+      return createPerTypePairProperty(registry, ALPHA_CUSTOM, caller);
+    }
+
+
+   MatrixProperty* createCinCustom(PropertyRegistry & registry, const char * caller, bool)
+  {
+    return createPerTypePairProperty(registry, CIN_CUSTOM, caller);
+  }
+
+   MatrixProperty* createAoneCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+  {
+    return createPerTypePairProperty(registry, AONE_CUSTOM, caller);
+  }
+
+   MatrixProperty* createAtwoCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+  {
+    return createPerTypePairProperty(registry, ATWO_CUSTOM, caller);
+  }
+
+   MatrixProperty* createAthreeCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+  {
+    return createPerTypePairProperty(registry, ATHREE_CUSTOM, caller);
+  }
+
+   MatrixProperty* createKcinCustom(PropertyRegistry & registry, const char * caller, bool sanity_checks)
+  {
+    return createPerTypePairProperty(registry, KCIN_CUSTOM, caller);
   }
 
   /* ---------------------------------------------------------------------- */
