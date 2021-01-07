@@ -16,21 +16,24 @@ Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, Mohammad Ron
 Notice that the website for LIGGGHTS-PUBLIC documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) does not contain the extended capabilities in LIGGGHTS-INL, e.g., the bonded-sphere model. 
 
 Documentation of the bonded-sphere model:
+
 `<LIGGGHTS-INL repository>/doc/gran_cohesion_bond.html`
 
 User examples of the bonded-sphere model:
+
 `<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/cohesive_bond `
 
 ## Instructions for Code Compilation with VTK
 
 ### Linux Ubuntu 18.04
 
-Install OpenMPI:
-`sudo apt-get install libopenmpi-dev openmpi-bin`
+Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
 
 Install VTK 6.3: `sudo apt-get install libvtk6-dev`
 
-Navigate to `<LIGGGHTS-INL repository>/src/` and compile the code by: `make -j4 mpi_ubuntu-18.04`
+Navigate to `<LIGGGHTS-INL repository>/src/`
+
+Compile the code by: `make -j4 mpi_ubuntu-18.04`
 
 ### Linux Ubuntu 20.04
 
