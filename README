@@ -1,3 +1,61 @@
+# LIGGGHTS-INL
+Granular Flow 
+
+LIGGGHTS-INL is a capability-extended version of LIGGGHTS. LIGGGHTS is an Open Source Discrete Element Method Particle Simulation Software (https://www.cfdem.com/media/DEM/docu/Manual.html). LIGGGHTS stands for LAMMPS improved for general granular and granular heat transfer simulations. LAMMPS is a classical molecular dynamics simulator. It is widely used in the field of Molecular Dynamics (https://lammps.sandia.gov/doc/Manual.html). Thanks to physical and algorithmic analogies, LAMMPS is a very good platform for DEM simulations. LAMMPS offers a GRANULAR package to perform these kinds of simulations. LIGGGHTS aims to improve those capability with the goal to apply it to industrial applications.
+
+### Citing LIGGGHTS-INL
+
+If you are using results generated with LIGGGHTS-INL, please cite the following paper:
+
+Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
+
+Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear," *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
+
+  
+
+ 
+### Other Software
+Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+
+[Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
+
+[Supported Open Source Software](https://github.com/idaholab)
+
+[Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
+
+[Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
+
+### License
+
+Copyright 2020 Battelle Energy Alliance, LLC
+
+Licensed under the GPL v2 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+ https://opensource.org/licenses/GPL-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+
+Licensing
+-----
+This software is licensed under the terms you may find in the file named "LICENSE" in this directory.
+
+
+Developers
+-----
+By contributing to this software project, you are agreeing to the following terms and conditions for your contributions:
+
+You agree your contributions are submitted under the GPL v2 license. You represent you are authorized to make the contributions and grant the license. If your employer has rights to intellectual property that includes your contributions, you represent that you have received permission to make contributions and grant the required license on behalf of that employer.
+
+#Content below is from LIGGGHTS
+
 ----------------------------------------------------------------------
 This is the
 
