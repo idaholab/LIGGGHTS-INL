@@ -1,9 +1,9 @@
 # LIGGGHTS-INL
 Granular Flow 
 
-LIGGGHTS-INL is a capability-extended version of LIGGGHTS. LIGGGHTS is an Open Source Discrete Element Method Particle Simulation Software (https://www.cfdem.com/media/DEM/docu/Manual.html). LIGGGHTS stands for LAMMPS improved for general granular and granular heat transfer simulations. LAMMPS is a classical molecular dynamics simulator. It is widely used in the field of Molecular Dynamics (https://lammps.sandia.gov/doc/Manual.html). Thanks to physical and algorithmic analogies, LAMMPS is a very good platform for DEM simulations. LAMMPS offers a GRANULAR package to perform these kinds of simulations. LIGGGHTS aims to improve those capability with the goal to apply it to industrial applications.
+**LIGGGHTS-INL is a capability-extended version of LIGGGHTS**. LIGGGHTS is an Open Source Discrete Element Method Particle Simulation Software ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). LIGGGHTS stands for LAMMPS improved for general granular and granular heat transfer simulations. LAMMPS is a classical molecular dynamics simulator. It is widely used in the field of Molecular Dynamics ([https://lammps.sandia.gov/doc/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). Thanks to physical and algorithmic analogies, LAMMPS is a very good platform for DEM simulations. LAMMPS offers a GRANULAR package to perform these kinds of simulations. LIGGGHTS aims to improve those capability with the goal to apply it to industrial applications.
 
-### Citing LIGGGHTS-INL
+## Citing LIGGGHTS-INL
 
 If you are using results generated with LIGGGHTS-INL, please cite the following paper:
 
@@ -11,10 +11,37 @@ Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, Qiushi Che
 
 Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear," *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
 
-  
+## Documentation
 
- 
-### Other Software
+Notice that the website for LIGGGHTS-PUBLIC documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) does not contain the extended capabilities in LIGGGHTS-INL, e.g., the bonded-sphere model. 
+
+Documentation of the bonded-sphere model:
+`<LIGGGHTS-INL repository>/doc/gran_cohesion_bond.html`
+
+User examples of the bonded-sphere model:
+`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/cohesive_bond `
+
+## Instructions for Code Compilation with VTK
+
+### Linux Ubuntu 18.04
+
+Install OpenMPI:
+`sudo apt-get install libopenmpi-dev openmpi-bin`
+
+Install VTK 6.3: `sudo apt-get install libvtk6-dev`
+
+Navigate to `<LIGGGHTS-INL repository>/src/` and compile the code by: `make -j4 mpi_ubuntu-18.04`
+
+### Linux Ubuntu 20.04
+
+[To be updated ...]
+
+### macOS
+
+[To be updated ...]
+
+
+## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
 
 [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
@@ -25,7 +52,7 @@ Idaho National Laboratory is a cutting edge research facility which is a constan
 
 [Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
 
-### License
+## License
 
 Copyright 2020 Battelle Energy Alliance, LLC
 
@@ -41,8 +68,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-
-
 Licensing
 -----
 This software is licensed under the terms you may find in the file named "LICENSE" in this directory.
@@ -55,7 +80,6 @@ By contributing to this software project, you are agreeing to the following term
 You agree your contributions are submitted under the GPL v2 license. You represent you are authorized to make the contributions and grant the license. If your employer has rights to intellectual property that includes your contributions, you represent that you have received permission to make contributions and grant the required license on behalf of that employer.
 
 #Content below is from LIGGGHTS
-
 ----------------------------------------------------------------------
 This is the
 
