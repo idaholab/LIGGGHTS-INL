@@ -1,4 +1,12 @@
 /* ----------------------------------------------------------------------
+   Copyright 2021, Battelle Energy Alliance, LLC  All Rights Reserved
+-------------------------------------------------------------------------
+
+   Contributing author and copyright for this file:
+
+   Yidong Xia (Idaho National Laboratory)
+------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------
     This is the
 
     ██╗     ██╗ ██████╗  ██████╗  ██████╗ ██╗  ██╗████████╗███████╗
@@ -30,10 +38,6 @@
     the producer of the LIGGGHTS® software and the CFDEM®coupling software
     See http://www.cfdem.com/terms-trademark-policy for details.
 
--------------------------------------------------------------------------
-    Contributing author and copyright for this file:
-
-    Rahul Mohanty (University of Edinburgh, P&G)
 ------------------------------------------------------------------------- */
 
 #ifdef NORMAL_MODEL

@@ -1,4 +1,12 @@
 /* ----------------------------------------------------------------------
+   Copyright 2021, Battelle Energy Alliance, LLC  All Rights Reserved
+-------------------------------------------------------------------------
+
+   Contributing author and copyright for this file:
+
+   Yidong Xia (Idaho National Laboratory) - fixed minor bugs
+------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------
     This is the
 
     ██╗     ██╗ ██████╗  ██████╗  ██████╗ ██╗  ██╗████████╗███████╗
@@ -226,7 +234,7 @@ namespace ContactModels {
       fix_bond_random_id_(NULL),
       compute_bond_counter_(NULL)
     {
-      history_offset_ = hsetup->add_history_value("contflag", "0"); 
+      history_offset_ = hsetup->add_history_value("contflag", "0");
       hsetup->add_history_value("initial_dist", "0");
       hsetup->add_history_value("contactPosX", "0");
       hsetup->add_history_value("contactPosY", "0");
@@ -255,7 +263,7 @@ namespace ContactModels {
       settings.registerOnOff("shearStress", shearflag_, true);
       settings.registerOnOff("normalTorqueStress", ntorqueflag_, true);
       settings.registerOnOff("shearTorqueStress", ttorqueflag_, true);
-      
+
       settings.registerOnOff("createBondAlways", createbond_always_flag_, false); // if false, bonds are created if within range, else at a certain timestep and within range
       settings.registerOnOff("dampingBond", dampingflag_, true);
       settings.registerOnOff("dampingBondSmooth", dampingsmooth_, false);
@@ -405,11 +413,11 @@ namespace ContactModels {
         {
           for(int j=1;j<max_type+1;j++)
           {
-            
+
             double cdf_one = 1.1 * 0.5*maxDist_[i][j]/minrad;
-            
+
             cdf_all = cdf_one > cdf_all ? cdf_one : cdf_all;
-            
+
           }
         }
       }
@@ -442,7 +450,7 @@ namespace ContactModels {
         {
           for (int j=1; j<max_type+1; j++)
           {
-            
+
             double stress = maxSigma_[i][j];
             if (useRatioTC_)
                 stress = fmax(stress, stress*ratioTensionCompression_[i][j]);
@@ -450,7 +458,7 @@ namespace ContactModels {
                 error->one(FLERR,"Bond settings: In case of stress breakage, the normal bond stiffness can't be <= 0!");
             double cdf_one = 0.5*(1.1*createDistanceBond_[i][j]/minrad + 1.1 * stress / (normalBondStiffness_[i][j] * minrad));
             cdf_all = cdf_one > cdf_all ? cdf_one : cdf_all;
-            
+
           }
         }
       }
@@ -497,7 +505,7 @@ namespace ContactModels {
       // history values
       double * const contflag = &scdata.contact_history[history_offset_];
       double * const contact_pos = &scdata.contact_history[history_offset_+2]; // 3-elements
-      
+
       // gather required properties
       // the distance r is the distance between the two particle centers
       // in case of a wall sqrt(scdata.rsq) is the distance to the intersection point on the wall, thus, assuming
@@ -512,19 +520,19 @@ namespace ContactModels {
           // check if particles are already bonded
           if (contflag[0] < SMALL_COHESION_MODEL_BOND)
           {
-            
+
             const bool create_bond_A =  (createbond_always_flag_ || (update->ntimestep == static_cast<int>(tsCreateBond_))) && (r_create < createDistanceBond_[itype][jtype]);
 
             if (create_bond_A)
-                createBond(scdata, r); 
+                createBond(scdata, r);
             else if (fix_bond_random_id_)
             {
-                
+
                 const double * const bond_rand_id = fix_bond_random_id_->vector_atom;
                 const bool create_bond_B = bond_rand_id && !scdata.is_wall && (update->ntimestep < bond_rand_id[i]) && MathExtraLiggghts::compDouble(bond_rand_id[i],bond_rand_id[j]) && (r_create < createDistanceBond_[itype][jtype]);
 
                 if (create_bond_B)
-                    createBond(scdata, r); 
+                    createBond(scdata, r);
 		else
                     return;
             }
@@ -665,7 +673,7 @@ namespace ContactModels {
       double nforce_damped[3] = {0.,0.,0.}, tforce_damped[3] = {0.,0.,0.}, ntorque_damped[3] = {0.,0.,0.}, ttorque_damped[3] = {0.,0.,0.};
 
       const double displacement = (initialdist[0] - r);
-      
+
       const double dissipate = dissipationflag_ ? std::min(dt*fn_dissipation_[itype][jtype],1.0) : 0.0; // dissipation_ already inverted during settings
 
       if (tensionflag_ || compressionflag_)
@@ -822,7 +830,7 @@ namespace ContactModels {
             s_factor = s_f[i][0];
            else if(!MathExtraLiggghts::compDouble(s_f[i][0],0.) && !MathExtraLiggghts::compDouble(s_f[j][0],0.))
             s_factor = 2. * (s_f[i][0] * s_f[j][0]) / (s_f[i][0] + s_f[j][0]);
-           
+
         }
 
         const double maxSigma = maxSigma_[itype][jtype] * ((useRatioTC_ && displacement < 1e-16) ? ratioTensionCompression_[itype][jtype] : 1.0);
@@ -886,13 +894,13 @@ namespace ContactModels {
                     vectorScalarMult3D(delta, update->dt);
                     // -= because force is in opposite direction
                     // no *dt as delta is v*dt of the contact position
-                    
+
                     elastic_pot[0] -= (delta[0]*elastic_pot[1] +
                                        delta[1]*elastic_pot[2] +
                                        delta[2]*elastic_pot[3])*0.5
                                        // from previous half step
                                        + elastic_pot[10];
-                    
+
                     elastic_pot[10] = -(delta[0]*(nforce[0] + force_tang[0]) +
                                         delta[1]*(nforce[1] + force_tang[1]) +
                                         delta[2]*(nforce[2] + force_tang[2]))*0.5;
@@ -947,7 +955,7 @@ namespace ContactModels {
 
       // return resulting forces
       if(scdata.is_wall) {
-        
+
         i_forces.delta_F[0] += F[0];
         i_forces.delta_F[1] += F[1];
         i_forces.delta_F[2] += F[2];
@@ -990,7 +998,7 @@ namespace ContactModels {
       //  const double r = (sidata.is_wall ? 2.0 : 1.0) * sidata.r;
       //create bond
       // if createbondflag_ && correct timestep && within range
-      
+
       //if( (update->ntimestep == static_cast<int>(tsCreateBond_) && createbondflag_ && r < createDistanceBond_[itype][jtype]) )
       //  createBond(sidata, r);
 
@@ -1110,7 +1118,7 @@ namespace ContactModels {
     int breakmode_;
     bool useRatioTC_;
     bool druckerPrager_;
-    
+
     // fix holding per-atom values for optional strengthening
     // of the bond
     class FixPropertyAtom *fix_strenghtening_factor_;

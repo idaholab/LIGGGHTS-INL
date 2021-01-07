@@ -1,4 +1,12 @@
 /* ----------------------------------------------------------------------
+   Copyright 2021, Battelle Energy Alliance, LLC  All Rights Reserved
+-------------------------------------------------------------------------
+
+   Contributing author and copyright for this file:
+
+   Yidong Xia (Idaho National Laboratory) - fixed a bug in cohesive force
+------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------
     This is the
 
     ██╗     ██╗ ██████╗  ██████╗  ██████╗ ██╗  ██╗████████╗███████╗
@@ -129,7 +137,7 @@ namespace ContactModels {
       registry.connect("fluidViscosity", fluidViscosity,"cohesion_model easo/capillary/viscous");
       registry.connect("contactAngle", contactAngle,"cohesion_model easo/capillary/viscous");
       registry.connect("minSeparationDistanceRatio", minSeparationDistanceRatio,"cohesion_model easo/capillary/viscous");
-      
+
       registry.connect("maxSeparationDistanceRatio", maxSeparationDistanceRatio,"cohesion_model easo/capillary/viscous");
 
       ln1overMinSeparationDistanceRatio = log(1./minSeparationDistanceRatio);
@@ -137,7 +145,7 @@ namespace ContactModels {
       fix_ste = modify->find_fix_scalar_transport_equation("liquidtransfer");
       if(!fix_ste)
       {
-        
+
         char initstr[200];
         sprintf(initstr,"%e",surfaceLiquidContentInitial);
 
@@ -212,7 +220,7 @@ namespace ContactModels {
       // capilar force
       // this is from Soulie et al, Intl. J Numerical and Analytical Methods in Geomechanics
       // 30 (2006), 213-228, Eqn. 13,14; separation distance = 0 in this case
-      
+
       const double R2 = (radi >=radj) ? radi : radj;
       const double R2inv = 1./R2;
       const double volBondScaled = volBond1000*R2inv*0.001*R2inv*R2inv;
@@ -338,7 +346,7 @@ namespace ContactModels {
           // capilary force
           // this is from Soulie et al, Intl. J Numerical and Analytical Methods in Geomechanics
           // 30 (2006), 213-228, Eqn. 13,14; separation distance = 0 in this case
-          
+
           const double R2 = (radi >=radj) ? radi : radj;
           const double R2inv = 1./R2;
           const double volBondScaled = volBond1000*R2inv*0.001*R2inv*R2inv;
@@ -456,7 +464,7 @@ namespace ContactModels {
               // liquid transfer happens here
               // assume liquid distributes evenly
               double *liquidFlux = fix_liquidflux->vector_atom;
-              
+
               const double invdt = 1./update->dt;
               const double rad_ratio = radj/radi;
               const double split_factor = 1.0/(1.0+rad_ratio*rad_ratio*rad_ratio);
@@ -465,7 +473,7 @@ namespace ContactModels {
 
               if (force->newton_pair || j < atom->nlocal)
                 liquidFlux[j] += invdt*((1.-split_factor) * volBond1000 - volLjBond1000) / (1333.333333*M_PI*radj*radj*radj) ;
-              
+
           }
       }
       // no else here, case (i) was already caught before
