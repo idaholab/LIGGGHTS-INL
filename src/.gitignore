@@ -2,6 +2,7 @@ Obj*/*
 style_*
 lmp_*
 version_liggghts.h
+style_cohesion_model.h
 .*.sw?
 debug_make_auto
 liblmp_*
