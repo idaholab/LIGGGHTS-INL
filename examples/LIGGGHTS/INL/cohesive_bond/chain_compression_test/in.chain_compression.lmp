@@ -1,0 +1,113 @@
+variable	dt		equal 2e-7
+variable	i_dump_skip	equal 200
+
+#-------------- initial settings
+
+echo		both
+units		si
+atom_style	granular
+atom_modify	map array
+boundary	f f f
+newton		off
+communicate	single vel yes
+hard_particles	yes
+soft_particles  yes
+
+# ------------- domain setup
+
+region		reg_domain block -0.005 0.005 -0.005 0.005 0.000 0.008 units box
+create_box	1 reg_domain
+neighbor	5e-4 bin
+neigh_modify	delay 0
+
+# ------------- define variables
+
+include         ../input/in.param.lmp
+
+#-------------- pair style
+
+pair_style	gran model hertz tangential history cohesion bond
+pair_coeff	* *
+
+#-------------- create particle shape: fiber
+
+create_atoms	1 single 0 0 0
+create_atoms	1 single 0 0 0.001
+create_atoms	1 single 0 0 0.002
+create_atoms	1 single 0 0 0.003
+create_atoms	1 single 0 0 0.004
+
+variable	radius		equal 0.0005
+variable	diam		equal ${radius}*2.0
+
+set		group all density ${i_density} diameter ${diam}
+
+group		head id 1
+group		end  id 5
+fix		bound_head head freeze
+fix		VISC all viscous 0.2
+fix		integrsp all nve/sphere
+
+# - define dump output
+
+fix		ts all check/timestep/gran ${i_dump_skip} 0.2 0.2
+
+# - define thermo output
+
+variable	xdisp		equal x[5]
+variable	ydisp		equal y[5]
+variable	zdisp		equal z[5]
+
+# - track the bonds
+
+compute		bond_status all bond/counter
+compute		bond_force  all pair/gran/local/bond
+
+# - screen output
+
+thermo_style	custom step atoms ke cpu time f_ts[1] f_ts[2] c_bond_status[3] v_zdisp
+thermo		${i_dump_skip}
+thermo_modify	lost ignore norm no
+
+# - dump output
+
+#dump		dmp1 all custom/vtk ${i_dump_skip}  balls*.vtk  &
+#		  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+
+#dump		dmp2 all custom ${i_dump_skip}      balls*.dump &
+#		  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+
+#dump            dmp3 all local/gran/vtk  ${i_dump_skip}  fbnd*.vtk bond_force
+
+#dump_modify     dmp1 pad 9
+#dump_modify     dmp2 pad 9
+#dump_modify     dmp3 pad 9
+
+# - run settings
+
+timestep   ${dt}
+
+
+variable	nSamples	equal 10
+
+label		loop
+
+variable	nLoop		loop  ${nSamples}
+variable	normalArea	equal PI*${radius}*${radius}
+variable	normalForce	equal -${nLoop}*0.1
+variable	normalStress	equal ${normalForce}/${normalArea}
+
+fix		FZ end addforce 0.0 0.0 ${normalForce}
+
+############### apply a downward vertical at the free end
+
+run		1000000
+
+variable	normalStrain	equal (${zdisp}-4e-3)/4e-3
+variable	normalE		equal ${normalStress}/${normalStrain}
+
+
+print		"${nLoop}, ${xdisp}, ${ydisp}, ${zdisp} ${normalStrain}, ${normalStress}, ${normalE}" append stress_strain.csv
+
+next		nLoop
+jump		SELF loop
