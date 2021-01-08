@@ -23,26 +23,36 @@ User examples of the bonded-sphere model:
 
 `<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/cohesive_bond `
 
-## Instructions for Code Compilation with VTK
+## Instructions for Code Compilation
 
-### Linux Ubuntu 18.04
+### Linux
+
+#### Ubuntu 20.04
 
 Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
 
-Install VTK 6.3: `sudo apt-get install libvtk6-dev`
+Install VTK 7.1: `sudo apt-get install libvtk7-dev`
 
 Navigate to `<LIGGGHTS-INL repository>/src/`
 
-Compile the code by: `make -j4 mpi_ubuntu-18.04`
+Compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
 
-### Linux Ubuntu 20.04
+If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04` 
 
-[To be updated ...]
 
 ### macOS
 
-[To be updated ...]
+Use Homebrew to install OpenMPI.
 
+**Special notice**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML.
+
+We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory.
+
+To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
+
+An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at: `<LIGGGHTS-INL repository>/src/MAKE/Makefile.mpi_vtk-7.1`
+
+(Detailed instruction to be updated ...)
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
