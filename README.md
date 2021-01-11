@@ -44,13 +44,11 @@ If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-2
 
 Use Homebrew to install OpenMPI.
 
-**Special notice**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML.
+**Special notice**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML. We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory. To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
 
-We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory.
+An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
 
-To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
-
-An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at: `<LIGGGHTS-INL repository>/src/MAKE/Makefile.mpi_vtk-7.1`
+`<LIGGGHTS-INL repository>/src/MAKE/Makefile.mpi_vtk-7.1`
 
 (Detailed instruction to be updated ...)
 
@@ -92,7 +90,7 @@ By contributing to this software project, you are agreeing to the following term
 
 You agree your contributions are submitted under the GPL v2 license. You represent you are authorized to make the contributions and grant the license. If your employer has rights to intellectual property that includes your contributions, you represent that you have received permission to make contributions and grant the required license on behalf of that employer.
 
-#Content below is from LIGGGHTS
+# Content below is from LIGGGHTS
 ----------------------------------------------------------------------
 This is the
 
