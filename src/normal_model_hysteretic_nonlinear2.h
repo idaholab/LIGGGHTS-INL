@@ -41,10 +41,10 @@
 ------------------------------------------------------------------------- */
 
 #ifdef NORMAL_MODEL
-NORMAL_MODEL(HYSTERETIC_NONLINEAR,hysteretic/nonlinear,15)
+NORMAL_MODEL(HYSTERETIC_NONLINEAR2,hysteretic/nonlinear2,18)
 #else
-#ifndef NORMAL_MODEL_HYSTERETIC_NONLINEAR_H_
-#define NORMAL_MODEL_HYSTERETIC_NONLINEAR_H_
+#ifndef NORMAL_MODEL_HYSTERETIC_NONLINEAR2_H_
+#define NORMAL_MODEL_HYSTERETIC_NONLINEAR2_H_
 #include "contact_models.h"
 #include "normal_model_base.h"
 #include <cmath>
@@ -60,7 +60,7 @@ namespace LIGGGHTS {
 namespace ContactModels
 {
   template<>
-  class NormalModel<HYSTERETIC_NONLINEAR> : public NormalModelBase
+  class NormalModel<HYSTERETIC_NONLINEAR2> : public NormalModelBase
   {
   public:
     NormalModel(LAMMPS * lmp, IContactHistorySetup * hsetup,class ContactModelBase *c) :
@@ -102,41 +102,41 @@ namespace ContactModels
     void postSettings(IContactHistorySetup * hsetup, ContactModelBase *cmb) {}
 
     void connectToProperties(PropertyRegistry & registry) {
-      registry.registerProperty("K_elastic", &MODEL_PARAMS::createLoadingStiffness,"model hysteretic/nonlinear");
-      registry.registerProperty("CoeffRestLog", &MODEL_PARAMS::createCoeffRestLog,"model hysteretic/nonlinear");
-      registry.registerProperty("kn2k1", &MODEL_PARAMS::createUnloadingStiffness,"model hysteretic/nonlinear");
-      registry.registerProperty("kn2kc", &MODEL_PARAMS::createCoeffAdhesionStiffness,"model hysteretic/nonlinear");
-      registry.registerProperty("phiF", &MODEL_PARAMS::createCoeffPlasticityDepth,"model hysteretic/nonlinear");
-      registry.registerProperty("f_adh", &MODEL_PARAMS::createPullOffForce,"model hysteretic/nonlinear");
-      //hysteretic nonlinear model properties
-      registry.registerProperty("Alpha", &MODEL_PARAMS::createAlphaCustom,"model hysteretic/nonlinear");
-      registry.registerProperty("Cin", &MODEL_PARAMS::createCinCustom,"model hysteretic/nonlinear");
-      registry.registerProperty("A1", &MODEL_PARAMS::createAoneCustom,"model hysteretic/nonlinear");
-      registry.registerProperty("A2", &MODEL_PARAMS::createAtwoCustom,"model hysteretic/nonlinear");
-      registry.registerProperty("A3", &MODEL_PARAMS::createAthreeCustom,"model hysteretic/nonlinear");
-      registry.registerProperty("kcin", &MODEL_PARAMS::createKcinCustom,"model hysteretic/nonlinear");
+      registry.registerProperty("K_elastic", &MODEL_PARAMS::createLoadingStiffness,"model hysteretic/nonlinear2");
+      registry.registerProperty("CoeffRestLog", &MODEL_PARAMS::createCoeffRestLog,"model hysteretic/nonlinear2");
+      registry.registerProperty("kn2k1", &MODEL_PARAMS::createUnloadingStiffness,"model hysteretic/nonlinear2");
+      registry.registerProperty("kn2kc", &MODEL_PARAMS::createCoeffAdhesionStiffness,"model hysteretic/nonlinear2");
+      registry.registerProperty("phiF", &MODEL_PARAMS::createCoeffPlasticityDepth,"model hysteretic/nonlinear2");
+      registry.registerProperty("f_adh", &MODEL_PARAMS::createPullOffForce,"model hysteretic/nonlinear2");
+      //hysteretic nonlinear2 model properties
+      registry.registerProperty("Alpha", &MODEL_PARAMS::createAlphaCustom,"model hysteretic/nonlinear2");
+      registry.registerProperty("Cin", &MODEL_PARAMS::createCinCustom,"model hysteretic/nonlinear2");
+      registry.registerProperty("A1", &MODEL_PARAMS::createAoneCustom,"model hysteretic/nonlinear2");
+      registry.registerProperty("A2", &MODEL_PARAMS::createAtwoCustom,"model hysteretic/nonlinear2");
+      registry.registerProperty("A3", &MODEL_PARAMS::createAthreeCustom,"model hysteretic/nonlinear2");
+      registry.registerProperty("kcin", &MODEL_PARAMS::createKcinCustom,"model hysteretic/nonlinear2");
 
       //
 
-      registry.connect("K_elastic", K_elastic,"model hysteretic/nonlinear");
-      registry.connect("CoeffRestLog", CoeffRestLog,"model hysteretic/nonlinear");
-      registry.connect("kn2kc", kn2kc,"model hysteretic/nonlinear");
-      registry.connect("kn2k1", kn2k1, "model hysteretic/nonlinear");
-      registry.connect("phiF", phiF,"model hysteretic/nonlinear");
-      registry.connect("f_adh", f_adh,"model hysteretic/nonlinear");
-      //hysteretic nonlinear model properties
-      registry.connect("Alpha", Alpha,"model hysteretic/nonlinear");
-      registry.connect("Cin", Cin,"model hysteretic/nonlinear");
-      registry.connect("A1", A1,"model hysteretic/nonlinear");
-      registry.connect("A2", A2,"model hysteretic/nonlinear");
-      registry.connect("A3", A3,"model hysteretic/nonlinear");
-      registry.connect("kcin", kcin,"model hysteretic/nonlinear");
+      registry.connect("K_elastic", K_elastic,"model hysteretic/nonlinear2");
+      registry.connect("CoeffRestLog", CoeffRestLog,"model hysteretic/nonlinear2");
+      registry.connect("kn2kc", kn2kc,"model hysteretic/nonlinear2");
+      registry.connect("kn2k1", kn2k1, "model hysteretic/nonlinear2");
+      registry.connect("phiF", phiF,"model hysteretic/nonlinear2");
+      registry.connect("f_adh", f_adh,"model hysteretic/nonlinear2");
+      //hysteretic nonlinear2 model properties
+      registry.connect("Alpha", Alpha,"model hysteretic/nonlinear2");
+      registry.connect("Cin", Cin,"model hysteretic/nonlinear2");
+      registry.connect("A1", A1,"model hysteretic/nonlinear2");
+      registry.connect("A2", A2,"model hysteretic/nonlinear2");
+      registry.connect("A3", A3,"model hysteretic/nonlinear2");
+      registry.connect("kcin", kcin,"model hysteretic/nonlinear2");
 
       //
 
       // error checks on coarsegraining
       if(force->cg_active())
-        error->cg(FLERR,"model hysteretic/nonlinear");
+        error->cg(FLERR,"model hysteretic/nonlinear2");
     }
 
     // effective exponent for stress-strain relationship
@@ -166,7 +166,7 @@ namespace ContactModels
       double kn = K_elastic[itype][jtype];
       // double kt = kn;
 
-      // input parameters for hysteretic/nonlinear model: Alpha, Cin, A1, A2, A3, CoeffGn, k_c
+      // input parameters for hysteretic/nonlinear2 model: Alpha, Cin, A1, A2, A3, CoeffGn, k_c
       //double Alpha_in = 20;
       //double Cin = 1.0e-7;
       //double A1 = 7.0e8; // 1.0e9; // 5.0e7; - stiffness increasing rate
@@ -182,6 +182,7 @@ namespace ContactModels
 
       double CoeffGn = 10.5*exp(0.6*CoeffRestLog[itype][jtype]);
       double k_c = kcin_in * A2_in;
+      double fcc = 1.0;
 
       // convert Kn and Kt from pressure units to force/distance^2
       // kn /= force->nktv2p;
@@ -292,22 +293,23 @@ namespace ContactModels
          f0_old = f0;
          if (deltan <= deltaZero)
          {
-            if (deltan <= deltaMin)
-               {
-                   fHys = -k_c*deltan;
-               }
-            else
-               {
-                   fHys = betan*(deltan-deltaZero);
-               }
+            //if (deltan <= deltaMin)
+            //   {
+            //       fHys = -k_c*deltan;
+            //   }
+            //else
+            //   {
+            //       fHys = betan*(deltan-deltaZero);
+            //   }
+	    fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1);
          }
          else
          {
             fHys = Alpha_in*k1*pow(deltan-deltaZero,2)+f0;
          }
          //calculate damping coefficient
-         gamman = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.25)+pow(deltaZero,0.25));
-         gammat = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.25)+pow(deltaZero,0.25));
+         gamman = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.5)+pow(deltaZero,0.5));
+         gammat = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.5)+pow(deltaZero,0.5));
          //update historic values
          history[1] = deltaZero;
          history[2] = k1;
@@ -321,35 +323,37 @@ namespace ContactModels
       }
       else //deltan < delta_old, unloading part
       {
-         k2 = A3_in*k1_old; //unloading stiffness
-         deltaZero = (1-k1_old/k2)*deltaMax; //plastic deformation
-         beta = Alpha_in*k1_old*pow(deltaMax-deltaZero_old,2)/k2/(deltaMax-deltaZero); //calculor
+         k2 = A3_in*(A1_in*deltaMax+A2_in); //unloading stiffness
+         deltaZero = fcc*(1-k1_old/k2)*deltaMax; //plastic deformation
+	 deltaZero_old = history[3];
+         beta = log(Alpha_in*k1_old/Cin_in/k2*pow(deltaMax-deltaZero_old,2)+1)/(deltaMax-fcc*(1-k1_old/k2)*deltaMax); //calculor
          deltaMin = beta*(k2-k1_old)/(beta*k2+k_c)*deltaMax;
          k1 = deltaMax*A1_in+A2_in; //updated loading stiffness
 
-         if (deltan >= deltaMin)
-            {
+	 //if (deltan >= deltaMin)
+         //   {
                if (deltan >= deltaZero)
                {
-                   betan = beta*k2;
-                   fHys = beta*k2*(deltan-deltaZero)+(deltan-deltaZero)*f0_old/(deltaMax-deltaZero);//f0_old;
+                   fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1) +(deltan-deltaZero)*f0_old/(deltaMax-deltaZero);
                    f0 = fHys - Alpha_in*k1*pow(deltan-deltaZero,2);
+		   //std::cout << std::scientific;
+		   //std::cout << "delta " << deltan << " fHys " << fHys << std::endl;
                }
                else
                {
-                   betan = beta*k2;
-                   fHys = beta*k2*(deltan-deltaZero);
+                   fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1); 
                    f0 = 0;
                }
-            }
-         else
-            {
-               fHys = -k_c*deltan;
-               f0 = 0;
-            }
+         //   }
+         //else
+         //   {
+         //      fHys = -k_c*deltan;
+         //      f0 = 0;
+         //   }
+
          //calculate damping coefficient
-         gamman = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1_old/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.25));//+pow(deltaZero,0.25));
-         gammat = sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1_old/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,0.25));//+pow(deltaZero,0.25));
+         gamman = 1*0.001*sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1_old/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,-0.25));
+         gammat = 1*0.001*sqrt(5/4)*sqrt(4.*meff*Alpha_in*k1_old/(1.+(M_PI/CoeffRestLog[itype][jtype])*(M_PI/CoeffRestLog[itype][jtype])))*(pow(deltan,-0.25));
          //update historic values
          history[1] = deltaZero;
          history[2] = k1;
@@ -374,10 +378,8 @@ namespace ContactModels
       double Fn = fHys + Fn_damping + f_0;
 
       //std::cout << std::scientific;
-      //std::cout << "id_i " << id_i << " id_j " << id_j << " Fhys " << fHys << std::endl;
-      //std::cout << "Fn " << Fn << std::endl;
-      //std::cout << "status " << tag_status << " sidata.vn " << sidata.vn  << " d_n " << deltan << " d_old " << delta_old << " fHys " << fHys << " f_damping " << Fn_damping << " d_0 " << deltaZero << " d_min " << deltaMin << " k1 " << k1 << " k2 " << k2 << " d_Max " << deltaMax << " f0 " << f0 << " beta " << beta << " k1_old " << k1_old << " d_0_old " << deltaZero_old << std::endl;
-      //std::cout << "vi_1 " << vi[0] << " vi_2 " << vi[1] << " vi_3 " << vi[2] << " vj_1 " << vj[0] << " vj_2 " << vj[1] << " vj_3 " << vj[2] << std::endl;
+      //std::cout << "id_i " << id_i << " id_j " << id_j << " d_n " << deltan << " Fhys " << fHys << " f_damping " << Fn_damping << " gamman " << gamman << " vj_3 " << vj[2] << std::endl;
+
 
       if(limitForce && (Fn<0.0) && kc == 0 && f_0 == 0.0){
           Fn = 0.0;
@@ -485,5 +487,5 @@ namespace ContactModels
   };
 }
 }
-#endif // NORMAL_MODEL_HYSTERETIC_NONLINEAR_H_
+#endif // NORMAL_MODEL_HYSTERETIC_NONLINEAR2_H_
 #endif

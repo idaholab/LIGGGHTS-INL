@@ -1,0 +1,354 @@
+# - initial settings
+echo            screen
+units           si
+atom_style      granular
+atom_modify     map array
+boundary        m m m
+newton          off
+communicate     single vel yes
+
+# - domain setup
+region          reg_domain block -0.1 0.1 -0.1 0.1 -0.1 0.2 units box
+create_box      2 reg_domain
+
+neighbor        0.01 bin
+neigh_modify    delay 0
+
+# ------------------ define variables
+# - material properties
+variable  i_density      equal  290.0
+
+# - Hertz contact model
+variable  i_E            equal  1e7
+variable  i_poisson      equal  0.3
+variable  i_restitution  equal  0.3
+variable  i_fric_pp      equal  0.0
+variable  i_fric_pw      equal  0.0
+
+# - rolling friction
+variable  i_rolling         equal  0.00
+
+# - Luding model
+variable k_elastic equal 5e4
+variable kn2k1 equal 2.5
+variable kn2kc equal 0
+variable phiF equal 0.1
+variable f_adh equal 0
+
+# - hysteretic nonlinear1 model
+variable i_alpha equal 20
+variable i_cin equal 1e-7
+variable i_A1 equal 10e8 # increasing slope of loading stiffness k1
+variable i_A2 equal 4e4 # initial value of loading stiffness k1
+variable i_A3 equal 8 # scalar factor of unloading stiffness
+variable i_kcin equal 1e-4 # scalar factor of cohesion stiffness
+
+# - material properties
+fix m01 all property/global youngsModulus peratomtype ${i_E} ${i_E}
+fix m02 all property/global poissonsRatio peratomtype ${i_poisson} ${i_poisson}
+fix m03 all property/global coefficientRestitution peratomtypepair 2 ${i_restitution} ${i_restitution} &
+	${i_restitution} ${i_restitution}
+fix m04 all property/global coefficientFriction peratomtypepair 2 ${i_fric_pp} ${i_fric_pw} &
+	 ${i_fric_pw} ${i_fric_pp}
+
+# - Luding model properties
+fix m11 all property/global LoadingStiffness peratomtypepair 2 ${k_elastic} ${k_elastic} &
+	 ${k_elastic} ${k_elastic}
+fix m12 all property/global UnloadingStiffness peratomtypepair 2 ${kn2k1} ${kn2k1} &
+	 ${kn2k1} ${kn2k1}
+fix m13 all property/global coefficientAdhesionStiffness peratomtypepair 2 ${kn2kc} ${kn2kc} &
+	 ${kn2kc} ${kn2kc}
+fix m14 all property/global coefficientPlasticityDepth peratomtypepair 2 ${phiF} ${phiF} &
+	 ${phiF} ${phiF}
+fix m15 all property/global pullOffForce peratomtypepair 2 ${f_adh} ${f_adh} &
+	 ${f_adh} ${f_adh}
+
+# - hysteretic nonlinear1 model properteis
+fix m16 all property/global alphaCustom peratomtypepair 2 ${i_alpha} ${i_alpha} &
+                                                          ${i_alpha} ${i_alpha}
+fix m17 all property/global cinCustom peratomtypepair 2 ${i_cin} ${i_cin} &
+                                                        ${i_cin} ${i_cin}
+fix m18 all property/global aoneCustom peratomtypepair 2 ${i_A1} ${i_A1} &
+                                                         ${i_A1} ${i_A1}
+fix m19 all property/global atwoCustom peratomtypepair 2 ${i_A2} ${i_A2} &
+                                                         ${i_A2} ${i_A2}
+fix m20 all property/global athreeCustom peratomtypepair 2 ${i_A3} ${i_A3} &
+                                                           ${i_A3} ${i_A3}
+fix m21 all property/global kcinCustom peratomtypepair 2 ${i_kcin} ${i_kcin} &
+                                                         ${i_kcin} ${i_kcin}
+
+# - rolling resistance
+fix m22 all property/global coefficientRollingFriction peratomtypepair 2 ${i_rolling} ${i_rolling} &
+									 ${i_rolling} ${i_rolling}
+
+#---------------pair style
+pair_style      gran model hysteretic/nonlinear1 tangential history
+pair_coeff      * *
+
+# - create atoms
+# include ./input_atoms.lmp
+
+create_atoms 1 single 0.0015 0.0015 0.0015
+create_atoms 1 single 0.0015 0.0015 0.0045
+
+set group all type 1 density ${i_density} diameter 0.003
+
+variable h_limit equal 0.0030
+region sphere_bulk block INF INF INF INF INF ${h_limit} units box
+group bulk region sphere_bulk
+fix fz bulk freeze
+
+region sphere_wall block INF INF INF INF ${h_limit} INF units box
+group top_lid region sphere_wall
+set group top_lid type 1
+
+# - calculate compressive force
+variable loading_tar equal -1000.0
+variable my_area equal 0.003*0.003
+variable force_loading_tar equal ${loading_tar}*${my_area}
+variable total_time equal 0.10
+variable slope equal ${force_loading_tar}/${total_time}
+variable my_time equal time
+variable my_force equal time*${slope} # linear force
+# variable my_force equal ${force_loading_tar} # constant force 
+variable out_stress equal my_force*100/${my_area}
+
+# - add force to the sphere wall
+velocity top_lid set 0.0 0.0 0.0
+fix freez top_lid setforce 0.0 0.0 NULL
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+
+
+fix integrsp all nve/sphere
+# fix integrsp2 top_lid nve/nonspherical
+
+# - boundary
+fix mesh_side_z0 all wall/gran model hertz tangential history primitive type 2 zplane 0.0
+fix mesh_side_x0 all wall/gran model hertz tangential history primitive type 2 xplane 0.0
+fix mesh_side_x1 all wall/gran model hertz tangential history primitive type 2 xplane 0.003
+fix mesh_side_y0 all wall/gran model hertz tangential history primitive type 2 yplane 0.0
+fix mesh_side_y1 all wall/gran model hertz tangential history primitive type 2 yplane 0.003
+
+
+# - test settings
+variable  i_timestep     equal 1.0e-6
+variable  i_dump_skip    equal 1000
+
+# - define dump output
+fix             ts all check/timestep/gran 1 0.2 0.2
+compute         cf all pair/gran/local pos force force_normal vel contactPoint delta
+
+# - define thermo output
+variable my_disp_z1 equal ${h_limit}-z[2]
+variable my_fz_1 equal fz[2]
+variable my_vel_z1 equal vz[2]
+variable my_disp_z2 equal z[1]
+variable my_vel_z2 equal vz[1]
+
+# - define output
+variable topFx equal f_loading[1]
+variable topFy equal f_loading[2]
+variable topFz equal f_loading[3]
+variable out_strain2 equal abs(v_my_disp_z1+0.0015)/${h_limit}*100
+variable out_stress1 equal abs(v_my_force)/${my_area}
+variable out_stress2 equal abs(v_topFz)/${my_area}
+
+fix printTopComp top_lid print 1000 "${my_time}, ${my_disp_z1}, ${my_vel_z1}, ${my_fz_1}, ${topFz}, ${out_strain2}, ${out_stress2}" &
+     file out_loading.csv title "my_time, my_disp_z1, my_vel_z1, my_fz_z, topFz, out_strain2, out_stress2" screen no
+
+# - screen output
+#thermo_style    custom step ke time f_ts[1] v_my_disp_z1 v_my_fz_1 v_my_vel_z1 v_my_force v_topFz
+#thermo          100
+#thermo_modify   lost ignore norm no
+
+# - dump output
+#dump            ff1 all local/gran/vtk ${i_dump_skip} post/forcechain*.vtk cf
+#dump            dmp1 all custom ${i_dump_skip}  post/balls*.dump    &
+#                  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+#dump	    	dmp2 all custom/vtk ${i_dump_skip} post/balls*.vtk &
+#                  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+
+#dump_modify     ff1 pad 9
+#dump_modify     dmp1 pad 9
+#dump_modify     dmp2 pad 9
+
+# - run settings
+timestep        ${i_timestep}
+variable my_n_dump equal 500
+
+variable my_atoms equal atoms
+variable my_cpu equal cpu
+
+variable my_disp equal f_mesh_lid[9]
+variable my_n_print equal 100
+
+# - finish compression
+run 100000
+# write_restart loading.dat
+
+
+unfix loading
+variable my_force delete
+variable my_force equal ${force_loading_tar}
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - unloading, linear force
+variable unloading_tar equal -10.0
+variable unloading_time equal 0.10
+variable force_unloading_tar equal ${unloading_tar}*${my_area}
+variable unloading_slope equal (${force_loading_tar}-${force_unloading_tar})/${unloading_time}
+variable my_force delete
+variable my_force equal ${force_loading_tar}-(time-0.2)*${unloading_slope}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - holding for a while after unloading
+variable my_force delete
+variable my_force equal ${force_unloading_tar}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - reloading
+variable stress_tar_2 equal -2500.0
+variable force_tar_2 equal ${stress_tar_2}*${my_area}
+variable reloading_time equal 0.1
+variable slope_2 equal (${force_unloading_tar}-${force_tar_2})/${reloading_time}
+variable my_force delete
+variable my_force equal ${force_unloading_tar}-(time-0.4)*${slope_2}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 2
+variable my_force delete
+variable my_force equal ${force_tar_2}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - unloading 2
+variable unloading_slope_2 equal (${force_tar_2}-${force_unloading_tar})/${unloading_time}
+variable my_force delete
+variable my_force equal ${force_tar_2}-(time-0.6)*${unloading_slope_2}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 2
+variable my_force delete
+variable my_force equal ${force_unloading_tar}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - loading 3
+variable stress_tar_3 equal -5000.0
+variable force_tar_3 equal ${stress_tar_3}*${my_area}
+variable slope_3 equal (${force_unloading_tar}-${force_tar_3})/${reloading_time}
+variable my_force delete
+variable my_force equal ${force_unloading_tar}-(time-0.8)*${slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 3
+variable my_force delete
+variable my_force equal ${force_tar_3}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - unlaoding 3
+variable unloading_slope_3 equal (${force_tar_3}-${force_unloading_tar})/${unloading_time}
+variable my_force delete
+variable my_force equal ${force_tar_3}-(time-1.0)*${unloading_slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 3
+variable my_force delete
+variable my_force equal ${force_unloading_tar}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+
+# - loading 4
+variable stress_tar_3 equal -7500.0
+variable force_tar_3 equal ${stress_tar_3}*${my_area}
+variable slope_3 equal (${force_unloading_tar}-${force_tar_3})/${reloading_time}
+variable my_force delete
+variable my_force equal ${force_unloading_tar}-(time-1.2)*${slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 4
+variable my_force delete
+variable my_force equal ${force_tar_3}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - unlaoding 4
+variable unloading_slope_3 equal (${force_tar_3}-${force_unloading_tar})/${unloading_time}
+variable my_force delete
+variable my_force equal ${force_tar_3}-(time-1.4)*${unloading_slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 4
+variable my_force delete
+variable my_force equal ${force_unloading_tar}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+
+
+# - loading 5
+variable stress_tar_3 equal -10000.0
+variable force_tar_3 equal ${stress_tar_3}*${my_area}
+variable slope_3 equal (${force_unloading_tar}-${force_tar_3})/${reloading_time}
+variable my_force delete
+variable my_force equal ${force_unloading_tar}-(time-1.6)*${slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 5
+variable my_force delete
+variable my_force equal ${force_tar_3}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - unlaoding 5
+variable unloading_slope_3 equal (${force_tar_3}-${force_unloading_tar})/${unloading_time}
+variable my_force delete
+variable my_force equal ${force_tar_3}-(time-1.8)*${unloading_slope_3}
+
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+
+# - sitting 5
+variable my_force delete
+variable my_force equal ${force_unloading_tar}
+unfix loading
+fix loading top_lid aveforce 0.0 0.0 v_my_force
+run 100000
+

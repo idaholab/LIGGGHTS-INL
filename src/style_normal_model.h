@@ -7,6 +7,7 @@
 #include "normal_model_hooke.h"
 #include "normal_model_hooke_hysteresis.h"
 #include "normal_model_hooke_stiffness.h"
-#include "normal_model_hysteretic_nonlinear.h"
+#include "normal_model_hysteretic_nonlinear1.h"
+#include "normal_model_hysteretic_nonlinear2.h"
 #include "normal_model_luding.h"
 #include "normal_model_thornton_ning.h"
