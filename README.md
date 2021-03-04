@@ -52,6 +52,18 @@ An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
 
 (Detailed instruction to be updated ...)
 
+## User Examples
+
+### Strain-hardening nonlinear normal contact
+
+An example of controlled collision between two spherical particles can be found at:
+
+`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1`
+
+The simulation result is shown in the following plot:
+
+<img src="figs/fig_strain_hardening_nonlinear_normal_contact.png">
+
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
 
