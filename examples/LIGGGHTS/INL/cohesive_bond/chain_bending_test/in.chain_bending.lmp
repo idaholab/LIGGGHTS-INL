@@ -1,7 +1,7 @@
 variable	dt		equal 2e-7
 variable	i_dump_skip	equal 200
 
-#-------------- initial settings
+############### initial settings
 
 echo		both
 units		si
@@ -12,23 +12,67 @@ newton		off
 communicate	single vel yes
 hard_particles	yes
 
-# ------------- domain setup
+############### domain setup
 
 region		reg_domain block -0.005 0.005 -0.005 0.005 0.000 0.008 units box
 create_box	1 reg_domain
 neighbor	5e-4 bin
 neigh_modify	delay 0
 
-# ------------- define variables
+###############
+############### begin: define variables
+###############
 
-include         ../input/in.param.lmp
+############### material properties
 
-#-------------- pair style
+variable        i_density               equal  430.0
+
+############### Hertz contact model
+
+variable        i_poisson               equal  0.3
+variable        i_restitution           equal  0.1
+variable        i_fric                  equal  0.5
+
+############### cohesion bond
+
+variable        i_damping               equal 0.0
+variable        i_bond_radius           equal 1.0
+variable        i_max_dist_bond         equal 0.0015
+variable        i_min_dist_bond         equal 0.0011
+
+############### variables for bond contact model
+
+variable        i_E                     equal  10e6
+variable        i_nBondK                equal  ${i_E}*1e3 #10e9 #${i_E}*1e3
+variable        i_tBondK                equal  ${i_nBondK}*0.06
+
+############### material properties
+
+fix             m01 all property/global youngsModulus peratomtype ${i_E}
+fix             m02 all property/global poissonsRatio peratomtype ${i_poisson}
+fix             m03 all property/global coefficientRestitution peratomtypepair 1 ${i_restitution}
+fix             m04 all property/global coefficientFriction peratomtypepair 1 ${i_fric}
+fix             m05 all property/global radiusMultiplierBond peratomtypepair 1 ${i_bond_radius}
+fix             m06 all property/global normalBondStiffnessPerUnitArea peratomtypepair 1 ${i_nBondK}
+fix             m07 all property/global tangentialBondStiffnessPerUnitArea peratomtypepair 1 ${i_tBondK}
+fix             m08 all property/global maxDistanceBond peratomtypepair 1 ${i_max_dist_bond}
+fix             m09 all property/global dampingNormalForceBond peratomtypepair 1 ${i_damping}
+fix             m10 all property/global dampingTangentialForceBond peratomtypepair 1 ${i_damping}
+fix             m11 all property/global dampingNormalTorqueBond peratomtypepair 1 ${i_damping}
+fix             m12 all property/global dampingTangentialTorqueBond peratomtypepair 1 ${i_damping}
+fix             m13 all property/global tsCreateBond scalar 1
+fix             m14 all property/global createDistanceBond peratomtypepair 1 ${i_min_dist_bond}
+
+###############
+############### end: define variables
+###############
+
+############### pair style
 
 pair_style	gran model hertz tangential history cohesion bond
 pair_coeff	* *
 
-#-------------- create particle shape: fiber
+############### create particle shape: fiber
 
 create_atoms	1 single 0 0 0
 create_atoms	1 single 0 0 0.001
@@ -45,30 +89,26 @@ fix		bound_end end addforce 1 0.0 0.0
 fix		VISC all viscous 0.2
 fix		integrsp all nve/sphere
 
-# - define dump output
+############### define dump output
 
 fix		ts all check/timestep/gran ${i_dump_skip} 0.2 0.2
 
-# - define thermo output
+############### define thermo output
 
 variable	i_disp equal x[5]
 
-
-
-
-
-# - track the bonds
+############### track the bonds
 
 compute		bond_status all bond/counter
 compute		bond_force  all pair/gran/local/bond
 
-# - screen output
+############### screen output
 
 thermo_style	custom step atoms ke cpu time f_ts[1] f_ts[2] c_bond_status[3] v_i_disp
 thermo		${i_dump_skip}
 thermo_modify	lost ignore norm no
 
-# - dump output
+############### dump output
 
 dump		dmp1 all custom/vtk ${i_dump_skip}  balls*.vtk  &
 		  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
@@ -82,7 +122,7 @@ dump_modify     dmp1 pad 9
 dump_modify     dmp2 pad 9
 dump_modify     dmp3 pad 9
 
-# - run settings
+############## run settings
 
 timestep   ${dt}
 run        100000
