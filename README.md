@@ -62,7 +62,7 @@ An example of controlled collision between two spherical particles can be found 
 
 The simulation result is shown in the following plot:
 
-<img src="figs/fig_strain_hardening_nonlinear_normal_contact.png">
+<img src="figs/fig_nonlinear_contact.png">
 
 ### Elastoplastic bond normal stiffness
 
