@@ -1,6 +1,7 @@
 doxygen
 warnings.liggghts
 log.liggghts
+*.swp
 *.csv
 *.png
 *.pdf

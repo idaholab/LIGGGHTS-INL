@@ -5,7 +5,7 @@ Granular Flow
 
 ## Citing LIGGGHTS-INL
 
-If you are using results generated with LIGGGHTS-INL, please cite the following paper:
+If you are using results generated with LIGGGHTS-INL, please cite the following articles:
 
 Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
 
@@ -52,7 +52,7 @@ An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
 
 (Detailed instruction to be updated ...)
 
-## User Examples
+## Examples of LIGGGHTS-INL Capabilities
 
 ### Strain-hardening nonlinear normal contact
 
@@ -63,6 +63,16 @@ An example of controlled collision between two spherical particles can be found 
 The simulation result is shown in the following plot:
 
 <img src="figs/fig_strain_hardening_nonlinear_normal_contact.png">
+
+### Elastoplastic bond normal stiffness
+
+An example of microfiber made of five bonded spheres can be found at:
+
+`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_um_2`
+
+The simulation result is shown in the following plot:
+
+<img src="figs/fig_microfiber.png">
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
