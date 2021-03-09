@@ -52,7 +52,9 @@ An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
 
 (Detailed instruction to be updated ...)
 
-## Examples of LIGGGHTS-INL Capabilities
+## Examples of Extended Capabilities in LIGGGHTS-INL
+
+The following examples of nonlinear contact and bond stiffness models in LIGGGHTS-INL are extended from LIGGGHTS-PUBLIC. No user manual has yet been created for these extended models. Interested users are referred to the listed journal articles and/or user examples below for more information.
 
 ### Strain-hardening nonlinear normal contact
 
