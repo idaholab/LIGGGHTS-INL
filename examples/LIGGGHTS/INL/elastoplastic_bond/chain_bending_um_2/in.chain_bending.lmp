@@ -134,6 +134,7 @@ fix		ffrz bot freeze
 velocity	top set 5.0 0.0 0.0
 
 ############### Integrator setting
+
 timestep	1e-7
 fix		integrsp all nve/sphere
 fix		ts all check/timestep/gran 1 0.2 0.2
@@ -145,7 +146,7 @@ thermo		100
 
 ############### Output: vtk
 
-compute		cf all pair/gran/local pos force force_normal vel contactPoint delta
+#compute		cf all pair/gran/local pos force force_normal vel contactPoint delta
 #dump		dmp1 all custom/vtk 1000 post/balls*.vtk id type x y z vx vy vz fx fy fz omegax omegay omegaz tqx tqy tqz radius
 #dump		dmp2 all local/gran/vtk 1000 post/forcechain*.vtk cf
 #dump_modify	dmp1 pad 9
@@ -159,4 +160,5 @@ fix		print_data all print 100 &
 		file output.csv screen no
 
 ############### Let's run
+
 run		50000
