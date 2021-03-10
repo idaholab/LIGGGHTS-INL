@@ -68,13 +68,22 @@ The simulation result is shown in the following plot:
 
 ### Elastoplastic bond normal stiffness
 
+An example of macro-fiber made of five bonded spheres can be found at:
+
+`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_mm_2`
+
+The simulation result is shown in the following plot:
+
+<img src="figs/fig_string_mm.png">
+
+
 An example of microfiber made of five bonded spheres can be found at:
 
 `<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_um_2`
 
 The simulation result is shown in the following plot:
 
-<img src="figs/fig_microfiber.png">
+<img src="figs/fig_string_um.png">
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
