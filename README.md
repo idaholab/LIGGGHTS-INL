@@ -3,6 +3,8 @@ Granular Flow
 
 **LIGGGHTS-INL is a capability-extended version of LIGGGHTS**. LIGGGHTS is an Open Source Discrete Element Method Particle Simulation Software ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). LIGGGHTS stands for LAMMPS improved for general granular and granular heat transfer simulations. LAMMPS is a classical molecular dynamics simulator. It is widely used in the field of Molecular Dynamics ([https://lammps.sandia.gov/doc/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). Thanks to physical and algorithmic analogies, LAMMPS is a very good platform for DEM simulations. LAMMPS offers a GRANULAR package to perform these kinds of simulations. LIGGGHTS aims to improve those capability with the goal to apply it to industrial applications.
 
+<img src="figs/fig_liggghts_inl_banner.png">
+
 ## Citing LIGGGHTS-INL
 
 If you are using results generated with LIGGGHTS-INL, please cite the following articles:
