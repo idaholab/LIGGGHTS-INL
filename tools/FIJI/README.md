@@ -9,69 +9,74 @@ A concise user tutorial is provided.
 
 ## Import image sequence
 
-File -> Import -> Image Sequence
+`File -> Import -> Image Sequence`
+
 
 <img src="figs/fig_fiji_step01.png">
 
 ## Crop image sequence (optional)
 
-Select region. Then go to Image -> Crop
+Select region. Then do
+`Image -> Crop`
+
+We recommend saving the cropped image sequence in TIFF and load it again for the following operations. This saves computer memory if the memory limit is a concern.
 
 <img src="figs/fig_fiji_step02.png">
 
-## Decide thrshold
+## Decide threshold
 
 ### Auto local threshold
+
+Only good with high-contrast images. Low-contrast images like those of biomass should not use any automatic thresholding.
 
 <img src="figs/fig_fiji_step03.png">
 
 ### Manual threshold
 
-Image -> Adjust -> Threshold
+`Image -> Adjust -> Threshold`
+
+Low-contrast images like those of biomass should require manual thresholding.
 
 <img src="figs/fig_fiji_step04.png">
 
 ## Binarize images
 
-Process -> Binary -> Make Binary
+`Process -> Binary -> Make Binary`
+
+Equivalent to auto threshholding. Should not apply to low-contrast images like those of biomass.
 
 <img src="figs/fig_fiji_step05.png">
 
 ## Denoise (optional)
 
-### Salt and pepper
+### Despeckle
 
-Process -> Noise -> Despeckle
+`Process -> Noise -> Despeckle`
 
 <img src="figs/fig_fiji_step06.png">
 
-### Manual denoise
+## Subtract background (optional)
 
-<img src="figs/fig_fiji_step07.png">
+`Process -> Subtract Background`
 
-## Subtract background
-
-Process -> Subtract Background
+Do not subtract background if already binarized.
 
 <img src="figs/fig_fiji_step08.png">
 
 ## Check the 3D view (optional)
 
-Plug-ins -> 3D Viewer
+`Plug-ins -> 3D Viewer`
 
 <img src="figs/fig_fiji_step09.png">
 
 ## Save image stack and image sequence
 
-File -> Save As -> Image Sequence
+`File -> Save As -> Image Sequence`
 
 <img src="figs/fig_fiji_step10.png">
 
-## Export *.obj file and visualize in ParaView
+## Export XYZ coordinates and visualize in ParaView
 
-File -> Save As -> Waterfront OBJ
-
-<img src="figs/fig_fiji_step11.png">
-
+`Analyze -> Tools -> Save XY Coordinates (save all slices)`
 
 
