@@ -2,7 +2,7 @@
 
 <img src="figs/fig_liggghts_inl_banner.png">
 
-**LIGGGHTS-INL is a capability-extended version of LIGGGHTS (Release Version 4.0.0)**. LIGGGHTS is an Open Source Discrete Element Method (DEM) Particle Simulation Software ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). LIGGGHTS stands for **L**AMMPS **i**mproved for **g**eneral **g**ranular and **g**ranular **h**eat **t**ransfer **s**imulations. LAMMPS is a classical molecular dynamics simulator ([https://lammps.sandia.gov/doc/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). 
+**LIGGGHTS-INL** is a capability-extended adaptation of the LIGGGHTS Open Source Discrete Element Method (DEM) Particle Simulation Software based on LIGGGHTS release version 4.0.0. 
 
 ## Citing LIGGGHTS-INL
 
@@ -14,15 +14,12 @@ If you are using results generated with LIGGGHTS-INL, please cite the following 
 
 ## Documentation
 
-Notice that the website for LIGGGHTS-PUBLIC documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) does not contain the extended capabilities in LIGGGHTS-INL, e.g., the bonded-sphere model. 
+Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** (e.g., the bonded-sphere model) can be found in this repository. Examples are provided below.
 
-Documentation of the bonded-sphere model:
-
-`<LIGGGHTS-INL repository>/doc/gran_cohesion_bond.html`
-
-User examples of the bonded-sphere model:
-
-`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/cohesive_bond `
+* Documentation of the bonded-sphere model:
+`<repository>/doc/gran_cohesion_bond.html`
+* User examples of the bonded-sphere model:
+`<repository>/examples/LIGGGHTS/INL/cohesive_bond `
 
 ## Instructions for Code Compilation
 
@@ -30,28 +27,22 @@ User examples of the bonded-sphere model:
 
 #### Ubuntu 20.04
 
-Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
-
-Install VTK 7.1: `sudo apt-get install libvtk7-dev`
-
-Navigate to `<LIGGGHTS-INL repository>/src/`
-
-Compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
-
-If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04` 
+* Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
+* Install VTK 7.1: `sudo apt-get install libvtk7-dev`
+* Navigate to `<repository>/src/`
+* Compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
+* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04` 
 
 
 ### macOS
 
-Use Homebrew to install OpenMPI.
-
-**Special notice**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML. We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory. To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
+* Use Homebrew to install OpenMPI.
+* (Detailed instruction to be updated ...)
 
 An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
+`<repository>/src/MAKE/Makefile.mpi_vtk-7.1`
 
-`<LIGGGHTS-INL repository>/src/MAKE/Makefile.mpi_vtk-7.1`
-
-(Detailed instruction to be updated ...)
+**Attention**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML. We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory. To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
 
 ## Examples of Extended Capabilities in LIGGGHTS-INL
 
@@ -61,7 +52,7 @@ The following examples of nonlinear contact and bond stiffness models in LIGGGHT
 
 An example of controlled collision between two spherical particles can be found at:
 
-`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1`
+`<repository>/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1`
 
 The simulation result is shown in the following plot:
 
@@ -71,7 +62,7 @@ The simulation result is shown in the following plot:
 
 An example of macro-fiber made of five bonded spheres can be found at:
 
-`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_mm_2`
+`<repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_mm_2`
 
 The simulation result is shown in the following plot:
 
@@ -80,7 +71,7 @@ The simulation result is shown in the following plot:
 
 An example of microfiber made of five bonded spheres can be found at:
 
-`<LIGGGHTS-INL repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_um_2`
+`<repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_um_2`
 
 The simulation result is shown in the following plot:
 
