@@ -1,18 +1,16 @@
 # LIGGGHTS-INL
-Granular Flow 
 
 <img src="figs/fig_liggghts_inl_banner.png">
 
-**LIGGGHTS-INL is a capability-extended version of LIGGGHTS (Release Version 4.0.0)**. LIGGGHTS-INL encompass LIGGGHTS is an Open Source Discrete Element Method (DEM) Particle Simulation Software ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). LIGGGHTS stands for LAMMPS improved for general granular and granular heat transfer simulations. LAMMPS is a classical molecular dynamics simulator. It is widely used in the field of Molecular Dynamics ([https://lammps.sandia.gov/doc/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). Thanks to physical and algorithmic analogies, LAMMPS is a very good platform for DEM simulations. LAMMPS offers a GRANULAR package to perform these kinds of simulations. LIGGGHTS aims to improve those capability with the goal to apply it to industrial applications.
-
+**LIGGGHTS-INL is a capability-extended version of LIGGGHTS (Release Version 4.0.0)**. LIGGGHTS is an Open Source Discrete Element Method (DEM) Particle Simulation Software ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). LIGGGHTS stands for **L**AMMPS **i**mproved for **g**eneral **g**ranular and **g**ranular **h**eat **t**ransfer **s**imulations. LAMMPS is a classical molecular dynamics simulator ([https://lammps.sandia.gov/doc/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)). 
 
 ## Citing LIGGGHTS-INL
 
 If you are using results generated with LIGGGHTS-INL, please cite the following articles:
 
-Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
-
-Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear," *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
+* Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, and Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
+* Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, and Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
+* Yuan Guo, Qiushi Chen, Yidong Xia, Jordan Klinger, and Vicki Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." *Powder Technology* (2021). [https://doi.org/10.1016/j.powtec.2021.03.008](https://doi.org/10.1016/j.powtec.2021.03.008)
 
 ## Documentation
 
