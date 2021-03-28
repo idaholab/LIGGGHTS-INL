@@ -10,7 +10,7 @@ If you are using results generated with LIGGGHTS-INL, please cite the following 
 
 * Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, and Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
 * Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, and Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
-* Yuan Guo, Qiushi Chen, Yidong Xia, Jordan Klinger, and Vicki Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." *Powder Technology* (2021). [https://doi.org/10.1016/j.powtec.2021.03.008](https://doi.org/10.1016/j.powtec.2021.03.008)
+* Yuan Guo, Qiushi Chen, Yidong Xia, Jordan Klinger, and Vicki Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." *Powder Technology* 385 (2021): 557-571. [https://doi.org/10.1016/j.powtec.2021.03.008](https://doi.org/10.1016/j.powtec.2021.03.008)
 
 ## Documentation
 
@@ -37,12 +37,10 @@ Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.
 ### macOS
 
 * Use Homebrew to install OpenMPI.
-* (Detailed instruction to be updated ...)
+* Install VTK 7.1. **Attention**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML. We suggest users build VTK 7.1 from source (with **MPI enabled** and in **Release mode**) and install the libraries in a common directory. To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
+* Navigate to `<repository>/src/`
+* An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at: `<repository>/src/MAKE/Makefile.mpi_vtk-7.1`. In this example, we assume that VTK 7.1 is installed in a user-specified diretory: `/opt/vtk`. So Compile the code with VTK: `make -j4 mpi_vtk-7.1`. 
 
-An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at:
-`<repository>/src/MAKE/Makefile.mpi_vtk-7.1`
-
-**Attention**: Do not use Homebrew to install VTK. The VTK libraries from Homebrew were pre-built without MPI enabled. So a number of VTK libraries needed by LIGGGHTS-INL are missing, e.g., vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, and vtkIOParallelXML. We suggest users build VTK 7.1 from source (with MPI enabled and in Release mode) and install the libraries in a common directory. To build VTK from source, additional prerequisite libraries are needed and can be installed from Homebrew.
 
 ## Examples of Extended Capabilities in LIGGGHTS-INL
 
