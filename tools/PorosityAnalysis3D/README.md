@@ -13,6 +13,7 @@ Technical point of contact: Yidong Xia ([yidong.xia@inl.gov](yidong.xia@inl.gov)
 If you are using results generated with our MATLAB codes, please cite the following article:
 
 Quan Sun, Yidong Xia, Jordan Klinger, Robert Seifert, Joshua Kane, Vicki Thompson, Qiushi Chen, "X-ray computer tomography-based porosity analysis: Algorithms and application for porous woody biomass." *Powder Technology* 388 (2021): 496-504. [https://doi.org/10.1016/j.powtec.2021.05.006](https://doi.org/10.1016/j.powtec.2021.05.006)
+<img src="fig_banner.png">
 
 A PDF copy of the authors' manuscript (no journal typesetting) is available on [ResearchGate](https://www.researchgate.net/publication/351366143_X-ray_computed_tomography-based_porosity_analysis_Algorithms_and_application_for_porous_woody_biomass).
 
