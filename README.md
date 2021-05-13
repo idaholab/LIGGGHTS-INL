@@ -12,7 +12,12 @@ If you are using results generated with LIGGGHTS-INL, please cite the following 
 * Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, and Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
 * Yuan Guo, Qiushi Chen, Yidong Xia, Jordan Klinger, and Vicki Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." *Powder Technology* 385 (2021): 557-571. [https://doi.org/10.1016/j.powtec.2021.03.008](https://doi.org/10.1016/j.powtec.2021.03.008)
 
-## Documentation
+## Auxiliary 3D Image Processing and Analysis Tools
+
+- A set of MATLAB codes for 3D image-based porosity analysis: [tools/PorosityAnalysis3D](tools/PorosityAnalysis3D)
+- A concise FIJI user tutorial for 3D image binarization: [tools/FIJI](tools/FIJI)
+
+## LIGGGHTS-INL Documentation
 
 Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** (e.g., the bonded-sphere model) can be found in this repository. Examples are provided below.
 
@@ -74,6 +79,9 @@ An example of microfiber made of five bonded spheres can be found at:
 The simulation result is shown in the following plot:
 
 <img src="figs/fig_string_um.png">
+
+
+
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
