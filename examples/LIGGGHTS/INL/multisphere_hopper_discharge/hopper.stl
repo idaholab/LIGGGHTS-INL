@@ -1,0 +1,32 @@
+solid Body 1
+  facet normal -8.191521e-01 5.735764e-01 0.000000e+00
+    outer loop
+      vertex 1.770729e-01 2.457456e-01 5.000000e-03
+      vertex 1.770729e-01 2.457456e-01 -5.000000e-03
+      vertex 5.000000e-03 0.000000e+00 5.000000e-03
+    endloop
+  endfacet
+  facet normal -8.191521e-01 5.735764e-01 0.000000e+00
+    outer loop
+      vertex 5.000000e-03 0.000000e+00 5.000000e-03
+      vertex 1.770729e-01 2.457456e-01 -5.000000e-03
+      vertex 5.000000e-03 0.000000e+00 -5.000000e-03
+    endloop
+  endfacet
+endsolid Body 1
+solid Body 2
+  facet normal 8.191521e-01 5.735764e-01 0.000000e+00
+    outer loop
+      vertex -5.000000e-03 0.000000e+00 5.000000e-03
+      vertex -5.000000e-03 0.000000e+00 -5.000000e-03
+      vertex -1.770729e-01 2.457456e-01 5.000000e-03
+    endloop
+  endfacet
+  facet normal 8.191521e-01 5.735764e-01 0.000000e+00
+    outer loop
+      vertex -1.770729e-01 2.457456e-01 5.000000e-03
+      vertex -5.000000e-03 0.000000e+00 -5.000000e-03
+      vertex -1.770729e-01 2.457456e-01 -5.000000e-03
+    endloop
+  endfacet
+endsolid Body 2

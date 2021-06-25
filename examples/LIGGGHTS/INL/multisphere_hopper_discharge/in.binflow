@@ -1,0 +1,146 @@
+### Initialization
+
+############### Preliminaries
+units		si
+atom_style	sphere
+atom_modify	map array
+boundary	p f p
+#boundary	f f f
+newton		off
+communicate	single vel yes
+processors	* * 1 grid twolevel 24 * * 1
+
+############### Declare domain
+#region		domain block -0.3 0.3 -0.2 0.5 -0.005 0.005 units box # still useful for moving mesh
+region		domain block -0.18 0.18 -0.15 0.25 -0.005 0.005 units box # use smaller domain if meshes do not move
+create_box	5 domain # the last is wall
+
+############### Neighbor listing
+neighbor	0.002 bin # 2x of particle radius may be good
+neigh_modify	delay 0
+
+### Setup
+
+############### Material and interaction properties required
+fix		m1 all property/global youngsModulus peratomtype 5e6 5e6 5e6 5e6 25e6
+fix		m2 all property/global poissonsRatio peratomtype 0.25 0.25 0.25 0.25 0.25
+
+fix		m3 all property/global coefficientRestitution peratomtypepair 5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5
+
+fix		m4 all property/global coefficientFriction peratomtypepair 5 &
+		0.2 0.2 0.2 0.2 0.5 &
+		0.2 0.2 0.2 0.2 0.5 &
+		0.2 0.2 0.2 0.2 0.5 &
+		0.2 0.2 0.2 0.2 0.5 &
+		0.5 0.5 0.5 0.5 0.5
+
+fix		m11 all property/global coefficientRollingFriction peratomtypepair 5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5 &
+		0.5 0.5 0.5 0.5 0.5
+
+fix             m5 all property/global minSeparationDistanceRatio scalar 1.01
+                #(value=value for the minimum separation distance, recommended as 1.01)
+
+fix             m6 all property/global maxSeparationDistanceRatio scalar 1.1
+                #(value=value for the maximum separation distance, recommended as 1.1)
+
+fix             m7 all property/global surfaceLiquidContentInitial scalar 1.1e-6 # 0 go |1e-3 jam|1e-4 jam|1e-5 jam|1e-8 go|1e-7go|1e-6 go|5e-6 jam|2.5e-6 jam|2e-6 jam|1.5e-6 jam|1.25e-6 jam
+                #(value=value for the initial surface liquid volume in % of the solid volume)
+
+fix             m8 all property/global surfaceTension scalar 71.97e-3 # water at 25 deg.C
+                #(value=value for the surface tension of liquid (SI units N/m))
+
+fix             m9 all property/global fluidViscosity scalar 8.90e-4 # water at 25 deg.C
+                #(value=value for the fluidViscosity (SI units Pas))
+
+fix             m10 all property/global contactAngle peratomtype 1.0472 1.0472 1.0472 1.0472 2.61799
+                #(value_i=value for contact angle of atom type i and fluid)
+
+
+############### Particle insertion
+fix             body1 all particletemplate/multisphere 15485863 atom_type 1 density constant 500 &
+		nspheres 5 ntry 1000000 spheres file body_type1.dat scale 1.0 type 1
+
+fix             body2 all particletemplate/multisphere 67867967 atom_type 2 density constant 500 &
+		nspheres 6 ntry 1000000 spheres file body_type2.dat scale 1.0 type 2
+
+fix             body3 all particletemplate/multisphere 86028121 atom_type 3 density constant 500 &
+		nspheres 8 ntry 1000000 spheres file body_type3.dat scale 1.0 type 3
+
+fix             body4 all particletemplate/multisphere 86028157 atom_type 4 density constant 500 &
+		nspheres 7 ntry 1000000 spheres file body_type4.dat scale 1.0 type 4
+
+fix		pdd all particledistribution/discrete/numberbased 15485867 4 body1 0.8 body2 0.05 body3 0.05 body4 0.1
+
+#region		factory block -0.17 0.17 0.25 0.45 -0.003 0.003 units box # too inefficient
+region		fac1 wedge axis z center 0 0.001 radius 0.25 bounds -0.004 0.004 angle0 55 angle 70 units box
+region		fac2 block -0.15 0.15 0.001 0.15 -0.004 0.004 units box
+region		factory intersect 2 fac1 fac2
+
+fix		ins all insert/pack seed 32452843 distributiontemplate pdd vel constant 0. 0. 0. &
+		insert_every once overlapcheck yes region factory ntry_mc 10000 volumefraction_region 0.8
+
+############### Import mesh from cad:
+fix		cad1 all mesh/surface file hopper.stl    type 5 scale 1.0
+#fix		cad2 all mesh/surface file sides.stl     type 5 scale 1.0
+
+############### Use the imported mesh as granular wall
+#fix		geo1 all wall/gran model hertz tangential history mesh n_meshes 2 meshes cad1 cad2
+fix		geo1 all wall/gran model hertz tangential history rolling_friction cdt mesh n_meshes 1 meshes cad1
+
+############### Create stopper for funnel
+fix		stopper_bot all wall/gran model hertz tangential history primitive type 5 yplane  0.0
+fix		stopper_low all wall/gran model hertz tangential history primitive type 5 yplane -0.15
+fix		stopper_top all wall/gran model hertz tangential history primitive type 5 yplane  0.25
+
+############### Define the physics
+pair_style	gran model hertz tangential history cohesion easo/capillary/viscous rolling_friction cdt
+pair_coeff	* *
+
+### Detailed settings
+
+############### Integrator for multisphere rigid bodies
+fix		integr all multisphere
+
+############### Gravity
+fix		grav all gravity 9.81 vector 0.0 -1.0 0.0
+
+############### Time step
+timestep	0.000002
+
+############### Thermodynamic output settings
+thermo_style	custom step atoms ke cpu
+thermo		50000
+thermo_modify	norm no #lost ignore # I suspect it cannot be used along with periodic bcs
+
+############### Check time step and initialize dump file
+fix		ctg all check/timestep/gran 1 0.01 0.01
+run		1
+unfix		ctg
+
+############### Create imaging information
+#dump		dumpstl all stl 10000 dump*.stl
+dump		dmp all custom 50000 out.*.dump id type x y z radius #ix iy iz vx vy vz fx fy fz omegax omegay omegaz
+dump_modify     dmp pad 7 first yes
+
+### Execution and further settings
+
+############### Fill the container
+run		250000 upto
+
+############### Pull the stopper
+#unfix		ins
+unfix		stopper_bot
+unfix		stopper_top
+#unfix		geo1
+#fix		geo2 all wall/gran model hertz tangential history mesh n_meshes 1 meshes cad1
+
+run		9000000
