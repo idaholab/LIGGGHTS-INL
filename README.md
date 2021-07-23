@@ -80,7 +80,15 @@ The simulation result is shown in the following plot:
 
 <img src="figs/fig_string_um.png">
 
+### Micro-biomechanics
 
+An example of compression test of a pine wood particle microstructural region of interest (ROI) can be found at:
+
+`<repository>/examples/LIGGGHTS/INL/microstructure_compression`
+
+The instantaneous snapshots of the simulation are shown in the following graph:
+
+<img src="figs/fig_microstructure_compression.png">
 
 
 ## Other Software
