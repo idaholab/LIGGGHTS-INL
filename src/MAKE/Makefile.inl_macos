@@ -1,14 +1,5 @@
-# mpi = mpic++, VTK 7.1.0 (alternative compilation, might need modification)
-##########################################################################
-#   This configuration is specifically for an INL Mac computer
-# in which MOOSE Environment is installed.
-#   MOOSE Environment uses CLANG compilers by default,
-# which does not support the "atoi" function.
-#   Therefore, users have to manually assign path to GCC compilers.
-# The path to the GCC compilers depend on the version of MOOSE Environment
-#   It is VERY important to use the matched "mpirun" or "mpiexec" for
-# running simulations. Otherwise there could be unexpected breakdown!!!
-##########################################################################
+# Tested on macOS Catalina
+# mpi = mpic++ (MPICH4), VTK 7.1 is installed in home folder
 
 SHELL = /bin/sh
 
@@ -16,17 +7,17 @@ SHELL = /bin/sh
 # compiler/linker settings
 # specify flags and libraries needed for your compiler
 
-CC =		/opt/moose/mpich/mpich-3.2/gcc-opt/bin/mpic++
+CC =		mpic++
 # Optimized version
-CCFLAGS =	-O2 -funroll-loops -fstrict-aliasing -Wall -Wno-unused-result -fPIC
+CCFLAGS =	-O3 -funroll-loops -fstrict-aliasing -Wall -Wno-unused-result -fPIC
 # Debug version
 #CCFLAGS =	-Og -g -pg -fPIC
 SHFLAGS =	-fPIC
 DEPFLAGS =	-M
 
-LINK =		/opt/moose/mpich/mpich-3.2/gcc-opt/bin/mpic++
+LINK =		mpic++
 # Optimized version
-LINKFLAGS =	-O2 -fPIC
+LINKFLAGS =	-O3 -fPIC
 # Debug version
 #LINKFLAGS =	-Og -g -pg -fPIC
 LIB =		-lstdc++
@@ -44,7 +35,7 @@ SHLIBFLAGS =	-shared
 # LAMMPS ifdef settings, OPTIONAL
 # see possible settings in doc/Section_start.html#2_2 (step 4)
 
-LMP_INC =	-DLAMMPS_GZIP #-DLAMMPS_VTK
+LMP_INC =	-DLAMMPS_GZIP -DLAMMPS_VTK
 
 # MPI library, REQUIRED
 # see discussion in doc/Section_start.html#2_2 (step 5)
@@ -84,9 +75,9 @@ JPG_LIB =
 # PATH = path for VTK library
 # LIB = name of VTK library
 
-VTK_INC =#	-I/opt/moose/VTK-7.1.0/clang-opt/include/vtk-7.1
-VTK_PATH =#	-L/opt/moose/VTK-7.1.0/clang-opt/lib
-VTK_LIB =#	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
+VTK_INC =	-I${HOME}/opt/vtk/include/vtk-7.1
+VTK_PATH =	-L${HOME}/opt/vtk/lib
+VTK_LIB =	-lvtkCommonCore-7.1 -lvtkIOCore-7.1 -lvtkIOXML-7.1 -lvtkIOLegacy-7.1 -lvtkCommonDataModel-7.1 -lvtkIOParallel-7.1 -lvtkParallelCore-7.1 -lvtkParallelMPI-7.1 -lvtkIOImage-7.1 -lvtkCommonExecutionModel-7.1 -lvtkFiltersCore-7.1 -lvtkIOParallelXML-7.1
 
 # ---------------------------------------------------------------------
 # build rules and dependencies
