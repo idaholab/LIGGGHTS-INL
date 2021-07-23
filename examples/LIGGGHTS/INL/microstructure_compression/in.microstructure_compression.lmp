@@ -1,0 +1,195 @@
+############### Inital setting
+echo		screen
+units		micro
+atom_style	granular
+atom_modify	map array
+boundary	m m m
+newton		off
+communicate	single vel yes
+hard_particles	yes
+
+############### Model setting
+region		reg block -10.0 110.0 -10.0 110.0 0.0 200.0 units box
+create_box	2 reg
+neighbor	2.0 bin
+neigh_modify	delay 0
+
+############### Define variable
+variable	gy_prime file prime_numbers.txt
+variable	gy_density	equal 1089.0
+variable	time_cost	equal time
+variable	vx1		equal vx[1]
+variable	vy1		equal vy[1]
+variable	vz1		equal vz[1]
+variable	px1		equal x[1]
+variable	py1		equal y[1]
+variable	pz1		equal z[1]
+variable	fx1		equal fx[1]
+variable	fy1		equal fy[1]
+variable	fz1		equal fz[1]
+variable	vx2		equal vx[114704]
+variable	vy2		equal vy[114704]
+variable	vz2		equal vz[114704]
+variable	px2		equal x[114704]
+variable	py2		equal y[114704]
+variable	pz2		equal z[114704]
+variable	fx2		equal fx[114704]
+variable	fy2		equal fy[114704]
+variable	fz2		equal fz[114704]
+variable	i_dump_skip	equal 100000
+
+# -------------------------
+# - material properties
+# -------------------------
+
+############### Hertz contact model
+variable	usr_poisson		equal 0.3
+variable	usr_restitution		equal 0.1
+variable	usr_fric_pp		equal 0.5
+variable	usr_E			equal 2.5e5
+variable	gy_E_w			equal 2.5e8
+variable	usr_diameter		equal 2
+############### Bond elastic
+variable	nonlinear_damping	equal 0.0
+variable	nonlinear_bond_radius	equal 1.0
+variable	nonlinear_max_dist	equal 1.5*${usr_diameter}
+variable	nonlinear_min_dist	equal 1.1*${usr_diameter}
+############### Bond strength
+variable	nonlinear_sigma		equal 1.0e5
+variable	nonlinear_sigma2	equal 1.0e5
+variable	nonlinear_tau		equal 1.0e5
+variable	nonlinear_tau2		equal 1.0e5
+variable	nonlinear_TC		equal 1.0 # e.g., 0.5 corresponds to tensile strength equaling to half of compression strength
+############### Bond stiffness
+variable	nonlinear_k_fn1		equal 249750.0
+variable	nonlinear_ku_fn1	equal 2.0*${nonlinear_k_fn1}
+variable	nonlinear_kc_fn1	equal 0.5*${nonlinear_k_fn1}
+variable	nonlinear_k_fn2		equal 249750.0
+variable	nonlinear_ku_fn2	equal 2.0*${nonlinear_k_fn2}
+variable	nonlinear_kc_fn2	equal 0.5*${nonlinear_k_fn2}
+variable	nonlinear_k_ft		equal 96.15
+variable	nonlinear_k_tn		equal 96.15
+variable	nonlinear_ku_tn		equal 2.0*${nonlinear_k_tn}
+variable	nonlinear_kc_tn		equal 0.5*${nonlinear_k_tn}
+variable	nonlinear_k_tt		equal 249750.0
+variable	nonlinear_ku_tt		equal 2.0*${nonlinear_k_tt}
+variable	nonlinear_kc_tt		equal 0.5*${nonlinear_k_tt}
+
+# -------------------------------
+# - assign material properties
+# -------------------------------
+
+############### Hertz contact model parameters
+fix		m01 all property/global youngsModulus peratomtype ${gy_E_w} ${usr_E}
+
+fix		m02 all property/global poissonsRatio peratomtype ${usr_poisson} ${usr_poisson}
+
+fix		m03 all property/global coefficientRestitution peratomtypepair 2 &
+    		${usr_restitution} ${usr_restitution} &
+    		${usr_restitution} ${usr_restitution}
+
+fix		m04 all property/global coefficientFriction peratomtypepair 2 &
+    		${usr_fric_pp} ${usr_fric_pp} &
+		${usr_fric_pp} ${usr_fric_pp}
+
+############### Built-in cohesion bond
+
+fix		m05 all property/global maxSigmaBond peratomtypepair 2 &
+		${nonlinear_sigma2} ${nonlinear_sigma2} &
+		${nonlinear_sigma2} ${nonlinear_sigma2}
+
+fix		m06 all property/global maxTauBond peratomtypepair 2 &
+		${nonlinear_tau2} ${nonlinear_tau2} &
+		${nonlinear_tau2} ${nonlinear_tau2}
+
+fix		m11 all property/global radiusMultiplierBond peratomtypepair 2 1.0 1.0 1.0 1.0
+
+fix		m12 all property/global normalBondStiffnessPerUnitArea peratomtypepair 2 &
+		${nonlinear_k_fn1} ${nonlinear_k_fn1} &
+		${nonlinear_k_fn1} ${nonlinear_k_fn1}
+
+fix		m13 all property/global tangentialBondStiffnessPerUnitArea peratomtypepair 2 &
+		${nonlinear_k_ft} ${nonlinear_k_ft} &
+		${nonlinear_k_ft} ${nonlinear_k_ft}
+
+fix		m14 all property/global maxDistanceBond peratomtypepair 2 &
+		${nonlinear_max_dist} ${nonlinear_max_dist} &
+		${nonlinear_max_dist} ${nonlinear_max_dist}
+
+fix		m15 all property/global dampingNormalForceBond peratomtypepair 2 &
+		${nonlinear_damping} ${nonlinear_damping} &
+		${nonlinear_damping} ${nonlinear_damping}
+
+fix		m16 all property/global dampingTangentialForceBond peratomtypepair 2 0.0 0.0 0.0 0.0
+
+fix		m17 all property/global dampingNormalTorqueBond peratomtypepair 2 0.0 0.0 0.0 0.0
+
+fix		m18 all property/global dampingTangentialTorqueBond peratomtypepair 2 0.0 0.0 0.0 0.0
+
+fix		m19 all property/global tsCreateBond scalar 1
+
+fix		m20 all property/global createDistanceBond peratomtypepair 2 &
+		${nonlinear_min_dist} ${nonlinear_min_dist} &
+		${nonlinear_min_dist} ${nonlinear_min_dist}
+
+############### Define contact
+pair_style	gran model hertz tangential history cohesion bond stressBreak on
+pair_coeff	* *
+
+############### Create particles
+next		gy_prime
+fix		pts1 all particletemplate/multiplespheres ${gy_prime} atom_type 1 density constant ${gy_density} &
+                nspheres 114704 ntry 100000 spheres_different_types file vox_1.lmp scale 1
+create_particles	pts1 single 49.0 49.0 99.0 velocity 0.0 0.0 0.0
+group		lower id <= 5395
+
+fix		ffrz lower freeze
+
+############### Create walls
+fix		mesh_top all mesh/surface/stress file mesh_plate.stl type 1 scale 1000 move 0.0 0.0 200
+fix		mesh_wall all wall/gran model hertz tangential history mesh n_meshes 1 meshes mesh_top
+
+############### Define compute
+timestep	2e-3
+fix		integrsp all nve/sphere
+fix		ts all check/timestep/gran 1 0.2 0.2
+fix		bal all balance 100 xyz 20 1.2
+compute		bond_status all bond/counter
+
+############### Thermo setting
+thermo_style	custom step ke time f_ts[1] v_pz2 v_vz2 v_fz2 c_bond_status[3]
+thermo		10000
+variable	top_Fx equal f_mesh_top[1]
+variable	top_Fy equal f_mesh_top[2]
+variable	top_Fz equal f_mesh_top[3]
+variable	top_pz equal f_mesh_top[9]
+
+############### Output: vtk
+compute		cf all pair/gran/local pos force force_normal vel contactPoint contactArea delta #computes contact force and other attributes.
+
+dump		dmp1 all custom/vtk ${i_dump_skip} post/balls*.vtk id type x y z vx vy vz fx fy fz omegax omegay omegaz tqx tqy tqz radius
+dump_modify	dmp1 pad 9
+
+dump		dmp2 all local/gran/vtk ${i_dump_skip} post/forcechain*.vtk cf
+dump_modify	dmp2 pad 9
+
+dump		dmp3 all mesh/gran/VTK ${i_dump_skip} post/meshes*.vtk id stress mesh_top
+dump_modify	dmp3 pad 9
+
+# Output: dump
+
+dump		dmp4 all custom ${i_dump_skip}  post2/balls*.dump id type x y z vx vy vz fx fy fz omegax omegay omegaz tqx tqy tqz radius
+dump_modify	dmp4 pad 9
+
+#dump		dmp5 all local ${i_dump_skip}  post2/forcechain*.dump cf
+#dump_modify	dmp5 pad 9
+
+dump		dmp6 all mesh/stl ${i_dump_skip} post2/meshes*.stl local
+dump_modify	dmp6 pad 9
+
+############### Output: print
+fix		print_data all print 10000 "${time_cost}, ${vx1}, ${vy1}, ${vz1}, ${px1}, ${py1}, ${pz1}, ${fx1}, ${fy1}, ${fz1}, ${vx2}, ${vy2}, ${vz2}, ${px2}, ${py2}, ${pz2}, ${fx2}, ${fy2}, ${fz2}, ${top_Fx}, ${top_Fy}, ${top_Fz}, ${top_pz}" title "time, vx1, vy1, vz1, px1, py1, pz1, fx1, fy1, fz1, vx2, vy2, vz2, px2, py2, pz2, fx2, fy2, fz2, top_Fx, top_Fy, top_Fz, top_pz" file output.csv screen no
+
+############### Let's run
+fix		move_fixing all move/mesh mesh mesh_top linear 0.0 0.0 -0.1
+run		1000000
