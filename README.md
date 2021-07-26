@@ -101,7 +101,7 @@ Compilation on other Linux distros (e.g., CentOS) is not too different from on U
  * Compile VTK with one CPU core: `make`, or multiple cores, e.g., `make -j4`. Upon completion, you should see something similar to the screenshot below. <img src="figs/vtk/fig_make.png">
  * Install VTK to the designated installation directory: `sudo make install`.
  * Add the location of VTK libraries to the system environment variable: `vi ~/.bash_profile` and add a line `export DYLD_LIBRARY_PATH=/opt/vtk/lib` in the file. Save and quit.
-* Navigate to `<repository>/src/`
+* Open a new Terminal window and navigate to `<repository>/src/`
 * An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at: `<repository>/src/MAKE/Makefile.mpi_vtk-7.1`. In this example, we assume that VTK 7.1 is installed in a user-specified diretory: `/opt/vtk`. So Compile the code with VTK: `make -j4 mpi_vtk-7.1`. 
 
 
