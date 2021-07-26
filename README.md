@@ -86,7 +86,7 @@ Compilation on other Linux distros (e.g., CentOS) is not too different from on U
 
 ### macOS Catalina, Big Sur (Intel chip)
 
-* **Important**: Open a Terminal windows. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
+* **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
 * Use Homebrew to install OpenMPI. 
 * Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling the VTK 7.1 compilation. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
 	* Create a folder: `sudo mkdir /opt/vtk`
@@ -104,7 +104,7 @@ Compilation on other Linux distros (e.g., CentOS) is not too different from on U
 	* Install VTK to the designated installation directory: `sudo make install`.
 	* Add the location of VTK libraries to the system environment variable: `vi ~/.bash_profile` and add a line `export DYLD_LIBRARY_PATH=/opt/vtk/lib` in the file. Save and quit.
 * Open a new Terminal window and navigate to `<repository>/src/`
-* An example of Makefile for compiling LIGGGHTS-INL on macOS can be found at: `<repository>/src/MAKE/Makefile.mpi_vtk-7.1`. In this example, we assume that VTK 7.1 is installed in a user-specified diretory: `/opt/vtk`. So Compile the code with VTK: `make -j4 mpi_vtk-7.1`. 
+* Compile the code with VTK: `make -j4 mpi_vtk-7.1`. 
 
 
 
