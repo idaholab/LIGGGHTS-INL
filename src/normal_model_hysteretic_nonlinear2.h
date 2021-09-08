@@ -251,7 +251,6 @@ namespace ContactModels
 
       double k2, fHys;
       k2 = A3_in*k1;
-      double beta;
 
 // - contact status, loading - 1, unloading - 2
       int tag_status;
@@ -301,7 +300,7 @@ namespace ContactModels
             //   {
             //       fHys = betan*(deltan-deltaZero);
             //   }
-	    fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1);
+	    fHys = Cin_in*k2*(exp(betan*(deltan-deltaZero))-1);
          }
          else
          {
@@ -326,22 +325,22 @@ namespace ContactModels
          k2 = A3_in*(A1_in*deltaMax+A2_in); //unloading stiffness
          deltaZero = fcc*(1-k1_old/k2)*deltaMax; //plastic deformation
 	 deltaZero_old = history[3];
-         beta = log(Alpha_in*k1_old/Cin_in/k2*pow(deltaMax-deltaZero_old,2)+1)/(deltaMax-fcc*(1-k1_old/k2)*deltaMax); //calculor
-         deltaMin = beta*(k2-k1_old)/(beta*k2+k_c)*deltaMax;
+         betan = log(Alpha_in*k1_old/Cin_in/k2*pow(deltaMax-deltaZero_old,2)+1)/(deltaMax-fcc*(1-k1_old/k2)*deltaMax); //calculor
+         deltaMin = betan*(k2-k1_old)/(betan*k2+k_c)*deltaMax;
          k1 = deltaMax*A1_in+A2_in; //updated loading stiffness
 
 	 //if (deltan >= deltaMin)
          //   {
                if (deltan >= deltaZero)
                {
-                   fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1) +(deltan-deltaZero)*f0_old/(deltaMax-deltaZero);
+                   fHys = Cin_in*k2*(exp(betan*(deltan-deltaZero))-1) +(deltan-deltaZero)*f0_old/(deltaMax-deltaZero);
                    f0 = fHys - Alpha_in*k1*pow(deltan-deltaZero,2);
 		   //std::cout << std::scientific;
 		   //std::cout << "delta " << deltan << " fHys " << fHys << std::endl;
                }
                else
                {
-                   fHys = Cin_in*k2*(exp(beta*(deltan-deltaZero))-1); 
+                   fHys = Cin_in*k2*(exp(betan*(deltan-deltaZero))-1); 
                    f0 = 0;
                }
          //   }
