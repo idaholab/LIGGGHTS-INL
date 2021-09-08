@@ -1,0 +1,198 @@
+############### Initial settings
+echo		screen
+units           si
+atom_style      granular
+atom_modify     map array
+boundary        f f f
+newton          off
+communicate     single vel yes
+
+############### Domain setup
+region          reg_domain block -0.015 0.035 -0.005 0.005 -0.001 0.01 units box
+create_box      3 reg_domain
+
+neighbor        0.001 bin
+neigh_modify    delay 0
+
+############### Define variables
+############### type 1 = sphere
+############### type 2 = boundary
+############### type 3 = virtual boundary
+
+############### Test settings
+variable	i_timestep	equal 1.0e-7
+variable	i_dump_skip	equal 5000
+
+############### Define variables
+############### Material properties
+variable	i_density       equal    320.0
+
+############### Hertz contact model
+variable	i_E             equal    1e7
+variable	i_poisson       equal    0.3
+variable	i_restitution   equal    0.3
+variable	i_fric_pp       equal    0.9
+variable	i_fric_pw       equal    0.9
+variable	i_fric_pw2      equal    0.0
+
+############### Rolling friction
+variable	i_rollfri_pp    equal    0.90
+variable	i_rollfri_pw    equal    0.20
+
+############### Luding model
+variable	k_elastic       equal    5e4
+variable	kn2k1           equal    2.5
+variable	kn2kc           equal    0.0
+variable	phiF            equal    0.1
+variable	f_adh           equal    0
+
+############### Hysteretic nonlinear contact model
+variable	i_alpha         equal    20
+variable	i_cin           equal    1e-7
+variable	i_A1            equal    16e8 # increasing slope of loading stiffness k1
+variable	i_A2            equal    4e4 # initial value of loading stiffness k1
+variable	i_A3            equal    11.0 # scalar factor of unloading stiffness
+variable	i_kcin          equal    1e-4 # scalar factor of cohesion stiffness
+
+
+############### Material properties
+fix		m01 all property/global youngsModulus peratomtype ${i_E} ${i_E} ${i_E}
+fix		m02 all property/global poissonsRatio peratomtype ${i_poisson} ${i_poisson} ${i_poisson}
+fix		m03 all property/global coefficientRestitution  peratomtypepair 3 ${i_restitution} ${i_restitution} ${i_restitution} &
+                                                                                  ${i_restitution} ${i_restitution} ${i_restitution} &
+                                                                                  ${i_restitution} ${i_restitution} ${i_restitution}
+fix		m04 all property/global coefficientFriction peratomtypepair 3 ${i_fric_pp} ${i_fric_pw} ${i_fric_pw2} &
+                                                                              ${i_fric_pw} ${i_fric_pp} ${i_fric_pp} &
+                                                                              ${i_fric_pw2} ${i_fric_pp} ${i_fric_pp}
+
+############### Liquid bridge model
+fix		m05 all property/global minSeparationDistanceRatio scalar 1.0
+fix		m06 all property/global maxSeparationDistanceRatio scalar 1.1
+fix		m07 all property/global surfaceLiquidContentInitial scalar 0.0
+fix		m08 all property/global surfaceTension scalar 71.97e-3
+fix		m09 all property/global fluidViscosity scalar 8.90e-4
+fix		m10 all property/global contactAngle peratomtype 1.0472 2.61799 2.61799
+
+############### Luding model properties
+fix		m11 all property/global LoadingStiffness peratomtypepair 3 ${k_elastic} ${k_elastic} ${k_elastic} &
+                                                                           ${k_elastic} ${k_elastic} ${k_elastic} &
+                                                                           ${k_elastic} ${k_elastic} ${k_elastic}
+fix		m12 all property/global UnloadingStiffness peratomtypepair 3 ${kn2k1} ${kn2k1} ${kn2k1} &
+                                                                             ${kn2k1} ${kn2k1} ${kn2k1} &
+                                                                             ${kn2k1} ${kn2k1} ${kn2k1}
+fix		m13 all property/global coefficientAdhesionStiffness peratomtypepair 3 ${kn2kc} ${kn2kc} ${kn2kc} &
+                                                                                       ${kn2kc} ${kn2kc} ${kn2kc} &
+                                                                                       ${kn2kc} ${kn2kc} ${kn2kc}
+fix		m14 all property/global coefficientPlasticityDepth peratomtypepair 3 ${phiF} ${phiF} ${phiF} &
+                                                                                     ${phiF} ${phiF} ${phiF} &
+                                                                                     ${phiF} ${phiF} ${phiF}
+fix		m15 all property/global pullOffForce peratomtypepair 3 ${f_adh} ${f_adh} ${f_adh} &
+                                                                       ${f_adh} ${f_adh} ${f_adh} &
+                                                                       ${f_adh} ${f_adh} ${f_adh}
+
+############### Hysteretic nonlinear model properteis
+fix		m16 all property/global alphaCustom peratomtypepair 3 ${i_alpha} ${i_alpha} ${i_alpha} &
+                                                                      ${i_alpha} ${i_alpha} ${i_alpha} &
+                                                                      ${i_alpha} ${i_alpha} ${i_alpha}
+fix		m17 all property/global cinCustom peratomtypepair 3 ${i_cin} ${i_cin} ${i_cin} &
+                                                                    ${i_cin} ${i_cin} ${i_cin} &
+                                                                    ${i_cin} ${i_cin} ${i_cin}
+fix		m18 all property/global aoneCustom peratomtypepair 3 ${i_A1} ${i_A1} ${i_A1} &
+                                                                     ${i_A1} ${i_A1} ${i_A1} &
+                                                                     ${i_A1} ${i_A1} ${i_A1}
+fix		m19 all property/global atwoCustom peratomtypepair 3 ${i_A2} ${i_A2} ${i_A2} &
+                                                                     ${i_A2} ${i_A2} ${i_A2} &
+                                                                     ${i_A2} ${i_A2} ${i_A2}
+fix		m20 all property/global athreeCustom peratomtypepair 3 ${i_A3} ${i_A3} ${i_A3} &
+                                                                       ${i_A3} ${i_A3} ${i_A3} &
+                                                                       ${i_A3} ${i_A3} ${i_A3}
+fix		m21 all property/global kcinCustom peratomtypepair 3 ${i_kcin} ${i_kcin} ${i_kcin} &
+                                                                     ${i_kcin} ${i_kcin} ${i_kcin} &
+                                                                     ${i_kcin} ${i_kcin} ${i_kcin}
+
+############### Rolling friction
+fix		m22 all property/global coefficientRollingFriction peratomtypepair 3 ${i_rollfri_pp} ${i_rollfri_pw} ${i_rollfri_pp} &
+                                                                                     ${i_rollfri_pw} ${i_rollfri_pp} ${i_rollfri_pp} &
+                                                                                     ${i_rollfri_pp} ${i_rollfri_pp} ${i_rollfri_pp}
+
+############### Pair style
+pair_style	gran model hysteretic/nonlinear2 tangential history cohesion easo/capillary/viscous rolling_friction cdtnonlinear2
+pair_coeff	* *
+
+############### Create packing: rainfall method
+############### Particle templates
+
+############### Create single sphere
+create_atoms    1 single 0.00 0.0015 0.0015
+region          2 block INF INF INF INF 0.0001 INF
+group           top region 2
+set             group top density ${i_density} diameter 0.003
+
+fix             sf1 all setforce NULL 0.0 NULL
+
+############### Boundary mesh
+fix		mesh_bottom all mesh/surface/stress file ./bottom.stl type 2
+fix		wall_all all wall/gran model hysteretic/nonlinear2 tangential history rolling_friction cdtnonlinear2 mesh n_meshes 1 meshes mesh_bottom
+fix		wall_y0 all wall/gran model hysteretic/nonlinear2 tangential history rolling_friction cdtnonlinear2 primitive type 3 yplane -0.005
+fix		wall_y1 all wall/gran model hysteretic/nonlinear2 tangential history rolling_friction cdtnonlinear2 primitive type 3 yplane 0.005
+
+############### Gravity
+variable	i_angle		equal    10
+variable	i_grav_x	equal    1.0*sin(${i_angle}/180.0*3.1415926)
+variable	i_grav_y	equal    0.0
+variable	i_grav_z	equal    -1.0*cos(${i_angle}/180.0*3.1415926)
+fix		grav all gravity 9.81 vector 0.0 0.0 -1.0
+
+############### Set angular velocity to zero / y-velocity to zero
+velocity	top set NULL 0.0 NULL sum no units box
+
+############### Run settings
+timestep	${i_timestep}
+fix		integrsp all nve/sphere
+
+############### Timestep check
+fix		ts all check/timestep/gran 100 0.2 0.2
+
+############### Output
+variable	my_atoms equal atoms
+variable	my_time  equal time
+variable	my_x equal x[1]
+variable	my_y equal y[1]
+variable	my_z equal z[1]
+variable	my_vel_x equal vx[1]
+variable	my_vel_y equal vy[1]
+variable	my_vel_z equal vz[1]
+variable	my_omega_x equal omegax[1]
+variable	my_omega_y equal omegay[1]
+variable	my_omega_z equal omegaz[1]
+variable	my_tqx equal tqx[1]
+variable	my_tqy equal tqy[1]
+variable	my_tqz equal tqz[1]
+
+compute		c1 all pair/gran/local pos contactArea contactPoint
+fix		print_stress all print 1000 &
+            	"${my_atoms}, ${my_time}, ${my_x}, ${my_y}, ${my_z}, ${my_vel_x}, ${my_vel_y}, ${my_vel_z}, ${my_omega_x}, ${my_omega_y}, ${my_omega_z}, ${my_tqx}, ${my_tqy}, ${my_tqz}" &
+		title "my_atoms, my_time, my_x, my_y, my_z, my_vel_x, my_vel_y, my_vel_z, my_omega_x, my_omega_y, my_omega_z, my_tqx, my_tqy, my_tqz" &
+		file out.loading.csv screen no
+
+############### Dump output:
+dump		dmp1 all custom ${i_dump_skip}  post/balls*.dump  id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+
+dump_modify	dmp1 pad 9
+
+############### Ouput: thermo
+thermo_style	custom step atoms ke cpu time f_ts[1]
+thermo		${i_dump_skip}
+thermo_modify	lost ignore norm no
+
+############### Run testing - self balance
+run		100000
+
+############### Change gravity direction
+unfix		grav
+fix		grav all gravity 9.81 vector ${i_grav_x} ${i_grav_y} ${i_grav_z}
+
+unfix		sf1
+fix		sf1 all setforce NULL 0.0 NULL
+
+run		100000
