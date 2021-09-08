@@ -1,5 +1,5 @@
 Obj*/*
-style_*
+style_*.h
 lmp_*
 version_liggghts.h
 style_cohesion_model.h
