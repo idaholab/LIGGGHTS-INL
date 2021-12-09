@@ -19,7 +19,7 @@ LINK =		mpic++
 LINKFLAGS =	-O2 -fPIC
 # Debug version
 #LINKFLAGS =	-Og -g -pg -fPIC
-LIB =		-lstdc++  -L/opt/pbs/lib -lsec
+LIB =		-lstdc++
 SIZE =		size
 
 ARCHIVE =		ar
