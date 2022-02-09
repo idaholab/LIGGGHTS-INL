@@ -8,6 +8,7 @@
 
 If you are using results generated with LIGGGHTS-INL, please cite the following articles:
 
+* Feiyang Chen, Yidong Xia, Jordan Klinger, Qiushi Chen, "A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass." *Powder Technology* 397 (2022): 117100. [https://doi.org/10.1016/j.powtec.2021.117100](https://doi.org/10.1016/j.powtec.2021.117100)
 * Yidong Xia, Zhengshou Lai, Tyler Westover, Jordan Klinger, Hai Huang, and Qiushi Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." *Powder Technology* 345 (2019): 1-14. [https://doi.org/10.1016/j.powtec.2018.12.072](https://doi.org/10.1016/j.powtec.2018.12.072)
 * Yuan Guo, Qiushi Chen, Yidong Xia, Tyler Westover, Sandra Eksioglu, and Mohammad Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." *Biomass & Bioenergy* 141 (2020): 105649. [https://doi.org/10.1016/j.biombioe.2020.105649](https://doi.org/10.1016/j.biombioe.2020.105649)
 * Yuan Guo, Qiushi Chen, Yidong Xia, Jordan Klinger, and Vicki Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." *Powder Technology* 385 (2021): 557-571. [https://doi.org/10.1016/j.powtec.2021.03.008](https://doi.org/10.1016/j.powtec.2021.03.008)
