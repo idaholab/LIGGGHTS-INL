@@ -79,7 +79,7 @@ We recommend Linux Ubuntu Long Term Service (LTS) releases. It might be the easi
 
 Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.
 
-Installing GCC and G++ (version 9) compilers
+**Install GCC and G++ (version 9) compilers and make the default version as 9**
 
 * Install gcc-9: `sudo apt-get install gcc-9`
 * Install g++-9: `sudo apt-get install g++-9`
@@ -91,7 +91,7 @@ Use the update-alternatives tool to create a list of multiple GCC and G++ compil
 * `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11`
 * `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11`
 
-Check the available C compilers list on your system and select desired version by entering relevant selection number.
+Check the available C compilers list and select desired version by entering relevant selection number.
 
 * Enter the command: `sudo update-alternatives --config gcc`
 
@@ -111,7 +111,11 @@ Check the available C compilers list on your system and select desired version b
 
 * In the example above, you should enter "2"
 
-Check the available C++ compilers list on your system and select desired version by entering relevant selection number.
+Check the version of the C compiler: `gcc --version`. We only show the first line of the output.
+
+> gcc (Ubuntu 9.4.0-5ubuntu1) 9.4.0
+
+Check the available C++ compilers list and select desired version by entering relevant selection number.
 
 * Enter the command: `sudo update-alternatives --config g++`
 
@@ -131,32 +135,16 @@ Check the available C++ compilers list on your system and select desired version
 
 * In the example above, you should enter "2"
 
-Check the version of the C compiler: `gcc --version`
-
-> gcc (Ubuntu 9.4.0-5ubuntu1) 9.4.0
->
-> Copyright (C) 2019 Free Software Foundation, Inc.
->
-> This is free software; see the source for copying conditions.  There is NO
->
-> warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-Check the version of the C++ compiler: `g++ --version`
+Check the version of the C++ compiler: `g++ --version`. We only show the first line of the output.
 
 > g++ (Ubuntu 9.4.0-5ubuntu1) 9.4.0
->
-> Copyright (C) 2019 Free Software Foundation, Inc.
->
-> This is free software; see the source for copying conditions.  There is NO
->
-> warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Install OpenMPI and VTK 7.1
+**Install OpenMPI and VTK 7.1**
 
 * Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
 * Install VTK 7.1: `sudo apt-get install libvtk7-dev`
 
-Compile the source code
+**Compile the source code**
 
 * Navigate to `<repository>/src/`
 * Compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
