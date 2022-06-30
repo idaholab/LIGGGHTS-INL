@@ -165,10 +165,17 @@ The command line instructions are below.
 
 Compilation on other Linux distros (e.g., CentOS) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
 
+### macOS Monterey (Apple Silicon)
+
+[Updated June 30, 2022]
+
+*  The default C++ compiler (Apple clang version 13.1.6 (clang-1316.0.21.2.5)) would result in compilation errors. Homebrew does not have a GCC 9 compiler for Apple Silicon chip. Therefore, the code cannot be successfully compiled yet.
+*  VTK 7.1.1 manual compilation is successful.
+
 ### macOS Catalina, Big Sur (Intel chip)
 
 * **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
-* Use Homebrew to install OpenMPI. 
+* Use Homebrew to install OpenMPI: `brew install open-mpi` 
 * Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling the VTK 7.1 compilation. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
 	* Create a folder: `sudo mkdir /opt/vtk`
 	* Download [https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip](https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip) to the `Downloads` directory.
