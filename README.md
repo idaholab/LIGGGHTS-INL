@@ -8,10 +8,11 @@
 
 If you are using results generated with LIGGGHTS-INL, please cite the following articles:
 
-* F. Chen, Y. Xia, J. Klinger, and Q. Chen, "A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass." [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100)
 * Y. Xia, Z. Lai, T. Westover, J. Klinger, H. Huang, and Q. Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072)
 * Y. Guo, Q. Chen, Y. Xia, T. Westover, S. Eksioglu, and M. Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649)
 * Y. Guo, Q. Chen, Y. Xia, J. Klinger, and V. Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008)
+* F. Chen, Y. Xia, J. Klinger, and Q. Chen, "A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass." [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100)
+* A. Hamed, Y. Xia, N. Saha, J. Klinger, D. N. Lanning, and J. Dooley, "Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose." [*Frontiers in Energy Research, section Bioenergy and Biofuel* 10 (2022).](https://doi.org/10.3389/fenrg.2022.859248)
 
 ## Auxiliary 3D Image Processing and Analysis Tools
 
