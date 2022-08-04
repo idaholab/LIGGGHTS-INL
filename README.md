@@ -46,7 +46,7 @@ The simulation result is shown in the following plot:
 
 An example of macro-fiber made of five bonded spheres can be found at:
 
-`<repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_mm_2`
+`<repository>/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2`
 
 The simulation result is shown in the following plot:
 
@@ -55,7 +55,7 @@ The simulation result is shown in the following plot:
 
 An example of microfiber made of five bonded spheres can be found at:
 
-`<repository>/examples/LIGGGHTS/INL/elastoplastic_bond/chain_bending_um_2`
+`<repository>/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_um_2`
 
 The simulation result is shown in the following plot:
 
