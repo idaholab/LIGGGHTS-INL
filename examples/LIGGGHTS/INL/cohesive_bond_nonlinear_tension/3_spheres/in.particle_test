@@ -1,0 +1,168 @@
+# -- test settings
+variable        my_primes       file  prime_numbers.txt
+variable 	dt 		equal 1e-8
+variable 	i_dump_skip 	equal 10
+
+# -- initial settings
+echo		screen
+units		si
+atom_style	granular
+atom_modify	map array
+boundary	f f f
+newton		off
+communicate	single vel yes
+#hard_particles  yes
+soft_particles	yes
+
+# -- domain setup
+region 		reg_domain block -0.125 0.125 -0.01 0.01 -0.01 0.01 units box
+create_box 	1 reg_domain
+neighbor 	0.0004 bin
+neigh_modify    delay 0
+
+# -- define variables
+variable 	i_density		equal 160.8
+
+# -- Hertz contact model
+variable 	i_poisson		equal 0.3
+variable 	i_restitution		equal 0.1
+variable 	i_fric			equal 0.5
+variable 	usr_diameter		equal 0.0004
+
+# -- bond/nonlinearmodel
+variable 	nonlinear_damping 	equal 0.0
+variable 	nonlinear_bond_radius   equal 1.0
+variable 	nonlinear_max_dist	equal 2.0*${usr_diameter}
+variable 	nonlinear_min_dist 	equal 1.1*${usr_diameter}
+
+# -- variables for bond contact model
+variable 	i_E			equal 2e4
+variable 	nonlinear_sigma 	equal 7.99e5
+variable 	nonlinear_sigma2 	equal 7.99e5
+variable 	nonlinear_tau 		equal 7.99e5
+variable	nonlinear_tau2 		equal 7.99e5
+variable 	nonlinear_TC 		equal 1.0
+
+# -- bond stiffness
+variable	nonlinear_k_fn_1	equal 5e4
+variable 	nonlinear_k_fn_2 	equal 5e4
+variable	nonlinear_ku_fn		equal 2.0*${nonlinear_k_fn_2}
+variable	nonlinear_kc_fn		equal 0.5*${nonlinear_k_fn_2}
+variable	nonlinear_k_ft		equal 1.92e4
+variable	nonlinear_k_tn		equal 1.92e4
+variable	nonlinear_ku_tn		equal 2.0*${nonlinear_k_fn_2}
+variable	nonlinear_kc_tn		equal 0.5*${nonlinear_k_fn_2}
+variable	nonlinear_k_tt		equal 5.0e4
+variable	nonlinear_ku_tt		equal 2.0*${nonlinear_k_tt}
+variable	nonlinear_kc_tt		equal 0.5*${nonlinear_k_tt}
+
+# -- material properties
+fix		m01		all property/global youngsModulus  peratomtype ${i_E}
+fix		m02		all property/global poissonsRatio peratomtype ${i_poisson}
+fix		m03		all property/global coefficientRestitution peratomtypepair 1 ${i_restitution}
+fix		m04		all property/global coefficientFriction peratomtypepair 1 ${i_fric}
+fix		m05		all property/global radiusMultiplierBondnonlinear peratomtypepair 1 ${nonlinear_bond_radius}
+fix		m06		all property/global tsCreateBondnonlinear scalar 1
+fix		bondnonlinear3  all property/global createDistanceBondnonlinear peratomtypepair 1 ${nonlinear_min_dist}
+fix		bondnonlinear4  all property/global maxDistanceBondnonlinear peratomtypepair 1 ${nonlinear_max_dist}
+fix		bondnonlinear5  all property/global maxSigmaBondnonlinear peratomtypepair 1 ${nonlinear_sigma2}
+fix		bondnonlinear6  all property/global maxTauBondnonlinear peratomtypepair 1 ${nonlinear_tau2}
+fix		bondnonlinear7  all property/global dampingNormalForceBondnonlinear peratomtypepair 1 ${nonlinear_damping}
+fix		bondnonlinear8  all property/global dampingTangentialForceBondnonlinear peratomtypepair 1 ${nonlinear_damping}
+fix		bondnonlinear9  all property/global dampingNormalTorqueBondnonlinear peratomtypepair 1 ${nonlinear_damping}
+fix		bondnonlinear10 all property/global dampingTangentialTorqueBondnonlinear peratomtypepair 1 ${nonlinear_damping}
+fix		bondnonlinear11 all property/global stiffnessPerUnitAreaK_fn1 peratomtypepair 1 ${nonlinear_k_fn_1}
+fix		bondnonlinear12 all property/global stiffnessPerUnitAreaKu_fn1 peratomtypepair 1 ${nonlinear_ku_fn}
+fix		bondnonlinear13 all property/global stiffnessPerUnitAreaKc_fn1 peratomtypepair 1 ${nonlinear_kc_fn}
+fix		bondnonlinear14 all property/global stiffnessPerUnitAreaK_fn2 peratomtypepair 1 ${nonlinear_k_fn_2}
+fix		bondnonlinear15 all property/global stiffnessPerUnitAreaKu_fn2 peratomtypepair 1 ${nonlinear_ku_fn}
+fix		bondnonlinear16 all property/global stiffnessPerUnitAreaKc_fn2 peratomtypepair 1 ${nonlinear_kc_fn}
+fix		bondnonlinear17 all property/global stiffnessPerUnitAreaK_ft peratomtypepair 1 ${nonlinear_k_ft}
+fix		bondnonlinear18 all property/global stiffnessPerUnitAreaK_tn peratomtypepair 1 ${nonlinear_k_tn}
+fix		bondnonlinear19 all property/global stiffnessPerUnitAreaKu_tn peratomtypepair 1 ${nonlinear_ku_tn}
+fix		bondnonlinear20 all property/global stiffnessPerUnitAreaKc_tn peratomtypepair 1 ${nonlinear_kc_tn}
+fix		bondnonlinear21 all property/global stiffnessPerUnitAreaK_tt peratomtypepair 1 ${nonlinear_k_tt}
+fix		bondnonlinear22 all property/global stiffnessPerUnitAreaKu_tt peratomtypepair 1 ${nonlinear_ku_tt}
+fix		bondnonlinear23 all property/global stiffnessPerUnitAreaKc_tt peratomtypepair 1 ${nonlinear_kc_tt}
+fix		bondcuin24      all property/global ratioTensionCompressionBondnonlinear peratomtypepair 1 ${nonlinear_TC}
+
+# -- pair style
+pair_style 	gran model hertz tangential history cohesion bond/nonlinear #stressBreak on
+pair_coeff 	* *
+
+# -- create particle shape
+fix             clump all particletemplate/multiplespheres ${my_primes} atom_type 1 &
+                density constant ${i_density} nspheres 3 ntry 10000000 &
+                spheres file clump.txt scale 1.0 bonded yes
+
+create_particles clump single 0.0 0.0 0.0 velocity 0.0 0.0 0.0
+
+group		left_force  id 1
+group		right_force id 3
+group		int subtract all left_force
+group		final subtract int right_force
+
+fix		bound_freeze left_force freeze
+fix		right_move right_force move linear 0.1 0.0 0.0
+
+compute		cf all pair/gran/local pos id force
+
+# -- define dump output
+fix 		ts all check/timestep/gran ${i_dump_skip} 0.2 0.2
+fix 		integrsp final nve/sphere
+
+# -- define thermo output
+variable        my_atoms	equal atoms
+variable        my_ke		equal ke
+variable        my_cpu		equal cpu
+variable        my_time		equal time
+variable 	xdisp1		equal x[1]
+variable	xdisp2		equal x[2]
+variable 	xdisp3		equal x[3]
+variable 	ydisp1		equal y[1]
+variable 	ydisp2		equal y[2]
+variable        ydisp3		equal y[3]
+variable 	zdisp1		equal z[1]
+variable 	zdisp2		equal z[2]
+variable 	zdisp3		equal z[3]
+variable        vel1		equal vx[1]
+variable        vel2		equal vx[2]
+variable 	vel3		equal vx[3]
+variable 	force1		equal fx[1]
+variable        force2		equal fx[2]
+variable 	force3		equal fx[3]
+variable 	force1y		equal fy[1]
+variable 	force2y		equal fy[2]
+variable        force3y		equal fy[3]
+variable	force1z		equal fz[1]
+variable 	force2z		equal fz[2]
+variable        force3z		equal fz[3]
+
+# -- track the bonds
+#compute 	bond_status all bond/counter
+
+# -- screen output
+thermo_style 	custom step atoms ke cpu time f_ts[1] f_ts[2] v_xdisp1
+thermo 		100
+thermo_modify   lost ignore norm no
+
+# -- dump output
+#dump 		dmp1 all custom/vtk ${i_dump_skip} post/balls*.vtk &
+#		id type x y z vx vy vz fx fy fz omegax omegay omegaz radius
+#dump 		dmp2 left_force custom/vtk ${i_dump_skip} post/ball*.vtk &
+#	        id x y z vx vy vz fx fy fz
+#dump 		dmp3 all local/gran/vtk ${i_dump_skip} post/forcechain*.vtk cf
+#dump_modify 	dmp1 pad 9
+#dump_modify 	dmp2 pad 9
+#dump_modify	dmp3 pad 9
+
+
+#-- print the outputgr
+fix             print_stress all print 1000 &
+                "${my_atoms}, ${my_ke}, ${my_cpu}, ${my_time}, ${xdisp1}, ${xdisp2}, ${xdisp3},  ${vel1}, ${vel2} , ${vel3},  ${force1}, ${force2}, ${force3}, ${force1y}, ${force2y},${force3y},  ${force1z}, ${force2z},${force3z}" &
+                title "my_atoms, my_ke, my_cpu, my_time, 1_disp, 2_disp, 3_disp, 1_vel, 2_vel, 3_vel,  1_force, 2_force, 3_force, force1y, force2y, force3y, force1z, force2z,force3z" &
+		file out.loading.csv screen no
+
+# --- #run settings
+timestep ${dt}
+run 5000000
