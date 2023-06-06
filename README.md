@@ -79,71 +79,72 @@ The instantaneous snapshots of the simulation are shown in the following graph:
 
 We recommend Linux Ubuntu Long Term Service (LTS) releases. It might be the easiest platform, as all the prerequisites as well as the required configuration of the VTK library can be directly installed from Ubuntu's Software Center.
 
-### Linux Ubuntu 22.04 LTS
+### Linux Ubuntu (tested on 22.04 LTS and 20.04 LTS)
 
-Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.
+<!-- Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.-->
 
-**Install GCC and G++ (version 9) compilers and make the default version as 9**
+<!-- **Install GCC and G++ (version 9) compilers and make the default version as 9** -->
 
-* Install gcc-9: `sudo apt-get install gcc-9`
-* Install g++-9: `sudo apt-get install g++-9`
+<!-- * Install gcc-9: `sudo apt-get install gcc-9` -->
+<!-- * Install g++-9: `sudo apt-get install g++-9` -->
 
-Use the update-alternatives tool to create a list of multiple GCC and G++ compiler alternatives
+<!-- Use the update-alternatives tool to create a list of multiple GCC and G++ compiler alternatives -->
 
-* `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9`
-* `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9`
-* `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11`
-* `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11`
+<!-- * `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9` -->
+<!-- * `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9` -->
+<!-- * `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11` -->
+<!-- * `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11` -->
 
-Check the available C compilers list and select desired version by entering relevant selection number.
+<!-- Check the available C compilers list and select desired version by entering relevant selection number. -->
 
-* Enter the command: `sudo update-alternatives --config gcc`
+<!-- * Enter the command: `sudo update-alternatives --config gcc` -->
 
->		There are 2 choices for the alternative gcc (providing /usr/bin/gcc).
->
->		Selection	Path			Priority	Status
->
->		------------------------------------------------------------
->
-> 		  0		/usr/bin/gcc-11		11		auto mode
->
->		  1		/usr/bin/gcc-11		11		manual mode
->
->		* 2		/usr/bin/gcc-9		9		manual mode
->
->		Press <enter> to keep the current choice[*], or type selection number:
+<!-- >		There are 2 choices for the alternative gcc (providing /usr/bin/gcc). -->
+<!-- > -->
+<!--  >		Selection	Path			Priority	Status -->
+<!-- > -->
+<!-- > -->	
+<!-- ------------------------------------------------------------ -->
+<!-- > -->
+<!-- > 		  0		/usr/bin/gcc-11		11		auto mode -->
+<!-- > -->
+<!-- >		  1		/usr/bin/gcc-11		11		manual mode -->
+<!-- > -->
+<!-- >		* 2		/usr/bin/gcc-9		9		manual mode -->
+<!-- > -->
+<!-- >		Press <enter> to keep the current choice[*], or type selection number: -->
 
-* In the example above, you should enter "2"
+<!-- * In the example above, you should enter "2" -->
 
-Check the version of the C compiler: `gcc --version`. We only show the first line of the output.
+<!-- Check the version of the C compiler: `gcc --version`. We only show the first line of the output. -->
 
-> gcc (Ubuntu 9.4.0-5ubuntu1) 9.4.0
+<!-- > gcc (Ubuntu 9.4.0-5ubuntu1) 9.4.0 -->
 
-Check the available C++ compilers list and select desired version by entering relevant selection number.
+<!-- Check the available C++ compilers list and select desired version by entering relevant selection number. -->
 
-* Enter the command: `sudo update-alternatives --config g++`
+<!-- * Enter the command: `sudo update-alternatives --config g++` -->
 
->		There are 2 choices for the alternative g++ (providing /usr/bin/g++).
->
->		Selection	Path			Priority	Status
->
->		------------------------------------------------------------
->
-> 		  0		/usr/bin/g++-11		11		auto mode
->
->		  1		/usr/bin/g++-11		11		manual mode
->
->		* 2		/usr/bin/g++-9		9		manual mode
->
->		Press <enter> to keep the current choice[*], or type selection number:
+<!-- >		There are 2 choices for the alternative g++ (providing /usr/bin/g++). -->
+<!-- > -->
+<!-- >		Selection	Path			Priority	Status -->
+<!-- > -->
+<!-- > ------------------------------------------------------------ -->
+<!-- > -->
+<!-- > 		  0		/usr/bin/g++-11		11		auto mode -->
+<!-- > -->
+<!-- >		  1		/usr/bin/g++-11		11		manual mode -->
+<!-- > -->
+<!-- >		* 2		/usr/bin/g++-9		9		manual mode -->
+<!-- > -->
+<!-- >		Press <enter> to keep the current choice[*], or type selection number: -->
 
-* In the example above, you should enter "2"
+<!-- * In the example above, you should enter "2" -->
 
-Check the version of the C++ compiler: `g++ --version`. We only show the first line of the output.
+<!-- Check the version of the C++ compiler: `g++ --version`. We only show the first line of the output. -->
 
-> g++ (Ubuntu 9.4.0-5ubuntu1) 9.4.0
+<!-- > g++ (Ubuntu 9.4.0-5ubuntu1) 9.4.0 -->
 
-**Install OpenMPI and VTK 7.1**
+The command line instructions are below.
 
 * Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
 * Install VTK 7.1: `sudo apt-get install libvtk7-dev`
@@ -151,23 +152,14 @@ Check the version of the C++ compiler: `g++ --version`. We only show the first l
 **Compile the source code**
 
 * Navigate to `<repository>/src/`
-* Compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
-* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-22.04` 
-
-
-### Linux Ubuntu 20.04 LTS
-
-The command line instructions are below.
-
-* Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
-* Install VTK 7.1: `sudo apt-get install libvtk7-dev`
-* Navigate to `<repository>/src/`
-* Compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
-* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04` 
+* If you have Ubuntu 20.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
+	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-22.04`
+* If you have Ubuntu 20.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
+	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04`
 
 ### Other Linux distros
 
-Compilation on other Linux distros (e.g., CentOS) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
+Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
 
 ### macOS Monterey (Apple Silicon)
 
