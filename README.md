@@ -79,9 +79,13 @@ The instantaneous snapshots of the simulation are shown in the following graph:
 
 We recommend Linux Ubuntu LTS releases. It is the easiest platform, as all the prerequisites and the required configuration of the VTK library can be directly installed from Ubuntu Software Center.
 
-### Linux Ubuntu (tested on 22.04 LTS and 20.04 LTS)
+### Linux Ubuntu
 
 [Updated June 6, 2023]
+
+Tested releases:
+* Linux Ubuntu 22.04 LTS
+* Linux Ubuntu 20.04 LTS
 
 <!-- Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.-->
 
@@ -163,9 +167,16 @@ The command line instructions are below.
 
 Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
 
-### macOS (tested on macOS Monterey (Apple Silicon) and macOS Catalina, Big Sur (Intel chip))
+### macOS
 
 [Updated June 6, 2023]
+
+Tested releases:
+* macOS Monterey (Apple Silicon)
+* macOS Catalina (Intel chip)
+* macOS Big Sur (Intel chip)
+
+The command line instructions are below.
 
 * **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
 * Use Homebrew to install OpenMPI: `brew install open-mpi`
