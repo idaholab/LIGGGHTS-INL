@@ -84,8 +84,8 @@ We recommend Linux Ubuntu LTS releases. It is the easiest platform, as all the p
 [Updated June 6, 2023]
 
 Tested releases:
-* Linux Ubuntu 22.04 LTS
-* Linux Ubuntu 20.04 LTS
+* **Linux Ubuntu 22.04 LTS**
+* **Linux Ubuntu 20.04 LTS**
 
 <!-- Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.-->
 
@@ -172,9 +172,9 @@ Compilation on other Linux distros (e.g., CentOS 7) is not too different from on
 [Updated June 6, 2023]
 
 Tested releases:
-* macOS Monterey (Apple Silicon)
-* macOS Catalina (Intel chip)
-* macOS Big Sur (Intel chip)
+* **macOS Monterey (Apple Silicon)**
+* **macOS Catalina (Intel chip)**
+* **macOS Big Sur (Intel chip)**
 
 The command line instructions are below.
 
