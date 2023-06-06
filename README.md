@@ -77,7 +77,7 @@ The instantaneous snapshots of the simulation are shown in the following graph:
 
 ## Instructions for Code Compilation
 
-We recommend Linux Ubuntu Long Term Service (LTS) releases. It might be the easiest platform, as all the prerequisites as well as the required configuration of the VTK library can be directly installed from Ubuntu's Software Center.
+We recommend Linux Ubuntu LTS releases. It is the easiest platform, as all the prerequisites and the required configuration of the VTK library can be directly installed from Ubuntu Software Center.
 
 ### Linux Ubuntu (tested on 22.04 LTS and 20.04 LTS)
 
@@ -152,7 +152,7 @@ The command line instructions are below.
 **Compile the source code**
 
 * Navigate to `<repository>/src/`
-* If you have Ubuntu 20.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
+* If you have Ubuntu 22.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
 	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-22.04`
 * If you have Ubuntu 20.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
 	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04`
