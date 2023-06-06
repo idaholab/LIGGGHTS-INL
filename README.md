@@ -6,7 +6,7 @@
 
 ## Citing LIGGGHTS-INL
 
-If you are using results generated with LIGGGHTS-INL, please cite the following articles:
+If you are using results generated with LIGGGHTS-INL, please cite one or several relevant articles as follows:
 
 * F. Chen, Y. Xia, J. Klinger, and Q. Chen, "Hopper discharge flow dynamics of milled pine and prediction of process upsets using the discrete element method." [*Powder Technology* 415 (2023): 118165.](https://doi.org/10.1016/j.powtec.2022.118165)
 * Q. Sun, Q. Chen, Y. Xia, F. Chen, J. Klinger, L. Ding, V. Thompson, "Reverse scaling of a bonded-sphere DEM model: Formulation and application to lignocellulosic biomass microstructures." [*Powder Technology* 409 (2022): 117797.](https://doi.org/10.1016/j.powtec.2022.117797)
