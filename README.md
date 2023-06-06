@@ -81,6 +81,8 @@ We recommend Linux Ubuntu LTS releases. It is the easiest platform, as all the p
 
 ### Linux Ubuntu (tested on 22.04 LTS and 20.04 LTS)
 
+[Updated June 6, 2023]
+
 <!-- Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.-->
 
 <!-- **Install GCC and G++ (version 9) compilers and make the default version as 9** -->
@@ -161,17 +163,12 @@ The command line instructions are below.
 
 Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
 
-### macOS Monterey (Apple Silicon)
+### macOS (tested on macOS Monterey (Apple Silicon) and macOS Catalina, Big Sur (Intel chip))
 
-[Updated June 30, 2022]
-
-*  The default C++ compiler (Apple clang version 13.1.6 (clang-1316.0.21.2.5)) would result in compilation errors. Homebrew does not have a GCC 9 compiler for Apple Silicon chip. Therefore, the code cannot be successfully compiled yet.
-*  VTK 7.1.1 manual compilation is successful.
-
-### macOS Catalina, Big Sur (Intel chip)
+[Updated June 6, 2023]
 
 * **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
-* Use Homebrew to install OpenMPI: `brew install open-mpi` 
+* Use Homebrew to install OpenMPI: `brew install open-mpi`
 * Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling the VTK 7.1 compilation. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
 	* Create a folder: `sudo mkdir /opt/vtk`
 	* Download [https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip](https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip) to the `Downloads` directory.
@@ -179,7 +176,7 @@ Compilation on other Linux distros (e.g., CentOS 7) is not too different from on
 	* Create a new folder: `mkdir ~/Downloads/VTK-build`.
 	* Navigate to the new folder: `cd ~/Downloads/VTK-build`.
 	* Do: `ccmake ../VTK-7.1.1`. (If your system does not recognize the **ccmake** command, use Homebrew to install the **cmake** package.) You should see an interface like the screenshot below. <img src="figs/vtk/fig_cmake_1.png">
-	* Press [c] to **Configure**. If the configuration process completes without issue, you will see something similar to the snapshot below. If you encounter issues, which are usually warning messages of missing libraries, use Homebrew to install the missing libraries as indicated. <img src="figs/vtk/fig_cmake_2.png"> 
+	* Press [c] to **Configure**. If the configuration process completes without issue, you will see something similar to the snapshot below. If you encounter issues, which are usually warning messages of missing libraries, use Homebrew to install the missing libraries as indicated. <img src="figs/vtk/fig_cmake_2.png">
 	* Press [e] to exit screen. You will see something similar to the screenshot below.  <img src="figs/vtk/fig_cmake_3.png"> There are three options that we need to modify in the listed options. (1) Change the **CMAKE BUILD TYPE** value from **Debug** to **Release**. 2) Change the **CMAKE INSTALL PREFIX** value from whatever in there to **/opt/vtk**. (3) Change the **VTK Group MPI** value from **OFF** to **ON**. Then the screen should look similar to the screenshot below. <img src="figs/vtk/fig_cmake_4.png">
 	* Press [c] to **Configure** a 2nd time. If the configuration completes without issue, you should see **Configuring done** in the last line of screen output. Press [e] to exit screen.
 	* Press [c] to **Configure** a 3rd time. If the configuration completes without issue, you should see **Configuring done** in the last line of screen output. Press [e] to exit screen.
@@ -188,8 +185,7 @@ Compilation on other Linux distros (e.g., CentOS 7) is not too different from on
 	* Install VTK to the designated installation directory: `sudo make install`.
 	* Add the location of VTK libraries to the system environment variable: `vi ~/.bash_profile` and add a line `export DYLD_LIBRARY_PATH=/opt/vtk/lib` in the file. Save and quit.
 * Open a new Terminal window and navigate to `<repository>/src/`
-* Compile the code with VTK: `make -j4 mpi_vtk-7.1`. 
-
+* Compile the code with VTK: `make -j4 mpi_vtk-7.1`.
 
 
 ## Other Software
