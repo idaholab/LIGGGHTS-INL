@@ -24,7 +24,7 @@ If you are using results generated with LIGGGHTS-INL, please cite one or several
 
 ## Tutorials for Granular Material Flow Characterization
 
-We are in the process of releasing a series of simulation test cases for beginners to use DEM simulation as a numerical tool for granular material flow characterization. The tutorial examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
+We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
 
 ## LIGGGHTS-INL Documentation
 
