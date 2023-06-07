@@ -165,7 +165,7 @@ The command line instructions are below.
 
 ### Other Linux distros
 
-Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library may need to be compiled and installed manually. Users can follow the instruction for macOS.
+Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library needs to be compiled and installed manually. Users can follow the instruction for macOS.
 
 ### macOS
 
@@ -180,7 +180,7 @@ The command line instructions are below.
 
 * **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
 * Use Homebrew to install OpenMPI: `brew install open-mpi`
-* Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling the VTK 7.1 compilation. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
+* Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling VTK 7.1. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
 	* Create a folder: `sudo mkdir /opt/vtk`
 	* Download [https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip](https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip) to the `Downloads` directory.
 	* Unzip the zip file so you will see a folder `~/Downloads/VTK-7.1.1`.
