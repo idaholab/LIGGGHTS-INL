@@ -10,4 +10,7 @@ log.liggghts
 *.plt
 *.data
 *.backup
+*.dump
+*.stl
+*.vtk
 src/log.liggghts

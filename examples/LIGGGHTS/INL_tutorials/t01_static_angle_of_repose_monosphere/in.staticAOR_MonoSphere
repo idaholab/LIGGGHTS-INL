@@ -1,0 +1,115 @@
+######################################################################
+#
+# Problem description:
+#  Static angle of repose using mono-sphere particles
+# Reference:
+#  https://doi.org/10.3389/fenrg.2022.859248
+# Script prepared by:
+#  Ahmed Hamed, Yidong Xia (Idaho National Laboratory)
+#
+######################################################################
+
+### Initialization
+
+############### Preliminaries
+units		si
+atom_style	sphere
+atom_modify	map array
+#boundary	p f p
+boundary	m m m # f f f
+newton		off
+communicate	single vel yes
+
+##############	If you use multiple CPUs, e.g., >=6
+#processors	* * 1 grid twolevel 6 * * 1
+
+############### Declare domain
+region		domain block -0.037 0.037 -0.037 0.037 -0.005 1.005 units box # use smaller domain if meshes do not move
+create_box	2 domain # the last is wall
+
+############### Neighbor listing
+neighbor	0.004 bin # 2x of particle radius may be good
+neigh_modify	delay 0
+
+### Setup
+
+############### Material and interaction properties required
+fix		m1 all property/global youngsModulus peratomtype 5e6  1e9
+fix		m2 all property/global poissonsRatio peratomtype 0.3 0.3
+
+fix		m3 all property/global coefficientRestitution peratomtypepair 2 &
+		0.3 0.3 &
+		0.3 0.3
+
+fix		m4 all property/global coefficientFriction peratomtypepair 2 &
+		0.7 0.3 &
+		0.3 0.3
+
+fix		m11 all property/global coefficientRollingFriction peratomtypepair 2 &
+		0.5 0.5 &
+		0.5 0.5
+
+############### Particle insertion
+fix	        body1 all particletemplate/sphere 15485863 atom_type 1 density constant 300 radius constant 3.00e-3
+
+fix		pdd all particledistribution/discrete/numberbased 15485867 1 body1 1.0
+
+region		factory cylinder z 0 0 0.033 0.002 1.0 units box
+
+fix		ins all insert/pack seed 32452843 distributiontemplate pdd vel constant 0. 0. 0. &
+		insert_every once overlapcheck yes region factory ntry_mc 10000 volumefraction_region 0.6
+
+############### Import mesh from cad:
+fix		cad1 all mesh/surface file Cylinder_35cm_7cm.stl    type 2
+
+############### Use the imported mesh as granular wall
+fix		geo1 all wall/gran model hertz tangential history rolling_friction cdt mesh n_meshes 1 meshes cad1
+
+############### Create stopper for the floor/base
+fix		stopper_bot all wall/gran model hertz  tangential history primitive type 2 zplane  0.0
+
+############### Define the physics
+pair_style	gran model hertz tangential history rolling_friction cdt
+pair_coeff	* *
+
+### Detailed settings
+
+############### Integrator for single sphere DEM particle
+fix		integr1 all nve/sphere
+
+############### Gravity
+fix		grav all gravity 9.81 vector 0.0 0.0 -1.0
+
+############### Time step
+timestep	0.000001
+
+############### Thermodynamic output settings
+compute         1 all pe
+compute         2 all erotate
+compute         3 all ke
+thermo_style    custom step atoms c_1 c_2 c_3 cpu
+thermo		50000
+thermo_modify	norm no
+
+############### Check time step and initialize dump file
+fix		ctg all check/timestep/gran 1 0.01 0.01
+run		1
+unfix		ctg
+
+############### Create imaging information
+dump		dmp all custom 50000 out.*.dump id type x y z radius
+dump_modify     dmp pad 7 first yes
+
+
+dump            dmpMyMesh all mesh/stl 50000 tube.*.stl cad1
+dump_modify     dmpMyMesh pad 7 first yes
+
+### Execution and further settings
+
+############### Fill the container
+run		1000000 upto
+
+############### Pull up the imported mesh as granular wall
+
+fix             move all move/mesh mesh cad1 linear 0. 0. 0.01
+run		9000000
