@@ -22,6 +22,10 @@ If you are using results generated with LIGGGHTS-INL, please cite one or several
 - A set of MATLAB codes for 3D image-based porosity analysis: [tools/PorosityAnalysis3D](tools/PorosityAnalysis3D)
 - A concise FIJI user tutorial for 3D image binarization: [tools/FIJI](tools/FIJI)
 
+## Tutorials for Granular Material Flow Characterization
+
+We are in the process of releasing a series of simulation test cases for beginners to use DEM simulation as a numerical tool for granular material flow characterization. The tutorial examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
+
 ## LIGGGHTS-INL Documentation
 
 Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** (e.g., the bonded-sphere model) can be found in this repository. Examples are provided below.
@@ -30,6 +34,8 @@ Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.
 `<repository>/doc/gran_cohesion_bond.html`
 * User examples of the bonded-sphere model:
 `<repository>/examples/LIGGGHTS/INL/cohesive_bond`
+
+
 
 ## Examples of Extended Capabilities in LIGGGHTS-INL
 
