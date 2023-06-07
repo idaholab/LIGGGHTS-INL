@@ -8,14 +8,14 @@
 
 If you are using results generated with LIGGGHTS-INL, please cite one or several relevant articles as follows:
 
-* F. Chen, Y. Xia, J. Klinger, and Q. Chen, "Hopper discharge flow dynamics of milled pine and prediction of process upsets using the discrete element method." [*Powder Technology* 415 (2023): 118165.](https://doi.org/10.1016/j.powtec.2022.118165)
-* Q. Sun, Q. Chen, Y. Xia, F. Chen, J. Klinger, L. Ding, V. Thompson, "Reverse scaling of a bonded-sphere DEM model: Formulation and application to lignocellulosic biomass microstructures." [*Powder Technology* 409 (2022): 117797.](https://doi.org/10.1016/j.powtec.2022.117797)
-* W. Jin, Y. Lu, F. Chen, A. Hamed, N. Saha, J. L. Klinger, S. Dai, Q. Chen, Y. Xia, "On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models." [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848)
-* A. Hamed, Y. Xia, N. Saha, J. Klinger, D. N. Lanning, and J. Dooley, "Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose." [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248)
-* F. Chen, Y. Xia, J. Klinger, and Q. Chen, "A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass." [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100)
-* Y. Guo, Q. Chen, Y. Xia, J. Klinger, and V. Thompson. "A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles." [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008)
-* Y. Guo, Q. Chen, Y. Xia, T. Westover, S. Eksioglu, and M. Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649)
-* Y. Xia, Z. Lai, T. Westover, J. Klinger, H. Huang, and Q. Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072)
+* F. Chen et al. Hopper discharge flow dynamics of milled pine and prediction of process upsets using the discrete element method [*Powder Technology* 415 (2023): 118165.](https://doi.org/10.1016/j.powtec.2022.118165)
+* Q. Sun et al. Reverse scaling of a bonded-sphere DEM model: Formulation and application to lignocellulosic biomass microstructures [*Powder Technology* 409 (2022): 117797.](https://doi.org/10.1016/j.powtec.2022.117797)
+* W. Jin et al. On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848)
+* A. Hamed et al. Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248)
+* F. Chen et al. A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100)
+* Y. Guo et al. A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008)
+* Y. Guo et al. Discrete element modeling of switchgrass particles under compression and rotational shear [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649)
+* Y. Xia et al. Discrete element modeling of deformable pinewood chips in cyclic loading test [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072)
 
 ## Tutorials for Granular Material Flow Characterization
 
