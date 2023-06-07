@@ -17,14 +17,14 @@ If you are using results generated with LIGGGHTS-INL, please cite one or several
 * Y. Guo, Q. Chen, Y. Xia, T. Westover, S. Eksioglu, and M. Roni. "Discrete element modeling of switchgrass particles under compression and rotational shear." [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649)
 * Y. Xia, Z. Lai, T. Westover, J. Klinger, H. Huang, and Q. Chen. "Discrete element modeling of deformable pinewood chips in cyclic loading test." [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072)
 
+## Tutorials for Granular Material Flow Characterization
+
+We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
+
 ## Auxiliary 3D Image Processing and Analysis Tools
 
 - A set of MATLAB codes for 3D image-based porosity analysis: [tools/PorosityAnalysis3D](tools/PorosityAnalysis3D)
 - A concise FIJI user tutorial for 3D image binarization: [tools/FIJI](tools/FIJI)
-
-## Tutorials for Granular Material Flow Characterization
-
-We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
 
 ## LIGGGHTS-INL Documentation
 
