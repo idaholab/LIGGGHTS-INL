@@ -9,6 +9,7 @@ log.liggghts
 *.pdf
 *.plt
 *.data
+*.dat
 *.backup
 *.dump
 *.stl
