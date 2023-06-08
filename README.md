@@ -22,172 +22,37 @@ Subscription-based journal articles (**links to authors' manuscript PDFs are pro
 * Y. Guo et al. Discrete element modeling of switchgrass particles under compression and rotational shear. [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/342170187_Discrete_element_modeling_of_switchgrass_particles_under_compression_and_rotational_shear))
 * Y. Xia et al. Discrete element modeling of deformable pinewood chips in cyclic loading test. [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/329869479_Discrete_element_modeling_of_deformable_pinewood_chips_in_cyclic_loading_test))
 
+## Installing LIGGGHTS-INL
+
+We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. It is the easiest to compile **LIGGGHTS-INL** on Ubuntu. We provide [detailed instructions for compiling the LIGGGHTS-INL source code on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
+
 ## Tutorials for Granular Material Flow Characterization
 
 We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
+
+## LIGGGHTS-INL Documentation and Extended Capabilities
+
+Users are referred to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/media/DEM/docu/Manual.html) for the common **LIGGGHTS** features. Documentation of some of the **LIGGGHTS-INL** extended capabilities is in this repository, e.g.,, the bonded-sphere model ([HTML documentation](/doc/gran_cohesion_bond.html) and [user examples](/examples/LIGGGHTS/INL/cohesive_bond)).
+
+
+**LIGGGHTS-INL** provides original **nonlinear contact and bond stiffness models**. No user manual has yet been created for these extended models. Refer to the listed articles for more information. A few user examples are introduced below:
+
+* **Strain-hardening nonlinear normal contact**: [An example of controlled collision between two spherical particles](/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1)
+<img src="figs/fig_nonlinear_contact.png">
+
+* **Elastoplastic bond normal stiffness** (a): [An example of macro-fiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2)
+<img src="figs/fig_string_mm.png">
+
+* **Elastoplastic bond normal stiffness** (b): [An example of microfiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_um_2)
+<img src="figs/fig_string_um.png">
+
+* **Micro-biomechanics**: [An example of compression on a pine wood particle microstructure](/examples/LIGGGHTS/INL/microstructure_compression)
+<img src="figs/fig_microstructure_compression.png">
 
 ## Auxiliary 3D Image Processing and Analysis Tools
 
 - A set of MATLAB codes for 3D image-based porosity analysis: [tools/PorosityAnalysis3D](tools/PorosityAnalysis3D)
 - A concise FIJI user tutorial for 3D image binarization: [tools/FIJI](tools/FIJI)
-
-## LIGGGHTS-INL Documentation
-
-Users are referred to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/media/DEM/docu/Manual.html) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** can be found in this repository, for example, the bonded-sphere model:
-
-* [Documentation of the bonded-sphere model](/doc/gran_cohesion_bond.html)
-* [User examples of the bonded-sphere model](/examples/LIGGGHTS/INL/cohesive_bond)
-
-
-
-## Extended Capabilities in LIGGGHTS-INL
-
-**LIGGGHTS-INL** provides original **nonlinear contact and bond stiffness models**. No user manual has yet been created for these extended models. Users are referred to the listed articles and examples for more information.
-
-**Strain-hardening nonlinear normal contact**:
-
-[An example of controlled collision between two spherical particles](/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1)
-<img src="figs/fig_nonlinear_contact.png">
-
-**Elastoplastic bond normal stiffness**:
-
-[An example of macro-fiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2)
-<img src="figs/fig_string_mm.png">
-
-[An example of microfiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_um_2)
-<img src="figs/fig_string_um.png">
-
-**Micro-biomechanics**
-
-[An example of compression test of a pine wood particle microstructural region of interest (ROI)](/examples/LIGGGHTS/INL/microstructure_compression)
-
-The instantaneous snapshots of the simulation are shown in the following graph:
-<img src="figs/fig_microstructure_compression.png">
-
-
-## Instructions for Code Compilation
-
-We recommend Linux Ubuntu LTS releases. It is the easiest platform, as all the prerequisites and the required configuration of the VTK library can be directly installed from Ubuntu Software Center.
-
-### Linux Ubuntu
-
-[Updated June 6, 2023]
-
-Tested releases:
-* **Linux Ubuntu 22.04 LTS**
-* **Linux Ubuntu 20.04 LTS**
-
-<!-- Starting from this release, the installation requires more preparation steps, as the use of the default GCC and G++ (version 11) in this release would result in compilation errors. We recommend using GCC and G++ (version 9). Detailed command line instructions are provided below.-->
-
-<!-- **Install GCC and G++ (version 9) compilers and make the default version as 9** -->
-
-<!-- * Install gcc-9: `sudo apt-get install gcc-9` -->
-<!-- * Install g++-9: `sudo apt-get install g++-9` -->
-
-<!-- Use the update-alternatives tool to create a list of multiple GCC and G++ compiler alternatives -->
-
-<!-- * `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 9` -->
-<!-- * `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 9` -->
-<!-- * `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11` -->
-<!-- * `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11` -->
-
-<!-- Check the available C compilers list and select desired version by entering relevant selection number. -->
-
-<!-- * Enter the command: `sudo update-alternatives --config gcc` -->
-
-<!-- >		There are 2 choices for the alternative gcc (providing /usr/bin/gcc). -->
-<!-- > -->
-<!--  >		Selection	Path			Priority	Status -->
-<!-- > -->
-<!-- > -->	
-<!-- ------------------------------------------------------------ -->
-<!-- > -->
-<!-- > 		  0		/usr/bin/gcc-11		11		auto mode -->
-<!-- > -->
-<!-- >		  1		/usr/bin/gcc-11		11		manual mode -->
-<!-- > -->
-<!-- >		* 2		/usr/bin/gcc-9		9		manual mode -->
-<!-- > -->
-<!-- >		Press <enter> to keep the current choice[*], or type selection number: -->
-
-<!-- * In the example above, you should enter "2" -->
-
-<!-- Check the version of the C compiler: `gcc --version`. We only show the first line of the output. -->
-
-<!-- > gcc (Ubuntu 9.4.0-5ubuntu1) 9.4.0 -->
-
-<!-- Check the available C++ compilers list and select desired version by entering relevant selection number. -->
-
-<!-- * Enter the command: `sudo update-alternatives --config g++` -->
-
-<!-- >		There are 2 choices for the alternative g++ (providing /usr/bin/g++). -->
-<!-- > -->
-<!-- >		Selection	Path			Priority	Status -->
-<!-- > -->
-<!-- > ------------------------------------------------------------ -->
-<!-- > -->
-<!-- > 		  0		/usr/bin/g++-11		11		auto mode -->
-<!-- > -->
-<!-- >		  1		/usr/bin/g++-11		11		manual mode -->
-<!-- > -->
-<!-- >		* 2		/usr/bin/g++-9		9		manual mode -->
-<!-- > -->
-<!-- >		Press <enter> to keep the current choice[*], or type selection number: -->
-
-<!-- * In the example above, you should enter "2" -->
-
-<!-- Check the version of the C++ compiler: `g++ --version`. We only show the first line of the output. -->
-
-<!-- > g++ (Ubuntu 9.4.0-5ubuntu1) 9.4.0 -->
-
-The command line instructions are below.
-
-* Install OpenMPI: `sudo apt-get install libopenmpi-dev openmpi-bin`
-* Install VTK 7.1: `sudo apt-get install libvtk7-dev`
-
-**Compile the source code**
-
-* Navigate to `<repository>/src/`
-* If you have Ubuntu 22.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-22.04`
-	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-22.04`
-* If you have Ubuntu 20.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-20.04`
-	* If compilation is successful, an executable will be generated: `lmp_mpi_ubuntu-20.04`
-
-### Other Linux distros
-
-Compilation on other Linux distros (e.g., CentOS 7) is not too different from on Ubuntu. A major difference is that the VTK 7.1 library needs to be compiled and installed manually. Users can follow the instruction for macOS.
-
-### macOS
-
-[Updated June 6, 2023]
-
-Tested releases:
-* **macOS Monterey (Apple Silicon)**
-* **macOS Catalina (Intel chip)**
-* **macOS Big Sur (Intel chip)**
-
-The command line instructions are below.
-
-* **Important**: Open a Terminal window. Change the default **zsh** to **bash**: `chsh -s /bin/bash`
-* Use Homebrew to install OpenMPI: `brew install open-mpi`
-* Install VTK 7.1 manually. **Attention**: Do not use Homebrew to install VTK. VTK libraries from Homebrew were pre-built without some required options on (i.e., **MPI**). Without **MPI** on, some required libraries will be missing (vtkIOParallel, vtkIOParallel, vtkParallelCore, vtkParallelMPI, vtkIOParallelXML, etc.). We use `/opt/vtk` as an example of instalation directory to provide a detailed instruction of compiling VTK 7.1. Additional prerequisite libraries may be needed on your system and can be installed from Homebrew.
-	* Create a folder: `sudo mkdir /opt/vtk`
-	* Download [https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip](https://www.vtk.org/files/release/7.1/VTK-7.1.1.zip) to the `Downloads` directory.
-	* Unzip the zip file so you will see a folder `~/Downloads/VTK-7.1.1`.
-	* Create a new folder: `mkdir ~/Downloads/VTK-build`.
-	* Navigate to the new folder: `cd ~/Downloads/VTK-build`.
-	* Do: `ccmake ../VTK-7.1.1`. (If your system does not recognize the **ccmake** command, use Homebrew to install the **cmake** package.) You should see an interface like the screenshot below. <img src="figs/vtk/fig_cmake_1.png">
-	* Press [c] to **Configure**. If the configuration process completes without issue, you will see something similar to the snapshot below. If you encounter issues, which are usually warning messages of missing libraries, use Homebrew to install the missing libraries as indicated. <img src="figs/vtk/fig_cmake_2.png">
-	* Press [e] to exit screen. You will see something similar to the screenshot below.  <img src="figs/vtk/fig_cmake_3.png"> There are three options that we need to modify in the listed options. (1) Change the **CMAKE BUILD TYPE** value from **Debug** to **Release**. 2) Change the **CMAKE INSTALL PREFIX** value from whatever in there to **/opt/vtk**. (3) Change the **VTK Group MPI** value from **OFF** to **ON**. Then the screen should look similar to the screenshot below. <img src="figs/vtk/fig_cmake_4.png">
-	* Press [c] to **Configure** a 2nd time. If the configuration completes without issue, you should see **Configuring done** in the last line of screen output. Press [e] to exit screen.
-	* Press [c] to **Configure** a 3rd time. If the configuration completes without issue, you should see **Configuring done** in the last line of screen output. Press [e] to exit screen.
-	* Now you should see an extra key option **[g] Generate**. Press [g]. This will complete the whole configuration process and you will be out of CMake interface upon completion.
-	* Compile VTK with one CPU core: `make`, or multiple cores, e.g., `make -j4`. Upon completion, you should see something similar to the screenshot below. <img src="figs/vtk/fig_make.png">
-	* Install VTK to the designated installation directory: `sudo make install`.
-	* Add the location of VTK libraries to the system environment variable: `vi ~/.bash_profile` and add a line `export DYLD_LIBRARY_PATH=/opt/vtk/lib` in the file. Save and quit.
-* Open a new Terminal window and navigate to `<repository>/src/`
-* Compile the code with VTK: `make -j4 mpi_vtk-7.1`.
-
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
