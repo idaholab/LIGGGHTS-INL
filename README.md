@@ -8,14 +8,19 @@
 
 If you are using results generated with LIGGGHTS-INL, please cite one or several relevant articles as follows:
 
-* F. Chen et al. Hopper discharge flow dynamics of milled pine and prediction of process upsets using the discrete element method [*Powder Technology* 415 (2023): 118165.](https://doi.org/10.1016/j.powtec.2022.118165)
-* Q. Sun et al. Reverse scaling of a bonded-sphere DEM model: Formulation and application to lignocellulosic biomass microstructures [*Powder Technology* 409 (2022): 117797.](https://doi.org/10.1016/j.powtec.2022.117797)
-* W. Jin et al. On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848)
-* A. Hamed et al. Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248)
-* F. Chen et al. A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100)
-* Y. Guo et al. A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008)
-* Y. Guo et al. Discrete element modeling of switchgrass particles under compression and rotational shear [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649)
-* Y. Xia et al. Discrete element modeling of deformable pinewood chips in cyclic loading test [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072)
+Open-access journal articles:
+
+* W. Jin et al. On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848)
+* A. Hamed et al. Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248)
+
+Subscription-based journal articles (**links to authors' manuscript PDFs are provided for free download**):
+
+* F. Chen et al. Hopper discharge flow dynamics of milled pine and prediction of process upsets using the discrete element method. [*Powder Technology* 415 (2023): 118165.](https://doi.org/10.1016/j.powtec.2022.118165) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/366219764_Hopper_discharge_flow_dynamics_of_milled_pine_and_prediction_of_process_upsets_using_the_discrete_element_method))
+* Q. Sun et al. Reverse scaling of a bonded-sphere DEM model: Formulation and application to lignocellulosic biomass microstructures. [*Powder Technology* 409 (2022): 117797.](https://doi.org/10.1016/j.powtec.2022.117797) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/362419823_Reverse_scaling_of_a_bonded-sphere_DEM_model_Formulation_and_application_to_lignocellulosic_biomass_microstructures))
+* F. Chen et al. A set of hysteretic nonlinear contact models for DEM: Theory, formulation, and application for lignocellulosic biomass. [*Powder Technology* 397 (2022): 117100.](https://doi.org/10.1016/j.powtec.2021.117100) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/357393650_A_set_of_hysteretic_nonlinear_contact_models_for_DEM_Theory_formulation_and_application_for_lignocellulosic_biomass))
+* Y. Guo et al. A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles. [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/350048423_A_nonlinear_elasto-plastic_bond_model_for_the_discrete_element_modeling_of_woody_biomass_particles))
+* Y. Guo et al. Discrete element modeling of switchgrass particles under compression and rotational shear. [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/342170187_Discrete_element_modeling_of_switchgrass_particles_under_compression_and_rotational_shear))
+* Y. Xia et al. Discrete element modeling of deformable pinewood chips in cyclic loading test. [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/329869479_Discrete_element_modeling_of_deformable_pinewood_chips_in_cyclic_loading_test))
 
 ## Tutorials for Granular Material Flow Characterization
 
