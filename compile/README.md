@@ -87,7 +87,7 @@ Follow the Terminal command line instructions below.
 * Option 1b. For users: `wget https://github.com/idaholab/LIGGGHTS-INL/archive/refs/heads/inl.zip`
 * Option 2. For developers: `git clone git@github.com:idaholab/LIGGGHTS-INL.git`
 
-**Compile the source code**
+**Compiling the source code**
 
 * Navigate to the repository folder `LIGGGHTS-INL/src/`
 * If you have Ubuntu 22.04 LTS, compile the code with VTK: `make -j4 mpi_ubuntu-22.04`. If compilation is successful, an executable file named `lmp_mpi_ubuntu-22.04` will be generated in `LIGGGHTS-INL/src`.
@@ -144,6 +144,9 @@ Follow the Terminal command line instructions below.
 
 * Option 1. For users: `git clone https://github.com/idaholab/LIGGGHTS-INL.git`
 * Option 2. For developers: `git clone git@github.com:idaholab/LIGGGHTS-INL.git`
+
+**Compiling the source code**
+
 * Open a new Terminal window and navigate to `LIGGGHTS-INL/src/`
 * Compile the code with VTK: `make -j4 mpi_vtk-7.1`
 * If compilation is successful, an executable file named `lmp_mpi_vtk-7.1` will be generated in `LIGGGHTS-INL/src`
