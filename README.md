@@ -42,45 +42,26 @@ Users are referred to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/
 
 ## Extended Capabilities in LIGGGHTS-INL
 
-**LIGGGHTS-INL** provides **nonlinear contact and bond stiffness models** not originally available in **LIGGGHTS-PUBLIC**. No user manual has yet been created for these extended models. Users are referred to the listed articles and examples for more information.
+**LIGGGHTS-INL** provides original **nonlinear contact and bond stiffness models**. No user manual has yet been created for these extended models. Users are referred to the listed articles and examples for more information.
 
-### Strain-hardening nonlinear normal contact
+**Strain-hardening nonlinear normal contact**:
 
-An example of controlled collision between two spherical particles can be found at:
-
-`<repository>/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1`
-
-The simulation result is shown in the following plot:
-
+[An example of controlled collision between two spherical particles](/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1)
 <img src="figs/fig_nonlinear_contact.png">
 
-### Elastoplastic bond normal stiffness
+**Elastoplastic bond normal stiffness**:
 
-An example of macro-fiber made of five bonded spheres can be found at:
-
-`<repository>/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2`
-
-The simulation result is shown in the following plot:
-
+[An example of macro-fiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2)
 <img src="figs/fig_string_mm.png">
 
-
-An example of microfiber made of five bonded spheres can be found at:
-
-`<repository>/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_um_2`
-
-The simulation result is shown in the following plot:
-
+[An example of microfiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_um_2)
 <img src="figs/fig_string_um.png">
 
-### Micro-biomechanics
+**Micro-biomechanics**
 
-An example of compression test of a pine wood particle microstructural region of interest (ROI) can be found at:
-
-`<repository>/examples/LIGGGHTS/INL/microstructure_compression`
+[An example of compression test of a pine wood particle microstructural region of interest (ROI)](/examples/LIGGGHTS/INL/microstructure_compression)
 
 The instantaneous snapshots of the simulation are shown in the following graph:
-
 <img src="figs/fig_microstructure_compression.png">
 
 
