@@ -4,6 +4,10 @@
 
 **LIGGGHTS-INL** is a capability-extended adaptation of the LIGGGHTS Open Source Discrete Element Method (DEM) Particle Simulation Software based on LIGGGHTS release version 4.0.0.
 
+## Installing LIGGGHTS-INL
+
+We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. We provide [detailed instructions for installing LIGGGHTS-INL on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
+
 ## Citing LIGGGHTS-INL
 
 If you are using results generated with LIGGGHTS-INL, please cite one or several relevant articles as follows:
@@ -21,10 +25,6 @@ Subscription-based journal articles (**links to authors' manuscript PDFs are pro
 * Y. Guo et al. A nonlinear elasto-plastic bond model for the discrete element modeling of woody biomass particles. [*Powder Technology* 385 (2021): 557-571.](https://doi.org/10.1016/j.powtec.2021.03.008) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/350048423_A_nonlinear_elasto-plastic_bond_model_for_the_discrete_element_modeling_of_woody_biomass_particles))
 * Y. Guo et al. Discrete element modeling of switchgrass particles under compression and rotational shear. [*Biomass & Bioenergy* 141 (2020): 105649.](https://doi.org/10.1016/j.biombioe.2020.105649) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/342170187_Discrete_element_modeling_of_switchgrass_particles_under_compression_and_rotational_shear))
 * Y. Xia et al. Discrete element modeling of deformable pinewood chips in cyclic loading test. [*Powder Technology* 345 (2019): 1-14.](https://doi.org/10.1016/j.powtec.2018.12.072) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/329869479_Discrete_element_modeling_of_deformable_pinewood_chips_in_cyclic_loading_test))
-
-## Installing LIGGGHTS-INL
-
-We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. We provide [detailed instructions for installing LIGGGHTS-INL on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
 
 ## Tutorials for Granular Material Flow Characterization
 
