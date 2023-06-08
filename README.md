@@ -24,20 +24,20 @@ Subscription-based journal articles (**links to authors' manuscript PDFs are pro
 
 ## Installing LIGGGHTS-INL
 
-We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. It is the easiest to compile **LIGGGHTS-INL** on Ubuntu. We provide [detailed instructions for compiling the LIGGGHTS-INL source code on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
+We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. We provide [detailed instructions for installing LIGGGHTS-INL on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
 
 ## Tutorials for Granular Material Flow Characterization
 
-We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials)
+We are in the process of releasing tutorials for beginners to use DEM simulation as a numerical tool for granular material flow characterization. Examples can be found here: [LIGGGHTS-INL tutorials](/examples/LIGGGHTS/INL_tutorials).
 
 ## LIGGGHTS-INL Documentation and Extended Capabilities
 
-Users are referred to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/media/DEM/docu/Manual.html) for the common **LIGGGHTS** features. Documentation of some of the **LIGGGHTS-INL** extended capabilities is in this repository, e.g.,, the bonded-sphere model ([HTML documentation](/doc/gran_cohesion_bond.html) and [user examples](/examples/LIGGGHTS/INL/cohesive_bond)).
+Refer to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/media/DEM/docu/Manual.html) for the common **LIGGGHTS** features. Documentation of some of the **LIGGGHTS-INL** extended capabilities is in this repository, e.g., the bonded-sphere model ([HTML documentation](/doc/gran_cohesion_bond.html) and [user examples](/examples/LIGGGHTS/INL/cohesive_bond)).
 
 
-**LIGGGHTS-INL** provides original **nonlinear contact and bond stiffness models**. No user manual has yet been created for these extended models. Refer to the listed articles for more information. A few user examples are introduced below:
+**LIGGGHTS-INL** provides original **nonlinear contact and bond stiffness models**. No user manual has yet been created for these models. Refer to the listed articles for more information. User examples are introduced below:
 
-* **Strain-hardening nonlinear normal contact**: [An example of controlled collision between two spherical particles](/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1)
+* **Strain-hardening nonlinear normal contact**: [An example of collision between two spherical particles](/examples/LIGGGHTS/INL/normal_contact_hysteretic_nonlinear1)
 <img src="figs/fig_nonlinear_contact.png">
 
 * **Elastoplastic bond normal stiffness** (a): [An example of macro-fiber made of five bonded spheres](/examples/LIGGGHTS/INL/cohesive_bond_nonlinear_compression/chain_bending_mm_2)

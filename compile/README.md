@@ -1,5 +1,7 @@
 # Installing LIGGGHTS-INL
 
+Detailed instructions for installing LIGGGHTS-INL on the latest Linux Ubuntu LTS and macOS releases are provided as follows.
+
 ## Linux Ubuntu
 
 Tested releases:
