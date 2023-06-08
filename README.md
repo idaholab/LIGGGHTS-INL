@@ -28,18 +28,16 @@ We are in the process of releasing tutorials for beginners to use DEM simulation
 
 ## LIGGGHTS-INL Documentation
 
-Users are referred to the **LIGGGHTS-PUBLIC** documentation ([https://www.cfdem.com/media/DEM/docu/Manual.html](https://www.cfdem.com/media/DEM/docu/Manual.html)) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** (e.g., the bonded-sphere model) can be found in this repository. Examples are provided below.
+Users are referred to the [LIGGGHTS-PUBLIC documentation](https://www.cfdem.com/media/DEM/docu/Manual.html) for most of the common **LIGGGHTS** features. Documentation of some of the extended capabilities in **LIGGGHTS-INL** can be found in this repository, for example, the bonded-sphere model:
 
-* Documentation of the bonded-sphere model:
-`<repository>/doc/gran_cohesion_bond.html`
-* User examples of the bonded-sphere model:
-`<repository>/examples/LIGGGHTS/INL/cohesive_bond`
+* [Documentation of the bonded-sphere model](/doc/gran_cohesion_bond.html)
+* [User examples of the bonded-sphere model](/examples/LIGGGHTS/INL/cohesive_bond)
 
 
 
-## Examples of Extended Capabilities in LIGGGHTS-INL
+## Extended Capabilities in LIGGGHTS-INL
 
-The following examples of nonlinear contact and bond stiffness models in LIGGGHTS-INL are extended from LIGGGHTS-PUBLIC. No user manual has yet been created for these extended models. Interested users are referred to the listed journal articles and/or user examples below for more information.
+**LIGGGHTS-INL** provides **nonlinear contact and bond stiffness models** not originally available in **LIGGGHTS-PUBLIC**. No user manual has yet been created for these extended models. Users are referred to the listed articles and examples for more information.
 
 ### Strain-hardening nonlinear normal contact
 
