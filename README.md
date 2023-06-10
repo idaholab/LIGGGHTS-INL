@@ -6,7 +6,7 @@
 
 ## Installing LIGGGHTS-INL
 
-We support installation of **LIGGGHTS-INL** on **Linux** and **macOS** operating systems. For Linux, we recommend **Ubuntu** Long Term Service (LTS) releases. We provide [detailed instructions for installing LIGGGHTS-INL on the latest Linux Ubuntu LTS and macOS releases](/compile/README.md).
+Supported operating systems: **Linux** and **macOS**. We provide [detailed instructions for installing LIGGGHTS-INL on the Linux Ubuntu LTS and macOS releases](/compile/README.md).
 
 ## Citing LIGGGHTS-INL
 
