@@ -32,7 +32,7 @@ Reference articles with results generated using LIGGGHTS-INL are listed below:
 
 **Screw feeder**
 
-* A. Hamed et al. Particle size and shape effect of Crumbler® rotary shear-milled granular woody biomass on the performance of Acrison® screw feeder: A computational and experimental investigation. [*Powder Technology* 427 (2023): 118707.](https://doi.org/10.1016/j.powtec.2023.118707)
+* A. Hamed et al. Particle size and shape effect of Crumbler® rotary shear-milled granular woody biomass on the performance of Acrison® screw feeder: A computational and experimental investigation. [*Powder Technology* 427 (2023): 118707.](https://doi.org/10.1016/j.powtec.2023.118707) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/371380786_Particle_size_and_shape_effect_of_CrumblerR_rotary_shear-milled_granular_woody_biomass_on_the_performance_of_AcrisonR_screw_feeder_A_computational_and_experimental_investigation))
 
 **FEM vs. DEM: granular flow benchmark case studies**
 
