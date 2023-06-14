@@ -16,7 +16,7 @@ Reference articles with results generated using LIGGGHTS-INL are listed below:
 
 **Static angle of repose**
 
-* A. Hamed et al. Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248)
+* A. Hamed et al. Flowability of Crumbler rotary shear size-reduced granular biomass: An experiment-informed modeling study on the angle of repose. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.859248) (<span style="color: green;">**Open Access**</span>)
 
 **Uniaxial loading test**
 
@@ -34,11 +34,11 @@ Reference articles with results generated using LIGGGHTS-INL are listed below:
 
 **Screw feeder**
 
-* A. Hamed et al. Particle size and shape effect of Crumbler® rotary shear-milled granular woody biomass on the performance of Acrison® screw feeder: A computational and experimental investigation. [*Powder Technology* 427 (2023): 118707.](https://doi.org/10.1016/j.powtec.2023.118707) (Download [Authors' manuscript PDF](https://www.researchgate.net/publication/371380786_Particle_size_and_shape_effect_of_CrumblerR_rotary_shear-milled_granular_woody_biomass_on_the_performance_of_AcrisonR_screw_feeder_A_computational_and_experimental_investigation))
+* A. Hamed et al. Particle size and shape effect of Crumbler® rotary shear-milled granular woody biomass on the performance of Acrison® screw feeder: A computational and experimental investigation. [*Powder Technology* 427 (2023): 118707.](https://doi.org/10.1016/j.powtec.2023.118707) (<span style="color: green;">**Open Access**</span>)
 
 **FEM vs. DEM: granular flow benchmark case studies**
 
-* W. Jin et al. On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848)
+* W. Jin et al. On the fidelity of computational models for the flow of milled loblolly pine: A benchmark study on continuum-mechanics models and discrete-particle models. [*Frontiers in Energy Research, section Bioenergy and Biofuel* (2022).](https://doi.org/10.3389/fenrg.2022.855848) (<span style="color: green;">**Open Access**</span>)
 
 **Structural biomechanics**
 
